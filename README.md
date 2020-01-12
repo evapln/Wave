@@ -1,4 +1,5 @@
-# Projet de fin d'études Suzanne Lansade & Eva Palandjian
+# Projet de fin d'études 
+# Suzanne Lansade & Eva Palandjian
 Université de Bordeaux - Master CSI
 
 Encadrant : Gilles Zemor
