@@ -1,12 +1,18 @@
 .PHONY = all wave clean help
 EXE = wave
 CFLAGS = -Wall -Wextra -std=c11
-LDFLAGS = -lm -llapack
+LDFLAGS = -lm
 
 all: wave
 
-wave:	wave.o
+wave:	wave.o matrix.o
 			$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+matrix.o: matrix.c matrix.h
+			$(CC) $(CFLAGS) $(CPPFLAGS) -c $< $(LDFLAGS)
+
+wave.o: wave.c wave.h matrix.h
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< $(LDFLAGS)
 
 clean:
 			@rm -f *~ *.o wave
