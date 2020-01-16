@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
 #include "matrix.h"
 
 int* phi (int x,int y, int a, int b, int c, int d);

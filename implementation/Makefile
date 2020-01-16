@@ -5,8 +5,11 @@ LDFLAGS = -lm
 
 all: wave
 
-wave:	wave.o matrix.o
+wave:	wave.o matrix.o algebra.o
 			$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+algebra.o: algebra.c algebra.h
+			$(CC) $(CFLAGS) $(CPPFLAGS) -c $< $(LDFLAGS)
 
 matrix.o: matrix.c matrix.h
 			$(CC) $(CFLAGS) $(CPPFLAGS) -c $< $(LDFLAGS)

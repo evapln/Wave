@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   for (int i = 0; i < row; ++i)
     for (int j = 0; j < col; ++j) {
-      short v = i+j;
+      char v = i+j;
       matrix_set_cell(A, i, j, v);
     }
   puts("A :");
@@ -22,10 +22,10 @@ int main(int argc, char **argv) {
 
   matrix_t *B = NULL;
   B = matrix_alloc(col,k);
-  matrix_set_cell(B, 0, 0, 3);
-  matrix_set_cell(B, 0, 1, 2);
-  matrix_set_cell(B, 1, 0, 4);
-  matrix_set_cell(B, 1, 1, 1);
+  matrix_set_cell(B, 0, 0, (char)3);
+  matrix_set_cell(B, 0, 1, (char)2);
+  matrix_set_cell(B, 1, 0, (char)4);
+  matrix_set_cell(B, 1, 1, (char)1);
   matrix_print(B,stdout);
 
   matrix_t *C = NULL;

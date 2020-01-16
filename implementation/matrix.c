@@ -3,7 +3,7 @@
 struct matrix_t {
   int nb_col;
   int nb_row;
-  short** mat;
+  char** mat;
 };
 
 matrix_t *matrix_alloc(int row, int col)
@@ -15,7 +15,7 @@ matrix_t *matrix_alloc(int row, int col)
   }
   matrix->nb_col = col;
   matrix->nb_row = row;
-  matrix->mat = calloc(row, sizeof(short*));
+  matrix->mat = calloc(row, sizeof(char*));
   if (!matrix->mat)
   {
     free(matrix);
@@ -23,7 +23,7 @@ matrix_t *matrix_alloc(int row, int col)
   }
   for (int i = 0; i < row; i++)
   {
-    matrix->mat[i] = calloc(col, sizeof(short));
+    matrix->mat[i] = calloc(col, sizeof(char));
     if (!matrix->mat[i])
     {
       for (int j = 0; j < i; ++j)
@@ -65,7 +65,7 @@ void matrix_free (matrix_t *matrix)
 }
 
 
-short matrix_get_cell(const matrix_t *matrix,const int row_val, const int col_val)
+char matrix_get_cell(const matrix_t *matrix,const int row_val, const int col_val)
 {
   if (!matrix)
     return 2;
@@ -91,7 +91,7 @@ int matrix_get_col(const matrix_t *matrix)
 }
 
 void matrix_set_cell(matrix_t *matrix, const int row_val, const int col_val,
-                   const short val) {
+                   const char val) {
   if (!matrix)
     return;
   int row = matrix->nb_row;
@@ -122,7 +122,7 @@ void matrix_print(matrix_t *matrix, FILE *fd)
     int row = matrix->nb_row;
     for (int i = 0; i < row; ++i)
     {
-      short val;
+      char val;
       for (int j = 0; j < col; ++j)
       {
         val = matrix_get_cell(matrix,i,j);
@@ -159,14 +159,14 @@ void matrix_scal(matrix_t *matrix, matrix_t *matrix1, matrix_t *matrix2) {
 }
 
 matrix_t *matrix_concatenation(matrix_t *A, matrix_t *B){
-  row = A->nb_row;
+  int row = A->nb_row;
   if (row != B->nb_row)
-    return;
+    return NULL;
   int col_A = A->nb_col;
   int col_B = B->nb_col;
-  col = col_A + col_B;
+  int col = col_A + col_B;
   matrix_t *conc = NULL;
-  matrix_alloc(conc,row,col);
+  conc = matrix_alloc(row,col);
   for (int i = 0; i < row; i++){
     for (int j = 0; j < col_A; j++)
       conc->mat[i][j] = A->mat[i][j];
@@ -195,39 +195,28 @@ void matrix_prod(matrix_t *matrix, matrix_t *matrix1, matrix_t *matrix2) {
 
 void matrix_inv(matrix_t *mat_inv, matrix_t *A){
   matrix_t *I = NULL;
-  matrix_copy(I,A);
+  I = matrix_copy(A);
   identity(I);
-  short** mat = A->mat;
+  char** mat = A->mat;
   matrix_t *B = NULL;
   B = matrix_concatenation(A,I);
-  // inv = mat_inv->mat;
-  int size = A->nb_col;
-  for(int i=0;i<size;i++)
-		 {
-			  if(mat[i][i] == 0)
-			  {
-				   return;
-			  }
-			  for(int j=0;j<size;j++)
-			  {
-				   if(i!=j)
-				   {
-					    float ratio = mat[j][i]/mat[i][i];
-					    for(int k=0;k<2*size;k++)
-					    {
-					     	inv[j][k] = mat[j][k] - ratio*mat[i][k];
-					    }
-				   }
-			  }
-		 }
-		 /* Row Operation to Make Principal Diagonal to 1 */
-		 for(i=0;i<size;i++)
-		 {
-			  for(j=0;j<2*size;j++)
-			  {
-			   	inv[i][j] = inv[i][j]/inv[i][i];
-			  }
-		 }
-     matrix_free(I);
-     matrix_free(B);
+  char** inv = mat_inv->mat;
+  int size = B->nb_row;
+  for(int i = 0; i < size; i++) {
+		if(B->mat[i][i] == 0)
+		  return;
+		for(int j=0;j<size;j++) {
+			if(i!=j) {
+			  char ratio = mul_Fq(B->mat[j][i], inv_Fq(B->mat[i][i]));
+			  for(int k=0;k<2*size;k++)
+					inv[j][k] = add_Fq(mat[j][k], -mul_Fq(ratio,mat[i][k]));
+			}
+    }
+	}
+	/* Row Operation to Make Principal Diagonal to 1 */
+	for(int i=0;i<size;i++)
+		for(int j=0;j<2*size;j++)
+		  inv[i][j] = mul_Fq(inv[i][j], inv_Fq(inv[i][i]));
+  matrix_free(I);
+  matrix_free(B);
 }
