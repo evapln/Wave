@@ -15,7 +15,7 @@ matrix.o: matrix.c matrix.h
 			$(CC) $(CFLAGS) $(CPPFLAGS) -c $< $(LDFLAGS)
 
 wave.o: wave.c wave.h matrix.h
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< $(LDFLAGS)
+	    $(CC) $(CFLAGS) $(CPPFLAGS) -c $< $(LDFLAGS)
 
 clean:
 			@rm -f *~ *.o wave

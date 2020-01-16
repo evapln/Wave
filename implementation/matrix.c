@@ -51,6 +51,33 @@ matrix_t *matrix_copy(const matrix_t *matrix)
   return copy;
 }
 
+matrix_t *matrix_identity (int size)
+{
+  matrix_t *id = NULL;
+  id = matrix_alloc(size,size);
+  for (int i = 0; i < size; i++){
+    id->mat[i][i] = 1;
+    for (int j = 0; j < size; j++){
+      if (j != i)
+        id->mat[i][j] = 0;
+    }
+  }
+  return id;
+}
+
+matrix_t *matrix_trans(const matrix_t *matrix)
+{
+  if (!matrix)
+    return NULL;
+  matrix_t *trans = matrix_alloc(matrix->nb_col, matrix->nb_row);
+  if (!trans)
+    return NULL;
+  for (int i = 0; i < trans->nb_row; ++i)
+    for (int j = 0; j < trans->nb_col; ++j)
+      trans->mat[i][j] = matrix->mat[j][i];
+  return trans;
+}
+
 void matrix_free (matrix_t *matrix)
 {
   if (matrix != NULL)
@@ -98,20 +125,10 @@ void matrix_set_cell(matrix_t *matrix, const int row_val, const int col_val,
   int col = matrix->nb_col;
   if (row_val >= row || col_val >= col)
     return;
-  matrix->mat[row_val][col_val] = val;
-}
-
-void identity (matrix_t *matrix){
-  int size = matrix->nb_row;
-  if (size != matrix->nb_col)
-    return;
-  for (int i = 0; i < size; i++){
-    matrix->mat[i][i] = 1;
-    for (int j = 0; j < size; j++){
-      if (j != i)
-        matrix->mat[i][j] = 0;
-    }
-  }
+  char tmp = val % ORDER;
+  if (tmp < 0)
+    tmp += ORDER;
+  matrix->mat[row_val][col_val] = tmp;
 }
 
 void matrix_print(matrix_t *matrix, FILE *fd)
@@ -126,7 +143,10 @@ void matrix_print(matrix_t *matrix, FILE *fd)
       for (int j = 0; j < col; ++j)
       {
         val = matrix_get_cell(matrix,i,j);
-        fprintf(fd,"%d ", val);
+        if (val == 2 && ORDER == 3)
+          fprintf(fd,"-1 ");
+        else
+          fprintf(fd," %d ", val);
       }
       fputs("\n", fd);
     }
@@ -143,10 +163,10 @@ void matrix_add(matrix_t *matrix, const matrix_t *matrix1, const matrix_t *matri
       return;
   for (int i = 0; i < row; ++i)
     for (int j = 0; j < col; ++j)
-      matrix->mat[i][j] = matrix1->mat[i][j] + matrix2->mat[i][j];
+      matrix->mat[i][j] = add_Fq(matrix1->mat[i][j], matrix2->mat[i][j]);
 }
 
-void matrix_scal(matrix_t *matrix, matrix_t *matrix1, matrix_t *matrix2) {
+void vect_scal(matrix_t *matrix, matrix_t *matrix1, matrix_t *matrix2) {
   int col = matrix->nb_col;
   if (matrix1->nb_col != col || matrix2->nb_col != col)
     return;
@@ -155,8 +175,21 @@ void matrix_scal(matrix_t *matrix, matrix_t *matrix1, matrix_t *matrix2) {
       return;
   for (int i = 0; i < row; ++i)
     for (int j = 0; j < col; ++j)
-      matrix->mat[i][j] = matrix1->mat[i][j] * matrix2->mat[i][j];
+      matrix->mat[i][j] = mul_Fq(matrix1->mat[i][j], matrix2->mat[i][j]);
 }
+
+void matrix_scal(matrix_t *matrix, matrix_t *matrix1, char scal) {
+  int col = matrix->nb_col;
+  if (matrix1->nb_col != col)
+    return;
+  int row = matrix->nb_row;
+  if (matrix1->nb_row != row)
+      return;
+  for (int i = 0; i < row; ++i)
+    for (int j = 0; j < col; ++j)
+      matrix->mat[i][j] = mul_Fq(matrix1->mat[i][j], scal);
+}
+
 
 matrix_t *matrix_concatenation(matrix_t *A, matrix_t *B){
   int row = A->nb_row;
@@ -188,35 +221,78 @@ void matrix_prod(matrix_t *matrix, matrix_t *matrix1, matrix_t *matrix2) {
     for (int j = 0; j < col; j++){
       matrix->mat[i][j] = 0;
       for (int ind = 0; ind < k; ind++)
-        matrix->mat[i][j] += matrix1->mat[i][ind]*matrix2->mat[ind][j];
+        matrix->mat[i][j] = add_Fq(mul_Fq(matrix1->mat[i][ind], matrix2->mat[ind][j]), matrix->mat[i][j]);
     }
   }
 }
 
-void matrix_inv(matrix_t *mat_inv, matrix_t *A){
-  matrix_t *I = NULL;
-  I = matrix_copy(A);
-  identity(I);
-  char** mat = A->mat;
-  matrix_t *B = NULL;
-  B = matrix_concatenation(A,I);
-  char** inv = mat_inv->mat;
-  int size = B->nb_row;
-  for(int i = 0; i < size; i++) {
-		if(B->mat[i][i] == 0)
-		  return;
-		for(int j=0;j<size;j++) {
-			if(i!=j) {
-			  char ratio = mul_Fq(B->mat[j][i], inv_Fq(B->mat[i][i]));
-			  for(int k=0;k<2*size;k++)
-					inv[j][k] = add_Fq(mat[j][k], -mul_Fq(ratio,mat[i][k]));
-			}
+matrix_t *matrix_sub (const matrix_t *A, int a, int b){
+  matrix_t *sub = NULL;
+  int row = A->nb_row;
+  int col = A->nb_col;
+  sub = matrix_alloc(row - 1, col - 1);
+  int ind_row = 0;
+  int ind_col = 0;
+  for (int i = 0; i < row; i++){
+    ind_col = 0;
+    if (i != a){
+      for (int j = 0; j < col; j++){
+        if (j != b){
+          sub->mat[ind_row][ind_col] = A->mat[i][j];
+          ind_col++;
+        }
+      }
+      ind_row++;
     }
-	}
-	/* Row Operation to Make Principal Diagonal to 1 */
-	for(int i=0;i<size;i++)
-		for(int j=0;j<2*size;j++)
-		  inv[i][j] = mul_Fq(inv[i][j], inv_Fq(inv[i][i]));
-  matrix_free(I);
-  matrix_free(B);
+  }
+  return sub;
+}
+
+char matrix_det(matrix_t *A) {
+  int size = A->nb_col;
+  if (size == 2)
+    return (add_Fq(mul_Fq(A->mat[0][0],A->mat[1][1]),-mul_Fq(A->mat[0][1],A->mat[1][0])));
+  char det = 0;
+  matrix_t *sub = NULL;
+  for (int i = 0; i < size; ++i) {
+    sub = matrix_sub(A,0,i);
+    char sub_det = matrix_det(sub);
+    char val1 = mul_Fq(pow(-1,i),A->mat[0][i]);
+    det = add_Fq(det,mul_Fq(val1,sub_det));
+    matrix_free(sub);
+  }
+  return det;
+}
+matrix_t *matrix_com(matrix_t *A) {
+  int col = A->nb_col;
+  int row = A->nb_row;
+  matrix_t *com = NULL;
+  com = matrix_alloc(row,col);
+  for (int i = 0; i < row; i++)
+    for (int j = 0; j < col; j++){
+      matrix_t *sub = NULL;
+      sub = matrix_sub(A,i,j);
+      com->mat[i][j] = mul_Fq(pow(-1,i+j),matrix_det(sub));
+      matrix_free(sub);
+    }
+  return com;
+}
+
+matrix_t *matrix_inv(matrix_t *A){
+  char det = matrix_det(A);
+  if (det == 0) {
+    puts("non inversible");
+    return NULL;
+  }
+  matrix_t *com = NULL;
+  puts("com");
+  com = matrix_com(A);
+  matrix_print(com,stdout);
+  matrix_t *inv = NULL;
+  inv = matrix_trans(com);
+  puts("inv");
+  matrix_print(inv,stdout);
+  matrix_scal(inv, inv, inv_Fq(det));
+  matrix_free(com);
+  return inv;
 }
