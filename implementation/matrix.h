@@ -17,4 +17,6 @@ void matrix_add(matrix_t *matrix, const matrix_t *matrix1, const matrix_t *matri
 void matrix_scal(matrix_t *matrix, matrix_t *matrix1, matrix_t *matrix2);
 // matrix_t *matrix_add(matrix_t *matrix1, matrix_t *matrix2);
 // matrix_t *matrix_scal(matrix_t *matrix1, matrix_t *matrix2);
-matrix_t *matrix_prod(matrix_t *matrix1, matrix_t *matrix2);
+void matrix_prod(matrix_t *matrix, matrix_t *matrix1, matrix_t *matrix2);
+void identity (matrix_t *matrix);
+void matrix_inv(matrix_t *mat_inv, matrix_t *mat);
