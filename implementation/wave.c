@@ -54,8 +54,7 @@ int main(int argc, char **argv) {
   matrix_print(C,stdout);
 
   matrix_t *id = NULL;
-  id = matrix_alloc(3,3);
-  matrix_prod(id,B,C);
+  id = matrix_prod(B,C);
   matrix_print(id,stdout);
 
   // matrix_t *inv = NULL;

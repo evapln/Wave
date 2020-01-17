@@ -1,5 +1,6 @@
 #include "algebra.h"
 
+/* tableau des inverses pour q = 3 */
 static char tab_inv[3] = {0,1,2};
 
 char add_Fq(char a, char b) {
