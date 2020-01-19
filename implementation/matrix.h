@@ -27,6 +27,9 @@ matrix_t *matrix_copy(const matrix_t *matrix);
 /* alloue en mémoire et renvoie une matrice identité de taille size */
 matrix_t *matrix_identity (int size);
 
+/* alloue en mémoire et renvoie une matrice aléatoire de taille row x col dont les coefficient sont dans Fq */
+matrix_t *matrix_random(const int row, const int col);
+
 /* alloue en mémoire et erenvoie la ransposée de matrix */
 matrix_t *matrix_trans(const matrix_t *matrix);
 
@@ -53,6 +56,13 @@ matrix_t *matrix_mul_by_scal(const matrix_t *matrix, const char scal);
 
 /* alloue en mémoire et renvoie la matrice prdouit de matrix1 et matrix2 */
 matrix_t *matrix_prod(const matrix_t *matrix1, const matrix_t *matrix2);
+
+void matrix_add_row(matrix_t *matrix, const int row1, const int row2, const char coef);
+void matrix_mul_row(matrix_t *matrix, const int row1, const char coef);
+void matrix_exchange_row(matrix_t *matrix, const int row1, const int row2);
+
+/*trigonalise matrix */
+void matrix_trigonalisation(matrix_t *matrix);
 
 /* renvoie le determinant de la matrice A */
 char matrix_det(matrix_t *A);

@@ -110,6 +110,15 @@ matrix_t *matrix_identity (int size) {
   return id;
 }
 
+matrix_t *matrix_random(const int row, const int col) {
+  matrix_t *rand = NULL;
+  rand = matrix_alloc(row,col);
+  for (int i = 0; i < row; ++i)
+    for (int j = 0; j < col; ++j)
+      rand->mat[i][j] = rand_Fq();
+  return rand;
+}
+
 matrix_t *matrix_trans(const matrix_t *matrix) {
   if (!matrix)
     return NULL;
@@ -256,6 +265,74 @@ matrix_t *matrix_prod(const matrix_t *matrix1, const matrix_t *matrix2) {
     }
   }
   return prod;
+}
+
+void matrix_add_row(matrix_t *matrix, const int row1, const int row2, const char coef) {
+  int row = matrix->nb_row;
+  if (row1 > row || row2 > row)
+    return;
+  for (int i = 0; i < matrix->nb_col; ++i)
+    matrix->mat[row1][i] = add_Fq(matrix->mat[row1][i], mul_Fq(coef,matrix->mat[row2][i]));
+}
+
+void matrix_mul_row(matrix_t *matrix, const int row1, const char coef) {
+  if (row1 > matrix->nb_row)
+    return;
+  for (int i = 0; i < matrix->nb_col; ++i)
+    matrix->mat[row1][i] = mul_Fq(coef,matrix->mat[row1][i]);
+}
+
+void matrix_exchange_row(matrix_t *matrix, const int row1, const int row2) {
+  int row = matrix->nb_row;
+  if (row1 > row || row2 > row)
+    return;
+  char tmp;
+  for (int i = 0; i < matrix->nb_col; ++i) {
+    tmp = matrix->mat[row1][i];
+    matrix->mat[row1][i] = matrix->mat[row2][i];
+    matrix->mat[row2][i] = tmp;
+  }
+}
+
+
+void matrix_trigonalisation(matrix_t *matrix) {
+  int row = matrix->nb_row;
+  int col = matrix->nb_col;
+  for (int i = 0; i < row; i++) {
+    for (int j = 0; j < i && j < col; j++) {
+      if (matrix->mat[i][j] % ORDER == 1)
+        matrix_add_row(matrix, i, j, -1);
+      if (matrix->mat[i][j] % ORDER == 2)
+        matrix_add_row(matrix, i, j, 1);
+      // matrix_print(matrix,stdout);
+    }
+    if (i < col) {
+      if (matrix->mat[i][i] % ORDER == 0) {
+        for (int k = i + 1; k < row; ++k) {
+          if (matrix->mat[k][i] % ORDER != 0) {
+            matrix_exchange_row(matrix, i, k);
+            if (i > 0)
+              i -= 1;
+          }
+        }
+      } else {
+        // matrix_print(matrix,stdout);
+        // modifier pour multiplier par l'inverse de du premier coef non nul plutôt
+        matrix_mul_row(matrix, i, inv_Fq(matrix->mat[i][i]));
+      }
+    }
+  }
+  for (int i = 0; i < row; i++) {
+    if (i < col && matrix->mat[i][i] % ORDER == 0) {
+      for (int k = i + 1; k < row; ++k) {
+        if (matrix->mat[k][i] % ORDER != 0) {
+          matrix_exchange_row(matrix, i, k);
+        }
+      }
+    }
+  }
+  // matrix_print(matrix,stdout);
+  // rajouter les addition et soustraction de ligne pour diagonaliser en remontant
 }
 
 char matrix_det(matrix_t *A) {
