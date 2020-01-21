@@ -4,9 +4,9 @@
 
 
 int main(int argc, char **argv) {
-  int col = 2;
-  int row = 3;
-  int k = 2;
+  // int col = 2;
+  // int row = 3;
+  // int k = 2;
 
   matrix_t *A = NULL;
   for (int i = 3; i < 7; ++i) {

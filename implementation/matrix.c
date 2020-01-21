@@ -71,8 +71,7 @@ int matrix_get_col(const matrix_t *matrix) {
   return matrix->nb_col;
 }
 
-void matrix_set_cell(matrix_t *matrix, const int row_val, const int col_val,
-                   const char val) {
+void matrix_set_cell(matrix_t *matrix, const int row_val, const int col_val, const char val) {
   if (!matrix)
     return;
   int row = matrix->nb_row;
@@ -294,45 +293,101 @@ void matrix_exchange_row(matrix_t *matrix, const int row1, const int row2) {
   }
 }
 
-
 void matrix_trigonalisation(matrix_t *matrix) {
   int row = matrix->nb_row;
   int col = matrix->nb_col;
-  for (int i = 0; i < row; i++) {
-    for (int j = 0; j < i && j < col; j++) {
-      if (matrix->mat[i][j] % ORDER == 1)
-        matrix_add_row(matrix, i, j, -1);
-      if (matrix->mat[i][j] % ORDER == 2)
-        matrix_add_row(matrix, i, j, 1);
-      // matrix_print(matrix,stdout);
+  // étape 1
+  // pour toutes les colonnes
+  for (int j = 0; j < col; ++j) {
+    // parcours de chaque colonne
+    for (int i = j; i < row; ++i) {
+      // on met un coefficient non nul en haut de chaque colonne
+      if (i != j && matrix->mat[i][j] % ORDER != 0) {
+        matrix_exchange_row(matrix, j, i);
+        break;
+      }
     }
-    if (i < col) {
-      if (matrix->mat[i][i] % ORDER == 0) {
-        for (int k = i + 1; k < row; ++k) {
-          if (matrix->mat[k][i] % ORDER != 0) {
-            matrix_exchange_row(matrix, i, k);
-            if (i > 0)
-              i -= 1;
-          }
-        }
-      } else {
-        // matrix_print(matrix,stdout);
-        // modifier pour multiplier par l'inverse de du premier coef non nul plutôt
-        matrix_mul_row(matrix, i, inv_Fq(matrix->mat[i][i]));
+    // annulation du reste de la colonne
+    for (int i = j + 1; i < row; ++i) {
+      char coef = mul_Fq(matrix->mat[i][j], inv_Fq(matrix->mat[j][j]));
+      if (coef != 0) {
+        matrix_add_row(matrix, i, j, -coef);
       }
     }
   }
-  for (int i = 0; i < row; i++) {
-    if (i < col && matrix->mat[i][i] % ORDER == 0) {
-      for (int k = i + 1; k < row; ++k) {
-        if (matrix->mat[k][i] % ORDER != 0) {
-          matrix_exchange_row(matrix, i, k);
+  // on met tous les pivits à 1
+  // pour toutes les lignes
+  for (int i = 0; i < row; ++i) {
+    // on parcours les lignes
+    for (int j = 0; j < col; ++j) {
+      // on trouve le premier coef non nul, le pivot
+      if (matrix->mat[i][j] != 0) {
+        matrix_mul_row(matrix, i, inv_Fq(matrix->mat[i][j]));
+        break;
+      }
+    }
+  }
+  // reduction à revoir
+  // pour toutes le lignes
+  for (int i = row - 1; i >= 0; --i) {
+    // parcours de la ligne
+    for (int j = 0; j < col; ++j) {
+      // on trouve le premier coef non nul
+      if (matrix->mat[i][j] != 0) {
+        break;
+      }
+      for (int k = 0; k < i; ++k) {
+        if (matrix->mat[k][j] != 0) {
+          matrix_add_row(matrix, k, i, -1);
         }
       }
     }
   }
+
+
+  // ancienne version
+  // annulation des début de ligne
+  // for (int i = 0; i < row; i++) {
+  //   for (int j = 0; j < i && j < col; j++) {
+  //     if (matrix->mat[i][j] % ORDER == 1)
+  //       matrix_add_row(matrix, i, j, -1);
+  //     if (matrix->mat[i][j] % ORDER == 2)
+  //       matrix_add_row(matrix, i, j, 1);
+  //   }
+  //   // si A[i][i] == 0
+  //   if (i < col) {
+  //     if (matrix->mat[i][i] % ORDER == 0) {
+  //       for (int k = i + 1; k < row; ++k) {
+  //         if (matrix->mat[k][i] % ORDER != 0) {
+  //           matrix_exchange_row(matrix, i, k);
+  //           if (i > 0)
+  //             i -= 1;
+  //         }
+  //       }
+  //     }
+  //   }
+  //   //
+  //   for (int j = 0; j < col; ++j) {
+  //     if (matrix->mat[i][j] != 0) {
+  //       matrix_mul_row(matrix, i, inv_Fq(matrix->mat[i][i]));
+  //       break;
+  //     }
+  //   }
+  // }
+  // for (int i = 0; i < row; i++) {
+  //   if (i < col && matrix->mat[i][i] % ORDER == 0) {
+  //     for (int k = i + 1; k < row; ++k) {
+  //       if (matrix->mat[k][i] % ORDER != 0) {
+  //         matrix_exchange_row(matrix, i, k);
+  //       }
+  //     }
+  //   }
+  // }
   // matrix_print(matrix,stdout);
   // rajouter les addition et soustraction de ligne pour diagonaliser en remontant
+  // for (int i = row - 1; i >= 0; --i) {
+  //
+  // }
 }
 
 char matrix_det(matrix_t *A) {
