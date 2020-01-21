@@ -57,10 +57,14 @@ matrix_t *matrix_mul_by_scal(const matrix_t *matrix, const char scal);
 /* alloue en mémoire et renvoie la matrice prdouit de matrix1 et matrix2 */
 matrix_t *matrix_prod(const matrix_t *matrix1, const matrix_t *matrix2);
 
+matrix_t *matrix_del_row(matrix_t *matrix, const int row1);
+
+bool row_is_zero (matrix_t *matrix, const int row);
+
 void matrix_add_row(matrix_t *matrix, const int row1, const int row2, const char coef);
 void matrix_mul_row(matrix_t *matrix, const int row1, const char coef);
 void matrix_exchange_row(matrix_t *matrix, const int row1, const int row2);
-
+matrix_t *matrix_del_null_row (matrix_t *matrix) ;
 /*trigonalise matrix */
 void matrix_trigonalisation(matrix_t *matrix);
 

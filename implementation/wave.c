@@ -9,14 +9,26 @@ int main(int argc, char **argv) {
   // int k = 2;
 
   matrix_t *A = NULL;
-  for (int i = 3; i < 7; ++i) {
-    printf("row : %d\t col : %d\n",i,4);
-    A = matrix_random(i,4);
-    matrix_print(A, stdout);
-    matrix_trigonalisation(A);
-    matrix_print(A, stdout);
-    matrix_free(A);
-  }
+  A = matrix_random(5,3);
+  matrix_print(A, stdout);
+  matrix_trigonalisation(A);
+  matrix_print(A, stdout);
+  // for (int i = 0; i < 5; i++){
+  //   printf("%d \n", row_is_zero(A,i) );
+  // }
+  matrix_t *B = NULL;
+  B = matrix_del_null_row(A);
+
+  matrix_print(B, stdout);
+  matrix_free(B);
+  // for (int i = 3; i < 7; ++i) {
+  //   printf("row : %d\t col : %d\n",i,4);
+  //   A = matrix_random(i,4);
+  //   matrix_print(A, stdout);
+  //   matrix_trigonalisation(A);
+  //   matrix_print(A, stdout);
+  //   matrix_free(A);
+  // }
   // matrix_t *A = NULL;
   // A = matrix_alloc(row,col);
   // if (!A)

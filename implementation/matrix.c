@@ -293,6 +293,47 @@ void matrix_exchange_row(matrix_t *matrix, const int row1, const int row2) {
   }
 }
 
+matrix_t *matrix_del_row(matrix_t *matrix, const int row1) {
+  int row = matrix->nb_row;
+  int col = matrix->nb_col;
+  if (row1 > row)
+    return NULL;
+  matrix_t *matrix2 = NULL;
+  matrix2 = matrix_alloc(row - 1, col);
+  int id_row = 0;
+  for (int i = 0; i < row; ++i){
+    if (i != row1){
+      for (int j = 0; j < col; ++j){
+        matrix2->mat[id_row][j] = matrix->mat[i][j];
+      }
+      id_row++;
+    }
+  }
+  matrix_free(matrix);
+  return matrix2;
+}
+
+bool row_is_zero (matrix_t *matrix, const int row) {
+  for (int col = 0; col < matrix->nb_col; col++){
+    if (matrix->mat[row][col] != 0) {
+      return false;
+    }
+  }
+  return true;
+}
+
+matrix_t *matrix_del_null_row (matrix_t *matrix) {
+  if (row_is_zero(matrix, matrix->nb_row - 1)) {
+    matrix_t *matrix2 = NULL;
+    matrix2 = matrix_del_null_row(matrix_del_row(matrix, matrix->nb_row - 1));
+    // matrix_free(matrix);
+    return matrix2;
+  }
+  else {
+    return matrix;
+  }
+}
+
 void matrix_trigonalisation(matrix_t *matrix) {
   int row = matrix->nb_row;
   int col = matrix->nb_col;
@@ -315,6 +356,7 @@ void matrix_trigonalisation(matrix_t *matrix) {
       }
     }
   }
+
   // on met tous les pivits à 1
   // pour toutes les lignes
   for (int i = 0; i < row; ++i) {
@@ -327,23 +369,45 @@ void matrix_trigonalisation(matrix_t *matrix) {
       }
     }
   }
+  // // reduction à revoir
+  // // pour toutes le lignes
+  // for (int i = row - 1; i >= 0; --i) {
+  //   // parcours de la ligne
+  //   for (int j = 0; j < col; ++j) {
+  //     // on trouve le premier coef non nul
+  //     if (matrix->mat[i][j] != 0) {
+  //       break;
+  //     }
+  //     for (int k = 0; k < i; ++k) {
+  //       if (matrix->mat[k][j] != 0) {
+  //         matrix_add_row(matrix, k, i, -1);
+  //       }
+  //     }
+  //   }
+  // }
   // reduction à revoir
   // pour toutes le lignes
+  matrix_print(matrix,stdout);
   for (int i = row - 1; i >= 0; --i) {
     // parcours de la ligne
-    for (int j = 0; j < col; ++j) {
-      // on trouve le premier coef non nul
-      if (matrix->mat[i][j] != 0) {
-        break;
+    int j = 0;
+    while ((matrix->mat[i][j] == 0) && (j != col - 1)) {
+      j += 1;
+      // printf("j = %d\n", j);
       }
+    // if (j == col - 1){
+    //   continue;
+      // matrix = matrix_del_row(matrix, i);
+    // }
+    // else {
       for (int k = 0; k < i; ++k) {
         if (matrix->mat[k][j] != 0) {
-          matrix_add_row(matrix, k, i, -1);
+          matrix_add_row(matrix, k, i, -inv_Fq(matrix->mat[k][j]));
         }
       }
-    }
+    // }
   }
-
+  // }
 
   // ancienne version
   // annulation des début de ligne
