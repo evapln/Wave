@@ -29,6 +29,8 @@ matrix_t *matrix_identity (int size);
 
 /* alloue en mémoire et renvoie une matrice aléatoire de taille row x col dont les coefficient sont dans Fq */
 matrix_t *matrix_random(const int row, const int col);
+void shuffle(int *array, int n);
+matrix_t *matrix_perm_random (const int n);
 
 /* alloue en mémoire et erenvoie la ransposée de matrix */
 matrix_t *matrix_trans(const matrix_t *matrix);

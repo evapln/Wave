@@ -1,6 +1,11 @@
 #include <lapacke.h>
 #include "wave.h"
 
+// matrix_t* phi (matrix_t* x,matrix_t* y,matrix_t* a,matrix_t* b, matrix_t* c, matrix_t* d) {
+//   matrix_t *res = NULL;
+//   res = matrix_alloc ();
+//   return res;
+// }
 
 
 int main(int argc, char **argv) {
@@ -21,6 +26,11 @@ int main(int argc, char **argv) {
 
   matrix_print(B, stdout);
   matrix_free(B);
+
+  matrix_t *P = NULL;
+  P = matrix_perm_random(10);
+  matrix_print(P, stdout);
+  matrix_free(P);
   // for (int i = 3; i < 7; ++i) {
   //   printf("row : %d\t col : %d\n",i,4);
   //   A = matrix_random(i,4);

@@ -1,7 +1,5 @@
 #include "algebra.h"
 
-#include <time.h>
-#include <unistd.h>
 
 /* tableau des inverses pour q = 3 */
 static char tab_inv[3] = {0,1,2};
