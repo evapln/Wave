@@ -21,6 +21,8 @@ int matrix_get_col(const matrix_t*matrix);
 /* mets  matrix[row_val][col_val] à val */
 void matrix_set_cell(matrix_t *matrix, const int row_val, const int col_val, const char val);
 
+matrix_t *matrix_init (const int row, const int col, const char val);
+
 /* alloue en mémoire et renvoie une copie de matrix */
 matrix_t *matrix_copy(const matrix_t *matrix);
 

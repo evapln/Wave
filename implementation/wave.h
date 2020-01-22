@@ -1,11 +1,13 @@
 #include "matrix.h"
 
-int* phi (int x,int y, int a, int b, int c, int d);
+
+
+matrix_t *phi (const matrix_t* x,const matrix_t* y,const matrix_t* a,const matrix_t* b, const matrix_t* c, const matrix_t* d);
 int* parite (int* parite_U, int* parite_V);
 int* trapdoor (int lambda);
 int* sign (int* sk, int m);
 bool verify (int* pk, int m, int* signature);
-int* syndrome (int e, int* parite_UV);
+matrix_t *syndrome (const matrix_t *e, const matrix_t *parite);
 int inversion_of_f (int* parite_U, int* parite_V, int* inv);
 int* invert_alg (int* sk, int* S);
 int iteration_prange (int* parite, int syndrome);

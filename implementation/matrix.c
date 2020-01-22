@@ -84,6 +84,15 @@ void matrix_set_cell(matrix_t *matrix, const int row_val, const int col_val, con
   matrix->mat[row_val][col_val] = tmp;
 }
 
+matrix_t *matrix_init (const int row, const int col, const char val) {
+  matrix_t *matrix = NULL;
+  matrix = matrix_alloc (row, col);
+  for (int i = 0; i < row; ++i)
+    for (int j = 0; j < col; ++j)
+      matrix->mat[i][j] = val;
+  return matrix;
+}
+
 matrix_t *matrix_copy(const matrix_t *matrix) {
   if (!matrix)
     return NULL;
@@ -201,7 +210,7 @@ matrix_t *matrix_concatenation(const matrix_t *A, const matrix_t *B) {
   for (int i = 0; i < row; i++){
     for (int j = 0; j < col_A; j++)
       conc->mat[i][j] = A->mat[i][j];
-    for (int j = col_A; j < col_B; j++)
+    for (int j = col_A; j < col; j++)
       conc->mat[i][j] = B->mat[i][j-col_A];
   }
   return conc;
