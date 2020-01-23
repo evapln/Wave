@@ -1,5 +1,6 @@
 #include <lapacke.h>
 #include "wave.h"
+// #include "matrix.c"
 
 const int SIZE = 16;
 const int DIM = 10;
@@ -8,6 +9,10 @@ matrix_t* A = NULL;
 matrix_t* B = NULL;
 matrix_t* C = NULL;
 matrix_t* D = NULL;
+matrix_t *gen_U = NULL;
+matrix_t *gen_V = NULL;
+
+static bool coef_init = false;
 
 struct sk_t {
   matrix_t *parite_U;
@@ -16,7 +21,111 @@ struct sk_t {
   matrix_t *permut;
 };
 
+sk_t *sk_alloc(void) {
+  // allocation sk
+  sk_t *sk = malloc(sizeof(sk_t));
+  if (!sk)
+    return NULL;
+  // allocation matrive de parité U
+  sk->parite_U = malloc(sizeof(matrix_t));
+  if (!sk->parite_U) {
+    free(sk);
+    return NULL;
+  }
+  // sk->parite_U = par_U;
+  // allocation matrice de parité V
+  sk->parite_V = malloc(sizeof(matrix_t));
+  if (!sk->parite_V) {
+    free(sk->parite_U);
+    free(sk);
+    return NULL;
+  }
+  // sk->parite_V = par_V;
+  // allocation matrice S
+  sk->S = malloc(sizeof(matrix_t));
+  if (!sk->S) {
+    free(sk->parite_V);
+    free(sk->parite_U);
+    free(sk);
+    return NULL;
+  }
+  // sk->S = S;
+  // allocation matrice de permutation P
+  sk->permut = matrix_alloc(SIZE,SIZE);
+  if (!sk->permut) {
+    free(sk->S);
+    free(sk->parite_V);
+    free(sk->parite_U);
+    free(sk);
+    return NULL;
+  }
+  // sk->permut = permut;
+  // retour
+  return sk;
+}
+
+// sk_t *sk_alloc(int par_U_row, int par_U_col, int par_V_row, int par_V_col, int S_size) {
+//   // allocation sk
+//   sk_t *sk = malloc(sizeof(sk_t));
+//   if (!sk)
+//     return NULL;
+//   // allocation matrive de parité U
+//   matrix_t *par_U = matrix_alloc(par_U_row, par_U_col);
+//   if (!par_U) {
+//     free(sk);
+//     return NULL;
+//   }
+//   sk->parite_U = par_U;
+//   // allocation matrice de parité V
+//   matrix_t *par_V = matrix_alloc(par_V_row, par_V_col);
+//   if (!par_V) {
+//     matrix_free(sk->parite_U);
+//     free(sk);
+//     return NULL;
+//   }
+//   sk->parite_V = par_V;
+//   // allocation matrice S
+//   matrix_t *S = matrix_alloc(S_size, S_size);
+//   if (!S) {
+//     matrix_free(sk->parite_V);
+//     matrix_free(sk->parite_U);
+//     free(sk);
+//     return NULL;
+//   }
+//   sk-> S = S;
+//   // allocation matrice de permutation P
+//   matrix_t *permut = matrix_alloc(SIZE,SIZE);
+//   if (!permut) {
+//     matrix_free(sk->S);
+//     matrix_free(sk->parite_V);
+//     matrix_free(sk->parite_U);
+//     free(sk);
+//     return NULL;
+//   }
+//   sk->permut = permut;
+//   // retour
+//   return sk;
+// }
+
+// sk_t *sk_alloc(void) {
+//   sk_t *sk = malloc(sizeof(sk));
+//   return sk;
+// }
+
+void sk_free (sk_t *sk) {
+  if (sk != NULL)
+  {
+    matrix_free(sk->parite_U);
+    matrix_free(sk->parite_V);
+    matrix_free(sk->S);
+    matrix_free(sk->permut);
+  }
+  free(sk);
+}
+
 matrix_t* phi (const matrix_t* x,const matrix_t* y) {
+  if (!coef_init)
+    return NULL;
   matrix_t *res = NULL;
   matrix_t *res_g = NULL;
   matrix_t *res_d = NULL;
@@ -86,18 +195,18 @@ matrix_t* parite (const matrix_t* parite_U,const matrix_t* parite_V) {
 }
 
 void coeff_phi (int mode) {
-  char a; char b; char c; char d;
+  char a, b, c, d;
   if (mode == 0) {
-    A = matrix_init (1,SIZE/2,(char)1);
-    B = matrix_init (1,SIZE/2,(char)0);
-    C = matrix_init (1,SIZE/2,(char)1);
-    D = matrix_init (1,SIZE/2,(char)1);
+    A = matrix_init(1,SIZE/2,(char)1);
+    B = matrix_init(1,SIZE/2,(char)0);
+    C = matrix_init(1,SIZE/2,(char)1);
+    D = matrix_init(1,SIZE/2,(char)1);
   }
   else {
-      A = matrix_alloc (1,SIZE/2);
-      B = matrix_alloc (1,SIZE/2);
-      C = matrix_alloc (1,SIZE/2);
-      D = matrix_alloc (1,SIZE/2);
+      A = matrix_alloc(1,SIZE/2);
+      B = matrix_alloc(1,SIZE/2);
+      C = matrix_alloc(1,SIZE/2);
+      D = matrix_alloc(1,SIZE/2);
       for (int i = 0; i < SIZE/2; i++) {
         a = 0;
         b = 0;
@@ -127,7 +236,7 @@ void coeff_phi (int mode) {
   matrix_print(C, stdout);
   puts("D : \n");
   matrix_print(D, stdout);
-  return;
+  coef_init = true;
 }
 
 void key_gen (int lambda, matrix_t *pk, sk_t *sk, int mode) {
@@ -135,37 +244,67 @@ void key_gen (int lambda, matrix_t *pk, sk_t *sk, int mode) {
   coeff_phi (mode);
 
   // crée les matrices génératrices de U et V et vérifie qu'elles sont ok:
-  bool answer = 0;
+  bool answer = false;
   matrix_t *gen_U_temp = NULL;
-  matrix_t *gen_U = NULL;
-  while (answer == 0){
+  // matrix_t *gen_U = NULL;
+  while (!answer){
     gen_U_temp = matrix_random(DIM/2,SIZE/2);
     matrix_systematisation(gen_U_temp);
     gen_U = matrix_del_null_row(gen_U_temp);
     answer = matrix_is_syst(gen_U);
-    if (answer == 0)
-      matrix_free (gen_U);
   }
+  matrix_free (gen_U_temp);
 
-  answer = 0;
+  answer = false;
   matrix_t *gen_V_temp = NULL;
-  matrix_t *gen_V = NULL;
-  while (answer == 0){
+  // matrix_t *gen_V = NULL;
+  while (!answer){
     gen_V_temp = matrix_random(DIM/2,SIZE/2);
     matrix_systematisation(gen_V_temp);
     gen_V = matrix_del_null_row(gen_V_temp);
     answer = matrix_is_syst(gen_V);
-    if (answer == 0)
-      matrix_free (gen_U);
-    }
+  }
+  matrix_free (gen_V_temp);
 
   // crée H_U H_V
+  matrix_t *parite_U = matrix_parite(gen_U);
+  matrix_t *parite_V = matrix_parite(gen_V);
+
+  // dimension des codes
+  int dim_U = matrix_get_col(parite_U) - matrix_get_row(parite_U);
+  int dim_V = matrix_get_col(parite_V) - matrix_get_row(parite_V);
+  int dim_parite = dim_U + dim_V;
+
   // crée H
+  matrix_t *H = parite(parite_U, parite_V);
+
   // S, P aléatoire
+  matrix_t *S = matrix_random(SIZE-dim_parite,SIZE-dim_parite);
+  matrix_t *P = matrix_perm_random(SIZE);
+
   // pk = SHP
+  matrix_t *SH = matrix_prod(S,H);
+  pk = matrix_prod(SH,P);
+
   // sk = H_U,H_V,S,P
-  matrix_free(gen_U);
-  matrix_free(gen_V);
+  sk = sk_alloc();
+  puts("1");
+  sk->parite_U = parite_U;
+  puts("2");
+  sk->parite_V = parite_V;
+  puts("3");
+  sk->S = S;
+  puts("4");
+  sk->permut = P;
+  puts("5");
+
+
+  // clean up
+  matrix_free(SH);
+  matrix_free(H);
+
+  // matrix_free(gen_U);
+  // matrix_free(gen_V);
   return;
 }
 
@@ -184,14 +323,76 @@ int main(int argc, char **argv) {
   // pariteUV = parite (X,Y);
   // puts("parite : \n");
   // matrix_print(pariteUV, stdout);
-  matrix_t *pk = NULL;
-  sk_t *sk = NULL;
-  key_gen(3,pk,sk,0);
+  //
+  // matrix_t *A = NULL;
+  // A = matrix_random(4,6);
+  // matrix_print(A, stdout);
+  // matrix_systematisation(A);
+  // matrix_print(A, stdout);
+  // if (matrix_is_syst(A))
+  //   puts("A syst");
+  // matrix_t *B = NULL;
+  // B = matrix_del_null_row(A);
+  // matrix_print(B, stdout);
+  // if (matrix_is_syst(B))
+  //   puts("B syst");
+  // matrix_free(A);
+  // matrix_free(B);
 
-  matrix_free(A);
-  matrix_free(B);
-  matrix_free(C);
-  matrix_free(D);
+  // matrix_t *A = NULL;
+  // A = matrix_alloc(4,6);
+  // matrix_set_cell(A,0,0,1);
+  // matrix_set_cell(A,0,1,1);
+  // matrix_set_cell(A,0,2,1);
+  // matrix_set_cell(A,0,3,0);
+  // matrix_set_cell(A,0,4,1);
+  // matrix_set_cell(A,0,5,1);
+  // matrix_set_cell(A,1,0,0);
+  // matrix_set_cell(A,1,1,1);
+  // matrix_set_cell(A,1,2,0);
+  // matrix_set_cell(A,1,3,0);
+  // matrix_set_cell(A,1,4,1);
+  // matrix_set_cell(A,1,5,1);
+  // matrix_set_cell(A,2,0,1);
+  // matrix_set_cell(A,2,1,0);
+  // matrix_set_cell(A,2,2,1);
+  // matrix_set_cell(A,2,3,1);
+  // matrix_set_cell(A,2,4,0);
+  // matrix_set_cell(A,2,5,1);
+  // matrix_set_cell(A,3,0,0);
+  // matrix_set_cell(A,3,1,1);
+  // matrix_set_cell(A,3,2,1);
+  // matrix_set_cell(A,3,3,1);
+  // matrix_set_cell(A,3,4,0);
+  // matrix_set_cell(A,3,5,1);
+  // matrix_print(A,stdout);
+  // matrix_systematisation(A);
+  // matrix_print(A,stdout);
+  // // matrix_free(A);
+  // matrix_t *B = NULL;
+  // B = matrix_parite(A);
+  // if (!B)
+  //   puts("error");
+  // else
+  //   matrix_print(B, stdout);
+  // matrix_free(B);
+
+  // matrix_t *pk = NULL;
+  sk_t *sk = NULL;
+  sk = sk_alloc();
+  sk->parite_U = matrix_random(3,4);
+  sk->parite_V = matrix_random(3,4);
+  sk->S = matrix_random(3,4);
+  sk->permut = matrix_random(3,4);
+  // key_gen(3,pk,sk,1);
+  // matrix_free(pk);
+  sk_free(sk);
+
+  // matrix_free(A);
+  // matrix_free(B);
+  // matrix_free(C);
+  // matrix_free(D);
+
   // matrix_free(X);
   // matrix_free(Y);
   // matrix_free(pariteUV);

@@ -1,17 +1,15 @@
 #include "matrix.h"
 
-struct matrix_t {
-  int nb_col;
-  int nb_row;
-  char** mat;
-};
+// struct matrix_t {
+//   int nb_col;
+//   int nb_row;
+//   char** mat;
+// };
 
 matrix_t *matrix_alloc(int row, int col) {
   matrix_t *matrix = malloc(sizeof(matrix_t));
   if (!matrix)
-  {
     return NULL;
-  }
   matrix->nb_col = col;
   matrix->nb_row = row;
   matrix->mat = calloc(row, sizeof(char*));
@@ -139,6 +137,38 @@ matrix_t *matrix_random(const int row, const int col) {
     for (int j = 0; j < col; ++j)
       rand->mat[i][j] = rand_Fq();
   return rand;
+}
+
+void shuffle(int *array, int n) {
+  if (n > 1)
+  {
+    for (int i = 0; i < n - 1; i++)
+    {
+      prng_init(time(NULL) + getpid());
+      int k = rand() % (n - i);
+      int j = i + k;
+      int t = array[j];
+      array[j] = array[i];
+      array[i] = t;
+    }
+  }
+}
+
+matrix_t *matrix_perm_random (const int n) {
+  matrix_t *matrix = NULL;
+  matrix = matrix_alloc(n,n);
+  int indices[n];
+  for (int i = 0; i < n; i++)
+    indices[i] = i;
+  for (int i = 0; i < 5; i++)
+    shuffle (indices, n);
+  for (int i = 0; i < n; i++)
+  {
+    for (int j = 0; j < n; j++)
+      matrix->mat[i][j] = 0;
+    matrix->mat[i][indices[i]] = 1;
+  }
+  return matrix;
 }
 
 matrix_t *matrix_trans(const matrix_t *matrix) {
@@ -306,6 +336,35 @@ matrix_t *matrix_prod(const matrix_t *matrix1, const matrix_t *matrix2) {
   return prod;
 }
 
+matrix_t *matrix_del_row(matrix_t *matrix, const int row1) {
+  int row = matrix->nb_row;
+  int col = matrix->nb_col;
+  if (row1 > row)
+    return NULL;
+  matrix_t *matrix2 = NULL;
+  matrix2 = matrix_alloc(row - 1, col);
+  int id_row = 0;
+  for (int i = 0; i < row; ++i){
+    if (i != row1){
+      for (int j = 0; j < col; ++j){
+        matrix2->mat[id_row][j] = matrix->mat[i][j];
+      }
+      id_row++;
+    }
+  }
+  // matrix_free(matrix);
+  return matrix2;
+}
+
+bool row_is_zero (matrix_t *matrix, const int row) {
+  for (int col = 0; col < matrix->nb_col; col++){
+    if (matrix->mat[row][col] != 0) {
+      return false;
+    }
+  }
+  return true;
+}
+
 void matrix_add_row(matrix_t *matrix, const int row1, const int row2, const char coef) {
   int row = matrix->nb_row;
   if (row1 > row || row2 > row)
@@ -333,44 +392,71 @@ void matrix_exchange_row(matrix_t *matrix, const int row1, const int row2) {
   }
 }
 
-matrix_t *matrix_del_row(matrix_t *matrix, const int row1) {
+// matrix_t *matrix_del_null_row (matrix_t *matrix) {
+//   if (row_is_zero(matrix, matrix->nb_row - 1)) {
+//     matrix_t *matrix2 = NULL;
+//     matrix2 = matrix_del_null_row(matrix_del_row(matrix, matrix->nb_row - 1));
+//     return matrix2;
+//   }
+//   else {
+//     return matrix;
+//   }
+// }
+
+matrix_t *matrix_del_null_row (matrix_t *matrix) {
   int row = matrix->nb_row;
-  int col = matrix->nb_col;
-  if (row1 > row)
-    return NULL;
-  matrix_t *matrix2 = NULL;
-  matrix2 = matrix_alloc(row - 1, col);
-  int id_row = 0;
-  for (int i = 0; i < row; ++i){
-    if (i != row1){
-      for (int j = 0; j < col; ++j){
-        matrix2->mat[id_row][j] = matrix->mat[i][j];
-      }
-      id_row++;
+  int tab_row[row];
+  for (int i = 0; i < row; ++i)
+    tab_row[i] = 0;
+  int nb_row = 0;
+  for (int i = 0; i < matrix->nb_row; ++i) {
+    if (!row_is_zero(matrix, i)) {
+      tab_row[nb_row] = i;
+      ++nb_row;
     }
   }
-  matrix_free(matrix);
+  int col = matrix->nb_col;
+  matrix_t *matrix2 = NULL;
+  matrix2 = matrix_alloc(nb_row, col);
+  for (int i = 0; i < nb_row; ++i) {
+    for (int j = 0; j < col; ++j) {
+      matrix2->mat[i][j] = matrix->mat[tab_row[i]][j];
+    }
+  }
   return matrix2;
 }
 
-bool row_is_zero (matrix_t *matrix, const int row) {
-  for (int col = 0; col < matrix->nb_col; col++){
-    if (matrix->mat[row][col] != 0) {
-      return false;
+matrix_t *matrix_parite(const matrix_t *gen) {
+  matrix_t *copy_gen = NULL;
+  copy_gen = matrix_copy(gen);
+  if (!copy_gen)
+    return NULL;
+  matrix_systematisation(copy_gen);
+  matrix_t *syst = NULL;
+  syst = matrix_del_null_row(copy_gen);
+  matrix_free(copy_gen);
+  if (!matrix_is_syst(syst)) {
+    matrix_free(syst);
+    return NULL;
+  }
+  int row_syst = syst->nb_row;
+  int col_syst = syst->nb_col;
+  int row_p = col_syst - row_syst;
+  int col_p = row_syst + row_p;
+  matrix_t *parite = NULL;
+  parite = matrix_alloc(row_p,col_p);
+  for (int i = 0; i < row_p; ++i) {
+    for (int j = 0; j < row_syst; ++j)
+      parite->mat[i][j] = syst->mat[j][row_syst + i];
+    for (int j = row_syst; j < col_p; ++j) {
+      if (j - row_syst == i)
+        parite->mat[i][j] = 1;
+      else
+        parite->mat[i][j] = 0;
     }
   }
-  return true;
-}
-
-matrix_t *matrix_del_null_row (matrix_t *matrix) {
-  if (row_is_zero(matrix, matrix->nb_row - 1)) {
-    matrix_t *matrix2 = NULL;
-    matrix2 = matrix_del_null_row(matrix_del_row(matrix, matrix->nb_row - 1));
-    return matrix2;
-  }
-  else {
-    return matrix;
-  }
+  matrix_free(syst);
+  return parite;
 }
 
 void matrix_systematisation(matrix_t *matrix) {
@@ -396,7 +482,7 @@ void matrix_systematisation(matrix_t *matrix) {
     }
   }
 
-  // on met tous les pivits à 1
+  // on met tous les pivots à 1
   // pour toutes les lignes
   for (int i = 0; i < row; ++i) {
     // on parcours les lignes
@@ -411,21 +497,20 @@ void matrix_systematisation(matrix_t *matrix) {
   for (int i = row - 1; i >= 0; --i) {
     // parcours de la ligne
     int j = 0;
-    while ((matrix->mat[i][j] == 0) && (j != col - 1)) {
+    while ((matrix->mat[i][j] == 0) && (j != col - 1))
       j += 1;
-      }
-      for (int k = 0; k < i; ++k) {
-        if (matrix->mat[k][j] != 0) {
-          matrix_add_row(matrix, k, i, -inv_Fq(matrix->mat[k][j]));
-        }
-      }
+    for (int k = 0; k < i; ++k) {
+      if (matrix->mat[k][j] != 0)
+        matrix_add_row(matrix, k, i, -inv_Fq(matrix->mat[k][j]));
+    }
   }
 }
 
 bool matrix_is_syst (matrix_t *matrix) {
   int row = matrix->nb_row;
+  int col = matrix->nb_col;
   for (int i = 0; i < row; i++)
-    for (int j = 0; j < row; j++){
+    for (int j = 0; j < col && j < row; j++){
       // char mat = matrix2->mat[i][j];
       if (i == j && (matrix->mat[i][j] != 1)){
         // matrix_free(matrix2);
@@ -476,38 +561,4 @@ void matrix_print(matrix_t *matrix, FILE *fd) {
     }
     fputs("\n\n", fd);
   }
-}
-
-void shuffle(int *array, int n) {
-  if (n > 1)
-  {
-    for (int i = 0; i < n - 1; i++)
-    {
-      prng_init(time(NULL) + getpid());
-      int k = rand() % (n - i);
-      int j = i + k;
-      int t = array[j];
-      array[j] = array[i];
-      array[i] = t;
-    }
-  }
-}
-
-matrix_t *matrix_perm_random (const int n) {
-  matrix_t *matrix = NULL;
-  matrix = matrix_alloc(n,n);
-  int indices[n];
-  for (int i = 0; i < n; i++)
-    indices[i] = i;
-  for (int i = 0; i < 5; i++)
-      shuffle (indices, n);
-  for (int i = 0; i < n; i++)
-  {
-    for (int j = 0; j < n; j++)
-    {
-      matrix->mat[i][j] = 0;
-    }
-    matrix->mat[i][indices[i]] = 1;
-  }
-  return matrix;
 }

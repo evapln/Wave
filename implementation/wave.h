@@ -2,13 +2,20 @@
 
 typedef struct sk_t sk_t;
 
+/* Alloue en mémoire l'espace d'une clé secrète mais pas ses composants */
+// sk_t *sk_alloc(int par_U_row, int par_U_col, int par_V_row, int par_V_col, int S_size);
+sk_t *sk_alloc(void);
+
+/* libère l'espace alloué pour la clé secrète et ses composants */
+void sk_free (sk_t *sk);
+
 /* Applique la fonction Phi sur x et y */
 matrix_t *phi (const matrix_t* x,const matrix_t* y);
 
 /* Renvoie s le syndrome de e pour le code associé à la matrice de parité */
 matrix_t *syndrome (const matrix_t *e, const matrix_t *parite);
 
-/* Renvoie parité du code UV en fonction des matrices de parité des codes U et V */
+/* Renvoie la matrice de parité du code UV en fonction des matrices de parité des codes U et V */
 matrix_t *parite (const matrix_t *parite_U, const matrix_t *parite_V);
 
 /* Si mode = 0, a=c=d=1 et b=0, si mode = 1 a,b,c,d random avec les bonnes propriétés */

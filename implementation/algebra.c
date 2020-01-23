@@ -31,7 +31,7 @@ char inv_Fq(char a) {
   return tab_inv[(int)a];
 }
 
-char opp_Fq(void){
+char opp_Fq(void) {
   return (ORDER - 1);
 }
 
