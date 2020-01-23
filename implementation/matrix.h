@@ -88,7 +88,10 @@ void matrix_exchange_row(matrix_t *matrix, const int row1, const int row2);
 matrix_t *matrix_del_null_row (matrix_t *matrix) ;
 
 /* Trigonalise matrix */
-void matrix_trigonalisation(matrix_t *matrix);
+void matrix_systematisation(matrix_t *matrix);
+
+/* Vérifie si la matrice est correctement systématisée */
+bool matrix_is_syst (matrix_t *matrix);
 
 /* Renvoie le determinant de la matrice A */
 char matrix_det(matrix_t *A);

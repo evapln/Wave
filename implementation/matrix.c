@@ -366,7 +366,6 @@ matrix_t *matrix_del_null_row (matrix_t *matrix) {
   if (row_is_zero(matrix, matrix->nb_row - 1)) {
     matrix_t *matrix2 = NULL;
     matrix2 = matrix_del_null_row(matrix_del_row(matrix, matrix->nb_row - 1));
-    // matrix_free(matrix);
     return matrix2;
   }
   else {
@@ -374,7 +373,7 @@ matrix_t *matrix_del_null_row (matrix_t *matrix) {
   }
 }
 
-void matrix_trigonalisation(matrix_t *matrix) {
+void matrix_systematisation(matrix_t *matrix) {
   int row = matrix->nb_row;
   int col = matrix->nb_col;
   // étape 1
@@ -423,6 +422,24 @@ void matrix_trigonalisation(matrix_t *matrix) {
   }
 }
 
+bool matrix_is_syst (matrix_t *matrix) {
+  int row = matrix->nb_row;
+  for (int i = 0; i < row; i++)
+    for (int j = 0; j < row; j++){
+      // char mat = matrix2->mat[i][j];
+      if (i == j && (matrix->mat[i][j] != 1)){
+        // matrix_free(matrix2);
+        return false;
+      }
+      if (i != j && (matrix->mat[i][j] != 0)){
+        // matrix_free(matrix2);
+        return false;
+      }
+    }
+  // matrix_free(matrix2);
+  return true;
+}
+
 char matrix_det(matrix_t *A) {
   int size = A->nb_col;
   if (size == 2)
@@ -461,8 +478,7 @@ void matrix_print(matrix_t *matrix, FILE *fd) {
   }
 }
 
-void shuffle(int *array, int n)
-{
+void shuffle(int *array, int n) {
   if (n > 1)
   {
     for (int i = 0; i < n - 1; i++)
@@ -477,8 +493,7 @@ void shuffle(int *array, int n)
   }
 }
 
-matrix_t *matrix_perm_random (const int n)
-{
+matrix_t *matrix_perm_random (const int n) {
   matrix_t *matrix = NULL;
   matrix = matrix_alloc(n,n);
   int indices[n];
