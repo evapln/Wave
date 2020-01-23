@@ -31,6 +31,10 @@ char inv_Fq(char a) {
   return tab_inv[(int)a];
 }
 
+char opp_Fq(void){
+  return (ORDER - 1);
+}
+
 char rand_Fq(void) {
   prng_init(time(NULL) + getpid());
   char rd = rand() % ORDER;

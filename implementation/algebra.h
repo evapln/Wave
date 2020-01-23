@@ -17,5 +17,8 @@ char mul_Fq(char a, char b);
 /* inversion dans le corps Fq */
 char inv_Fq(char a);
 
+/* opposé dans le corps Fq */
+char opp_Fq(void);
+
 /* renvoi un nombre aléatoire modulo q */
 char rand_Fq(void);

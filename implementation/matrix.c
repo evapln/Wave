@@ -118,6 +118,20 @@ matrix_t *matrix_identity (int size) {
   return id;
 }
 
+matrix_t *matrix_vect_to_diag (const matrix_t *vect, const char val) {
+  int size = vect->nb_col;
+  matrix_t *diag = NULL;
+  diag = matrix_alloc (size, size);
+  for (int i = 0; i < size; i++)
+    for (int j = 0; j < size; j++) {
+      if (j == i)
+        diag->mat[i][j] = mul_Fq(vect->mat[0][i], val);
+      else
+        diag->mat[i][j] = 0;
+    }
+  return diag;
+}
+
 matrix_t *matrix_random(const int row, const int col) {
   matrix_t *rand = NULL;
   rand = matrix_alloc(row,col);
@@ -198,20 +212,37 @@ matrix_t *matrix_sub (const matrix_t *A, int a, int b) {
   return sub;
 }
 
-matrix_t *matrix_concatenation(const matrix_t *A, const matrix_t *B) {
-  int row = A->nb_row;
-  if (row != B->nb_row)
-    return NULL;
-  int col_A = A->nb_col;
-  int col_B = B->nb_col;
-  int col = col_A + col_B;
+matrix_t *matrix_concatenation(const matrix_t *A, const matrix_t *B, const int mode) {
   matrix_t *conc = NULL;
-  conc = matrix_alloc(row,col);
-  for (int i = 0; i < row; i++){
-    for (int j = 0; j < col_A; j++)
-      conc->mat[i][j] = A->mat[i][j];
-    for (int j = col_A; j < col; j++)
-      conc->mat[i][j] = B->mat[i][j-col_A];
+  if (mode == 0){
+    int row = A->nb_row;
+    if (row != B->nb_row)
+      return NULL;
+    int col_A = A->nb_col;
+    int col_B = B->nb_col;
+    int col = col_A + col_B;
+    conc = matrix_alloc(row,col);
+    for (int i = 0; i < row; i++){
+      for (int j = 0; j < col_A; j++)
+        conc->mat[i][j] = A->mat[i][j];
+      for (int j = col_A; j < col; j++)
+        conc->mat[i][j] = B->mat[i][j-col_A];
+    }
+  }
+  else{
+    int col = A->nb_col;
+    if (col != B->nb_col)
+      return NULL;
+    int row_A = A->nb_row;
+    int row_B = B->nb_row;
+    int row = row_A + row_B;
+    conc = matrix_alloc(row,col);
+    for (int i = 0; i < row_A; i++)
+      for (int j = 0; j < col; j++)
+        conc->mat[i][j] = A->mat[i][j];
+    for (int i = row_A; i < row; i++)
+      for (int j = 0; j < col; j++)
+        conc->mat[i][j] = B->mat[i - row_A][j];
   }
   return conc;
 }

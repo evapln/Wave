@@ -29,6 +29,8 @@ matrix_t *matrix_copy(const matrix_t *matrix);
 /* alloue en mémoire et renvoie une matrice identité de taille size */
 matrix_t *matrix_identity (int size);
 
+matrix_t *matrix_vect_to_diag (const matrix_t *vect, const char val);
+
 /* alloue en mémoire et renvoie une matrice aléatoire de taille row x col dont les coefficient sont dans Fq */
 matrix_t *matrix_random(const int row, const int col);
 void shuffle(int *array, int n);
@@ -47,7 +49,7 @@ matrix_t *matrix_inv(matrix_t *mat);
 matrix_t *matrix_sub (const matrix_t *A, int a, int b);
 
 /* alloue en mémoire et renvoie la concaénation de A et B */
-matrix_t *matrix_concatenation(const matrix_t *A, const matrix_t *B);
+matrix_t *matrix_concatenation(const matrix_t *A, const matrix_t *B, const int mode);
 
 /* alloue en mémoire et renvoie la matrice sum = matrix1 + matrix2 */
 matrix_t *matrix_add(const matrix_t *matrix1, const matrix_t *matrix2);
