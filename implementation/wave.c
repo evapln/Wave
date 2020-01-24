@@ -2,16 +2,19 @@
 #include "wave.h"
 
 const int SIZE = 16;
-const int DIM = 10;
+const int DIM = 8;
 const int OMEGA;
 matrix_t* A = NULL;
 matrix_t* B = NULL;
 matrix_t* C = NULL;
 matrix_t* D = NULL;
-matrix_t *gen_U = NULL;
-matrix_t *gen_V = NULL;
 
 static bool coef_init = false;
+
+struct keys_t {
+  sk_t *sk;
+  matrix_t *pk;
+};
 
 struct sk_t {
   matrix_t *parite_U;
@@ -19,97 +22,39 @@ struct sk_t {
   matrix_t *S;
   matrix_t *permut;
 };
-//
-// sk_t *sk_alloc(void) {
-//   // allocation sk
-//   sk_t *sk = malloc(sizeof(sk_t));
-//   if (!sk)
-//     return NULL;
-//   // allocation matrive de parité U
-//   sk->parite_U = malloc(sizeof(matrix_t));
-//   if (!sk->parite_U) {
-//     free(sk);
-//     return NULL;
-//   }
-//   // sk->parite_U = par_U;
-//   // allocation matrice de parité V
-//   sk->parite_V = malloc(sizeof(matrix_t));
-//   if (!sk->parite_V) {
-//     free(sk->parite_U);
-//     free(sk);
-//     return NULL;
-//   }
-//   // sk->parite_V = par_V;
-//   // allocation matrice S
-//   sk->S = malloc(sizeof(matrix_t));
-//   if (!sk->S) {
-//     free(sk->parite_V);
-//     free(sk->parite_U);
-//     free(sk);
-//     return NULL;
-//   }
-//   // sk->S = S;
-//   // allocation matrice de permutation P
-//   sk->permut = matrix_alloc(SIZE,SIZE);
-//   if (!sk->permut) {
-//     free(sk->S);
-//     free(sk->parite_V);
-//     free(sk->parite_U);
-//     free(sk);
-//     return NULL;
-//   }
-//   // sk->permut = permut;
-//   // retour
-//   return sk;
-// }
 
-// sk_t *sk_alloc(int par_U_row, int par_U_col, int par_V_row, int par_V_col, int S_size) {
-//   // allocation sk
-//   sk_t *sk = malloc(sizeof(sk_t));
-//   if (!sk)
-//     return NULL;
-//   // allocation matrive de parité U
-//   matrix_t *par_U = matrix_alloc(par_U_row, par_U_col);
-//   if (!par_U) {
-//     free(sk);
-//     return NULL;
-//   }
-//   sk->parite_U = par_U;
-//   // allocation matrice de parité V
-//   matrix_t *par_V = matrix_alloc(par_V_row, par_V_col);
-//   if (!par_V) {
-//     matrix_free(sk->parite_U);
-//     free(sk);
-//     return NULL;
-//   }
-//   sk->parite_V = par_V;
-//   // allocation matrice S
-//   matrix_t *S = matrix_alloc(S_size, S_size);
-//   if (!S) {
-//     matrix_free(sk->parite_V);
-//     matrix_free(sk->parite_U);
-//     free(sk);
-//     return NULL;
-//   }
-//   sk-> S = S;
-//   // allocation matrice de permutation P
-//   matrix_t *permut = matrix_alloc(SIZE,SIZE);
-//   if (!permut) {
-//     matrix_free(sk->S);
-//     matrix_free(sk->parite_V);
-//     matrix_free(sk->parite_U);
-//     free(sk);
-//     return NULL;
-//   }
-//   sk->permut = permut;
-//   // retour
-//   return sk;
-// }
-
-// sk_t *sk_alloc(void) {
-//   sk_t *sk = malloc(sizeof(sk));
-//   return sk;
-// }
+sk_t *sk_alloc(int dim_U, int dim_V) {
+  sk_t *sk = malloc(sizeof(sk_t));
+  if (!sk)
+    return NULL;
+  sk->parite_U = matrix_alloc ((SIZE/2)-dim_U, SIZE/2);
+  if (!sk->parite_U){
+    free(sk);
+    return NULL;
+  }
+  sk->parite_V = matrix_alloc ((SIZE/2)-dim_V, SIZE/2);
+  if (!sk->parite_V){
+    matrix_free(sk->parite_U);
+    free(sk);
+    return NULL;
+  }
+  sk->S = matrix_alloc (SIZE-DIM, SIZE-DIM);
+  if (!sk->S) {
+    matrix_free(sk->parite_V);
+    matrix_free(sk->parite_U);
+    free(sk);
+    return NULL;
+  }
+  sk->permut = matrix_alloc (SIZE,SIZE);
+  if (!sk->permut) {
+    matrix_free(sk->S);
+    matrix_free(sk->parite_V);
+    matrix_free(sk->parite_U);
+    free(sk);
+    return NULL;
+  }
+  return sk;
+}
 
 void sk_free (sk_t *sk) {
   if (sk != NULL)
@@ -120,6 +65,33 @@ void sk_free (sk_t *sk) {
     matrix_free(sk->permut);
   }
   free(sk);
+}
+
+keys_t *key_alloc(int dim_U, int dim_V){
+  keys_t *keys = malloc(sizeof(keys_t));
+  if (!keys)
+    return NULL;
+  keys->sk = sk_alloc (dim_U, dim_V);
+  if (!keys->sk){
+    free (keys);
+    return NULL;
+  }
+  keys->pk = matrix_alloc (DIM, SIZE);
+  if (!keys->pk){
+    sk_free(keys->sk);
+    free (keys);
+    return NULL;
+  }
+  return keys;
+}
+
+void key_free (keys_t *keys) {
+  if (keys != NULL)
+  {
+    matrix_free(keys->pk);
+    sk_free(keys->sk);
+  }
+  free(keys);
 }
 
 matrix_t* phi (const matrix_t* x,const matrix_t* y) {
@@ -238,19 +210,25 @@ void coeff_phi (int mode) {
   coef_init = true;
 }
 
-void key_gen (int lambda, matrix_t *pk, sk_t *sk, int mode) {
+keys_t *key_gen (int lambda, int mode) {
   // initialise a,b,c,d :
   coeff_phi (mode);
 
+  matrix_t *gen_U = NULL;
+  matrix_t *gen_V = NULL;
   // crée les matrices génératrices de U et V et vérifie qu'elles sont ok:
   bool answer = false;
   matrix_t *gen_U_temp = NULL;
   // matrix_t *gen_U = NULL;
   while (!answer){
-    gen_U_temp = matrix_random(DIM/2,SIZE/2);
+    gen_U_temp = matrix_random(SIZE/2-2,SIZE/2);
     matrix_systematisation(gen_U_temp);
     gen_U = matrix_del_null_row(gen_U_temp);
     answer = matrix_is_syst(gen_U);
+    if (!answer){
+      matrix_free(gen_U_temp);
+      matrix_free(gen_U);
+    }
   }
   matrix_free (gen_U_temp);
 
@@ -258,45 +236,77 @@ void key_gen (int lambda, matrix_t *pk, sk_t *sk, int mode) {
   matrix_t *gen_V_temp = NULL;
   // matrix_t *gen_V = NULL;
   while (!answer){
-    gen_V_temp = matrix_random(DIM/2,SIZE/2);
+    gen_V_temp = matrix_random(SIZE/2-2,SIZE/2);
     matrix_systematisation(gen_V_temp);
     gen_V = matrix_del_null_row(gen_V_temp);
     answer = matrix_is_syst(gen_V);
+    if (!answer){
+      matrix_free(gen_V_temp);
+      matrix_free(gen_V);
+    }
   }
   matrix_free (gen_V_temp);
 
+  matrix_print (gen_U, stdout);
+  matrix_print (gen_V, stdout);
+  // dimension des codes
+  int dim_U = matrix_get_row(gen_U);
+  int dim_V = matrix_get_row(gen_V);
+  int DIM = dim_U + dim_V;
+  printf("dim_U = %d, dim_V = %d, DIM = %d\n",dim_U,dim_V, DIM);
+
   // crée H_U H_V
-  matrix_t *parite_U = matrix_parite(gen_U);
-  matrix_t *parite_V = matrix_parite(gen_V);
+  matrix_t *H_U = matrix_parite(gen_U);
+  matrix_t *H_V = matrix_parite(gen_V);
 
   // dimension des codes
-  int dim_U = matrix_get_col(parite_U) - matrix_get_row(parite_U);
-  int dim_V = matrix_get_col(parite_V) - matrix_get_row(parite_V);
-  int dim_parite = dim_U + dim_V;
+  // int dim_U = matrix_get_col(H_U) - matrix_get_row(H_U);
+  // int dim_V = matrix_get_col(H_V) - matrix_get_row(H_V);
+  // int DIM = dim_U + dim_V;
+  // printf("DIM = %d\n", DIM);
+
+  keys_t *keys = NULL;
+  keys = key_alloc(dim_U,dim_V);
+  // sk_t *sk = keys->sk;
+  matrix_print (H_U,stdout);
+  matrix_print (H_V,stdout);
+  matrix_copy2(keys->sk->parite_U,H_U);
+  matrix_free(H_U);
+  matrix_copy2(keys->sk->parite_V,H_V);
+  matrix_free(H_V);
 
   // crée H
-  matrix_t *H = parite(parite_U, parite_V);
+  matrix_t *H = parite(keys->sk->parite_U, keys->sk->parite_V);
 
+  matrix_print (keys->sk->parite_U,stdout);
+  matrix_print (keys->sk->parite_V,stdout);
   // S, P aléatoire
-  matrix_t *S = matrix_random(SIZE-dim_parite,SIZE-dim_parite);
-  matrix_t *P = matrix_perm_random(SIZE);
+  matrix_t *S = matrix_random(SIZE-DIM,SIZE-DIM);
+  matrix_copy2(keys->sk->S, S);
+  matrix_free(S);
+  matrix_t *permut = matrix_perm_random(SIZE);
+  matrix_copy2(keys->sk->permut, permut);
+  matrix_free(permut);
 
+  puts("ok");
   // pk = SHP
-  matrix_t *SH = matrix_prod(S,H);
-  pk = matrix_prod(SH,P);
+  matrix_t *SH = matrix_prod(keys->sk->S,H);
+  matrix_t *SHP = matrix_prod(keys->sk->S,H);
+  matrix_copy2(keys->pk, SHP);
 
   // sk = H_U,H_V,S,P
-  sk = malloc(sizeof(sk_t));
+  // sk = malloc(sizeof(sk_t));
   // à continuer
 
 
   // clean up
   matrix_free(SH);
+  matrix_free(SHP);
   matrix_free(H);
 
-  // matrix_free(gen_U);
-  // matrix_free(gen_V);
-  return;
+  matrix_free(gen_U);
+  matrix_free(gen_V);
+  return keys;
 }
 
 int main(int argc, char **argv) {
@@ -369,7 +379,24 @@ int main(int argc, char **argv) {
   // matrix_free(B);
 
   // matrix_t *pk = NULL;
-  sk_t *sk = NULL;
+  // pk = matrix_alloc ()
+  // sk_t *sk = NULL;
+
+
+  keys_t *keys = key_gen(0,0);
+  key_free(keys);
+
+  // keys_t *keys = key_alloc (4,4);
+  // DIM = 8;
+  // printf("key : %d,%d\n", matrix_get_col(keys->pk),  matrix_get_row(keys->pk));
+  // matrix_t *pk = matrix_alloc (8,SIZE);
+  // for (int i = 0; i < 4; i++)
+  //   for (int j = 0; j < 4; j++)
+  //     matrix_set_cell(keys->sk->parite_U, i,j,0);
+  // printf("pk : %d,%d\n", matrix_get_col(pk),  matrix_get_row(pk));
+  // key_free(keys);
+
+  // sk_free(sk);
   // sk = sk_alloc();
   // sk->parite_U = matrix_random(3,4);
   // sk->parite_V = matrix_random(3,4);
@@ -379,10 +406,10 @@ int main(int argc, char **argv) {
   // matrix_free(pk);
   // sk_free(sk);
 
-  // matrix_free(A);
-  // matrix_free(B);
-  // matrix_free(C);
-  // matrix_free(D);
+  matrix_free(A);
+  matrix_free(B);
+  matrix_free(C);
+  matrix_free(D);
 
   // matrix_free(X);
   // matrix_free(Y);

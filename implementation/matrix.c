@@ -103,6 +103,17 @@ matrix_t *matrix_copy(const matrix_t *matrix) {
   return copy;
 }
 
+void matrix_copy2 (const matrix_t *matrix1,const matrix_t *matrix2) {
+  if (!matrix1 || !matrix2)
+    return;
+  if (matrix1->nb_row != matrix2->nb_row || matrix1->nb_col != matrix2->nb_col)
+    return;
+  for (int i = 0; i < matrix1->nb_row; ++i)
+    for (int j = 0; j < matrix1->nb_col; ++j)
+      matrix1->mat[i][j] = matrix2->mat[i][j];
+  return;
+}
+
 matrix_t *matrix_identity (int size) {
   matrix_t *id = NULL;
   id = matrix_alloc(size,size);
@@ -391,17 +402,6 @@ void matrix_exchange_row(matrix_t *matrix, const int row1, const int row2) {
     matrix->mat[row2][i] = tmp;
   }
 }
-
-// matrix_t *matrix_del_null_row (matrix_t *matrix) {
-//   if (row_is_zero(matrix, matrix->nb_row - 1)) {
-//     matrix_t *matrix2 = NULL;
-//     matrix2 = matrix_del_null_row(matrix_del_row(matrix, matrix->nb_row - 1));
-//     return matrix2;
-//   }
-//   else {
-//     return matrix;
-//   }
-// }
 
 matrix_t *matrix_del_null_row (matrix_t *matrix) {
   int row = matrix->nb_row;

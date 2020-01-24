@@ -2,12 +2,18 @@
 
 typedef struct sk_t sk_t;
 
-/* Alloue en mémoire l'espace d'une clé secrète mais pas ses composants */
-// sk_t *sk_alloc(int par_U_row, int par_U_col, int par_V_row, int par_V_col, int S_size);
-// sk_t *sk_alloc(void);
+typedef struct keys_t keys_t;
+
+/* Alloue en mémoire l'espace d'une clé secrète */
+sk_t *sk_alloc(int dim_U, int dim_V);
 
 /* libère l'espace alloué pour la clé secrète et ses composants */
 void sk_free (sk_t *sk);
+
+keys_t *key_alloc(int dim_U, int dim_V);
+
+void key_free (keys_t *keys);
+
 
 /* Applique la fonction Phi sur x et y */
 matrix_t *phi (const matrix_t* x,const matrix_t* y);
@@ -22,7 +28,7 @@ matrix_t *parite (const matrix_t *parite_U, const matrix_t *parite_V);
 void coeff_phi (int mode);
 
 /* Génère les clés */
-void key_gen (int lambda, matrix_t *pk, sk_t *sk, int mode);
+keys_t *key_gen (int lambda, int mode);
 
 int* sign (int* sk, int m);
 bool verify (int* pk, int m, int* signature);
