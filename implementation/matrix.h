@@ -3,12 +3,6 @@
 
 typedef struct matrix_t matrix_t;
 
-struct matrix_t {
-  int nb_col;
-  int nb_row;
-  char** mat;
-};
-
 /* Alloue en mémoire et renvoie une matrice de taille row x col vide */
 matrix_t *matrix_alloc(int row, int col);
 

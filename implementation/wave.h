@@ -4,7 +4,7 @@ typedef struct sk_t sk_t;
 
 /* Alloue en mémoire l'espace d'une clé secrète mais pas ses composants */
 // sk_t *sk_alloc(int par_U_row, int par_U_col, int par_V_row, int par_V_col, int S_size);
-sk_t *sk_alloc(void);
+// sk_t *sk_alloc(void);
 
 /* libère l'espace alloué pour la clé secrète et ses composants */
 void sk_free (sk_t *sk);

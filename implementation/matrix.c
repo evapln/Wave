@@ -1,10 +1,10 @@
 #include "matrix.h"
 
-// struct matrix_t {
-//   int nb_col;
-//   int nb_row;
-//   char** mat;
-// };
+struct matrix_t {
+  int nb_col;
+  int nb_row;
+  char** mat;
+};
 
 matrix_t *matrix_alloc(int row, int col) {
   matrix_t *matrix = malloc(sizeof(matrix_t));

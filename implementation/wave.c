@@ -1,6 +1,5 @@
 #include <lapacke.h>
 #include "wave.h"
-// #include "matrix.c"
 
 const int SIZE = 16;
 const int DIM = 10;
@@ -20,49 +19,49 @@ struct sk_t {
   matrix_t *S;
   matrix_t *permut;
 };
-
-sk_t *sk_alloc(void) {
-  // allocation sk
-  sk_t *sk = malloc(sizeof(sk_t));
-  if (!sk)
-    return NULL;
-  // allocation matrive de parité U
-  sk->parite_U = malloc(sizeof(matrix_t));
-  if (!sk->parite_U) {
-    free(sk);
-    return NULL;
-  }
-  // sk->parite_U = par_U;
-  // allocation matrice de parité V
-  sk->parite_V = malloc(sizeof(matrix_t));
-  if (!sk->parite_V) {
-    free(sk->parite_U);
-    free(sk);
-    return NULL;
-  }
-  // sk->parite_V = par_V;
-  // allocation matrice S
-  sk->S = malloc(sizeof(matrix_t));
-  if (!sk->S) {
-    free(sk->parite_V);
-    free(sk->parite_U);
-    free(sk);
-    return NULL;
-  }
-  // sk->S = S;
-  // allocation matrice de permutation P
-  sk->permut = matrix_alloc(SIZE,SIZE);
-  if (!sk->permut) {
-    free(sk->S);
-    free(sk->parite_V);
-    free(sk->parite_U);
-    free(sk);
-    return NULL;
-  }
-  // sk->permut = permut;
-  // retour
-  return sk;
-}
+//
+// sk_t *sk_alloc(void) {
+//   // allocation sk
+//   sk_t *sk = malloc(sizeof(sk_t));
+//   if (!sk)
+//     return NULL;
+//   // allocation matrive de parité U
+//   sk->parite_U = malloc(sizeof(matrix_t));
+//   if (!sk->parite_U) {
+//     free(sk);
+//     return NULL;
+//   }
+//   // sk->parite_U = par_U;
+//   // allocation matrice de parité V
+//   sk->parite_V = malloc(sizeof(matrix_t));
+//   if (!sk->parite_V) {
+//     free(sk->parite_U);
+//     free(sk);
+//     return NULL;
+//   }
+//   // sk->parite_V = par_V;
+//   // allocation matrice S
+//   sk->S = malloc(sizeof(matrix_t));
+//   if (!sk->S) {
+//     free(sk->parite_V);
+//     free(sk->parite_U);
+//     free(sk);
+//     return NULL;
+//   }
+//   // sk->S = S;
+//   // allocation matrice de permutation P
+//   sk->permut = matrix_alloc(SIZE,SIZE);
+//   if (!sk->permut) {
+//     free(sk->S);
+//     free(sk->parite_V);
+//     free(sk->parite_U);
+//     free(sk);
+//     return NULL;
+//   }
+//   // sk->permut = permut;
+//   // retour
+//   return sk;
+// }
 
 // sk_t *sk_alloc(int par_U_row, int par_U_col, int par_V_row, int par_V_col, int S_size) {
 //   // allocation sk
@@ -287,16 +286,8 @@ void key_gen (int lambda, matrix_t *pk, sk_t *sk, int mode) {
   pk = matrix_prod(SH,P);
 
   // sk = H_U,H_V,S,P
-  sk = sk_alloc();
-  puts("1");
-  sk->parite_U = parite_U;
-  puts("2");
-  sk->parite_V = parite_V;
-  puts("3");
-  sk->S = S;
-  puts("4");
-  sk->permut = P;
-  puts("5");
+  sk = malloc(sizeof(sk_t));
+  // à continuer
 
 
   // clean up
@@ -379,14 +370,14 @@ int main(int argc, char **argv) {
 
   // matrix_t *pk = NULL;
   sk_t *sk = NULL;
-  sk = sk_alloc();
-  sk->parite_U = matrix_random(3,4);
-  sk->parite_V = matrix_random(3,4);
-  sk->S = matrix_random(3,4);
-  sk->permut = matrix_random(3,4);
+  // sk = sk_alloc();
+  // sk->parite_U = matrix_random(3,4);
+  // sk->parite_V = matrix_random(3,4);
+  // sk->S = matrix_random(3,4);
+  // sk->permut = matrix_random(3,4);
   // key_gen(3,pk,sk,1);
   // matrix_free(pk);
-  sk_free(sk);
+  // sk_free(sk);
 
   // matrix_free(A);
   // matrix_free(B);
