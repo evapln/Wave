@@ -1,0 +1,78 @@
+\documentclass[12pt]{article}
+\usepackage{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage{listings}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{appendix}
+
+\theoremstyle{definition}
+\newtheorem{thm}{Théorème}[section]
+\newtheorem{lemme}[thm]{Lemme}
+\newtheorem{remarque}[thm]{Remarque}
+\newtheorem{defi}[thm]{Définition}
+\newtheorem{propo}[thm]{Proposition}
+
+\renewcommand{\a}{\alpha}
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}} 
+\newcommand{\F}{\mathbb{F}} 
+\newcommand{\K}{\mathbb{K}} 
+
+\title{Projet - Wave}
+\author{Lansade Suzanne}
+\author{Palandjian Eva}
+
+\begin{document}
+
+\begin{titlepage}
+
+\center
+
+\textsc{\LARGE Université de Bordeaux}\\[2.0cm]
+\textsc{\Large Master 2 : Cryptologie et Sécurité Informatique}\\[0.5cm] 
+\textsc{\large Projet de fin d'études}\\[1.2cm] 
+
+\HRule \\[0.4cm]
+{ \huge \bfseries Wave - Un procédé de signature \\ à base de codes correcteurs}\\[0.3cm] 
+\HRule \\[1.3cm]
+
+
+\begin{minipage}{0.4\textwidth}
+\begin{flushleft} \large
+Suzanne \textsc{Lansade}\\
+Eva \textsc{Palandjian}\\
+\end{flushleft}
+\end{minipage}
+~
+\begin{minipage}{0.4\textwidth}
+\begin{flushright} \large
+\emph{Encadrant:} \\
+Gilles \textsc{Zemor}
+\end{flushright}
+\end{minipage}\\[2cm]
+
+\begin{large}
+Février, 2020
+\end{large}
+
+\vspace{0.5in}
+
+\includegraphics [scale=0.2]{Universite_Bordeaux.jpg}
+
+\end{titlepage}
+
+\newpage
+\tableofcontents
+
+\newpage
+\section*{Introduction}
+\addcontentsline{toc}{section}{\protect\numberline{}Introduction}
+
+
+\bibliographystyle{plain}
+\bibliography{bibliography}
+
+\end{document}
