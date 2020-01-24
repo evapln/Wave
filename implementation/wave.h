@@ -5,12 +5,13 @@ typedef struct sk_t sk_t;
 typedef struct keys_t keys_t;
 
 /* Alloue en mémoire l'espace d'une clé secrète */
-sk_t *sk_alloc(int dim_U, int dim_V);
+sk_t *sk_alloc(int dim_U, int dim_V, int dim);
 
 /* libère l'espace alloué pour la clé secrète et ses composants */
 void sk_free (sk_t *sk);
 
-keys_t *key_alloc(int dim_U, int dim_V);
+keys_t *key_alloc(int dim_U, int dim_V, int dim
+);
 
 void key_free (keys_t *keys);
 
