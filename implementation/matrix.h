@@ -27,6 +27,7 @@ matrix_t *matrix_init (const int row, const int col, const char val);
 /* Alloue en mémoire et renvoie une copie de matrix */
 matrix_t *matrix_copy(const matrix_t *matrix);
 
+/* Copie matrix2 dans matrix1 sans toucher à aucune mémoire */
 void matrix_copy2 (const matrix_t *matrix1,const matrix_t *matrix2);
 
 /* Alloue en mémoire et renvoie une matrice identité de taille size */

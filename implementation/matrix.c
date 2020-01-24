@@ -210,7 +210,7 @@ matrix_t *matrix_com(matrix_t *A) {
 }
 
 matrix_t *matrix_inv(matrix_t *A) {
-  // calcul du dterminant
+  // calcul du determinant
   char det = matrix_det(A);
   if (det == 0) {
     puts("non inversible");

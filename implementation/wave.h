@@ -7,14 +7,14 @@ typedef struct keys_t keys_t;
 /* Alloue en mémoire l'espace d'une clé secrète */
 sk_t *sk_alloc(int dim_U, int dim_V, int dim);
 
-/* libère l'espace alloué pour la clé secrète et ses composants */
+/* Libère l'espace alloué pour la clé secrète et ses composants */
 void sk_free (sk_t *sk);
 
-keys_t *key_alloc(int dim_U, int dim_V, int dim
-);
+/* Alloue en mémoire l'espace des deux clés */
+keys_t *key_alloc(int dim_U, int dim_V, int dim);
 
+/* Libère l'espace alloué pour les clés */
 void key_free (keys_t *keys);
-
 
 /* Applique la fonction Phi sur x et y */
 matrix_t *phi (const matrix_t* x,const matrix_t* y);
@@ -31,6 +31,7 @@ void coeff_phi (int mode);
 /* Génère les clés */
 keys_t *key_gen (int lambda, int mode);
 
+// TO DO //
 int* sign (int* sk, int m);
 bool verify (int* pk, int m, int* signature);
 int inversion_of_f (int* parite_U, int* parite_V, int* inv);
