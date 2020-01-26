@@ -14,27 +14,34 @@ void sk_free (sk_t *sk);
 keys_t *key_alloc(int dim_U, int dim_V, int dim);
 
 /* Libère l'espace alloué pour les clés */
-void key_free (keys_t *keys);
+void key_free(keys_t *keys);
 
 /* Applique la fonction Phi sur x et y */
-matrix_t *phi (const matrix_t* x,const matrix_t* y);
+matrix_t *phi(const matrix_t* x,const matrix_t* y);
 
 /* Renvoie s le syndrome de e pour le code associé à la matrice de parité */
-matrix_t *syndrome (const matrix_t *e, const matrix_t *parite);
+matrix_t *syndrome(const matrix_t *e, const matrix_t *parite);
 
 /* Renvoie la matrice de parité du code UV en fonction des matrices de parité des codes U et V */
-matrix_t *parite (const matrix_t *parite_U, const matrix_t *parite_V);
+matrix_t *parite(const matrix_t *parite_U, const matrix_t *parite_V);
 
 /* Si mode = 0, a=c=d=1 et b=0, si mode = 1 a,b,c,d random avec les bonnes propriétés */
-void coeff_phi (int mode);
+void coeff_phi(int mode);
 
 /* Génère les clés */
-keys_t *key_gen (int lambda, int mode);
+keys_t *key_gen(int lambda, int mode);
 
 // TO DO //
-int* sign (int* sk, int m);
-bool verify (int* pk, int m, int* signature);
-int inversion_of_f (int* parite_U, int* parite_V, int* inv);
-int* invert_alg (int* sk, int* S);
-int iteration_prange (int* parite, int syndrome);
-int prange_alg (int* parite, int syndrome, int* info, int x);
+matrix_t *sign(sk_t *sk, int m);
+bool verify(matrix_t *pk, int m, matrix_t *signature);
+int inversion_of_f(matrix_t *parite_U, matrix_t *parite_V, matrix_t *inv);
+matrix_t *invert_alg(sk_t *sk, matrix_t *S);
+
+/* renvoie un tableau de longueur len aléatoire don les coefficients sont inférieurs à n */
+void infoset(int *info, const int n, const int len);
+
+/* calcul de e, appelé par iteration_prange */
+matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome, const int *info, const int len_i, const matrix_t *x);
+
+/* renvoie e tel que eH_T = s */
+matrix_t *iteration_prange(const matrix_t *parite, const matrix_t *syndrome);

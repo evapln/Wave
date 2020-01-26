@@ -150,7 +150,7 @@ matrix_t *matrix_random(const int row, const int col) {
   return rand;
 }
 
-void shuffle(int *array, int n) {
+void shuffle(int *array, const int n) {
   if (n > 1)
   {
     for (int i = 0; i < n - 1; i++)
@@ -165,21 +165,82 @@ void shuffle(int *array, int n) {
   }
 }
 
-matrix_t *matrix_perm_random (const int n) {
+bool is_in_array(const int *array, const int len, const int val) {
+    for (int i = 0; i < len; ++i)
+      if (array[i] == val)
+        return true;
+    return false;
+}
+
+void shuffle_info(int *array, const int len_a, const int *info, const int len_i, const int dim) {
+  // test longueurs correctes
+  if (len_i > len_a || dim > len_a || dim < len_i)
+    return;
+  prng_init(time(NULL) + getpid());
+  // initialisation du tableau contenant les dim dernières coordonnées pas encore mélangées
+  int fin[dim];
+  int i;
+  for (i  = 0; i < len_i; ++i)
+    fin[i] = info[i];
+  int random;
+  while (i < dim) {
+    random = rand() % len_a;
+    if (!is_in_array(fin, i, array[random])) {
+      fin[i] = array[random];
+      ++i;
+    }
+  }
+  // initialisation du tableau contenant les indices de début de array privés de ceux de fin
+  int len_deb = len_a - dim;
+  int debut[len_deb];
+  int j = 0;
+  for (int i = 0; i < len_a; ++i) {
+    if (!is_in_array(fin, dim, array[i])) {
+      debut[j] = array[i];
+      ++j;
+    }
+  }
+  // mélange
+  shuffle(fin, dim);
+  shuffle(debut, len_deb);
+  // concaténation
+  for (int i = 0; i < len_deb; ++i)
+      array[i] = debut[i];
+  for (int i  = 0; i < dim; ++i)
+      array[i + len_deb] = fin[i];
+}
+
+matrix_t *matrix_perm_random(const int n) {
   matrix_t *matrix = NULL;
   matrix = matrix_alloc(n,n);
   int indices[n];
   for (int i = 0; i < n; i++)
     indices[i] = i;
   for (int i = 0; i < 5; i++)
-    shuffle (indices, n);
+    shuffle(indices, n);
   for (int i = 0; i < n; i++)
   {
     for (int j = 0; j < n; j++)
-      matrix->mat[i][j] = 0;
-    matrix->mat[i][indices[i]] = 1;
+      matrix->mat[j][i] = 0;
+    matrix->mat[indices[i]][i] = 1;
   }
   return matrix;
+}
+
+matrix_t *matrix_perm_random_info(const int n, const int *info, const int len_i, const int dim) {
+  matrix_t *perm = matrix_alloc(n,n);
+  int indices[n];
+  for (int i = 0; i < n; i++)
+    indices[i] = i;
+  for (int i = 0; i < 5; i++)
+    shuffle_info(indices, n, info, len_i, dim);
+  for (int i = 0; i < n; i++)
+  {
+    for (int j = 0; j < n; j++)
+      perm->mat[j][i] = 0;
+    perm->mat[indices[i]][i] = 1;
+  }
+  return perm;
 }
 
 matrix_t *matrix_trans(const matrix_t *matrix) {
@@ -253,6 +314,27 @@ matrix_t *matrix_sub (const matrix_t *A, int a, int b) {
   return sub;
 }
 
+void matrix_separate(const matrix_t *matrix, matrix_t *A, matrix_t *B) {
+  int row = matrix->nb_row;
+  int col_A = A->nb_col;
+  int col_B = B->nb_col;
+  // erreur dimensions
+  if (A->nb_row != row || B->nb_row != row || col_A + col_B != matrix->nb_col) {
+    A = NULL;
+    B = NULL;
+    return;
+  }
+  // initialisation des matrices
+  for (int i = 0; i < row; ++i) {
+    // matrice A
+    for (int j = 0; j < col_A; ++j)
+      A->mat[i][j] = matrix->mat[i][j];
+    // matrice B
+    for (int j = 0; j < col_B; ++j)
+      B->mat[i][j] = matrix->mat[i][j+col_A];
+  }
+}
+
 matrix_t *matrix_concatenation(const matrix_t *A, const matrix_t *B, const int mode) {
   matrix_t *conc = NULL;
   if (mode == 0){
@@ -301,6 +383,51 @@ matrix_t *matrix_add(const matrix_t *matrix1, const matrix_t *matrix2) {
     for (int j = 0; j < col; ++j)
       sum->mat[i][j] = add_Fq(matrix1->mat[i][j], matrix2->mat[i][j]);
   return sum;
+}
+
+int sub_weight(const matrix_t *vect, const int *subset, const int len_s) {
+  int w = 0;
+  for (int i = 0; i < len_s; ++i)
+    if (vect->mat[0][subset[i]] % ORDER != 0)
+      ++w;
+  return w;
+}
+
+matrix_t *vector_rand_weight(const int n, const int *info, const int len_i, const int t) {
+  // test valeur rentées
+  if (t > len_i)
+    return NULL;
+  // allocation vecteur
+  matrix_t *vect = matrix_alloc(1,n);
+  // remplissage des coordonnées sans contraintes à rand_Fq et celles avec contraintes à 0
+  for (int i = 0; i < n; ++i) {
+    if (!is_in_array(info, len_i, i))
+      vect->mat[0][i] = rand_Fq();
+    else
+      vect->mat[0][i] = 0;
+  }
+  // remplissage des coordonnées avec contraintes avec des rand_Fq
+  int w;
+  char r;
+  for (int i = 0; i < len_i; ++i) {
+    w = sub_weight(vect, info, len_i);
+    // si le poids est déjà atteint, remplissage avec des 0
+    if (w == t) {
+      vect->mat[0][info[i]] = 0;
+    } else {
+      // si il reste juste assez de cases vides pour obtenir le poids souhaité, remplissage avec des valeurs non nulles
+      if (len_i - i <= t - w) {
+        r = 0;
+        while (r == 0)
+          r = rand_Fq();
+        vect->mat[0][info[i]] = r;
+      } else {
+        // aucun des deux cas précédents, on remplie aléatoirement
+        vect->mat[0][info[i]] = rand_Fq();
+      }
+    }
+  }
+  return vect;
 }
 
 matrix_t *vect_scal(const matrix_t *vect1, const matrix_t *vect2) {

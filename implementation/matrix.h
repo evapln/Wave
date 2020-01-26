@@ -39,11 +39,21 @@ matrix_t *matrix_vect_to_diag (const matrix_t *vect, const char val);
 /* Alloue en mémoire et renvoie une matrice aléatoire de taille row x col dont les coefficients sont dans Fq */
 matrix_t *matrix_random(const int row, const int col);
 
-/* Mélange le vecteur array */
-void shuffle(int *array, int n);
+/* Mélange le vecteur array sur les n premières coordonnées */
+void shuffle(int *array, const int n);
 
-/* Alloue en mémoire et renvoie une matrice de permutation aléatoire */
-matrix_t *matrix_perm_random (const int n);
+/* retourne true si val est dans array de longueur len, false sinon */
+bool is_in_array(const int *array, const int len, const int val);
+
+/* Mélange le vecteur array de taille len_a en mettant les indices contenus dans infos de taille len_i aux dim dernières coordonnées */
+void shuffle_info(int *array, const int len_a, const int *info, const int len_i, const int dim);
+
+/* Alloue en mémoire et renvoie une matrice de permutation aléatoire de taille n */
+matrix_t *matrix_perm_random(const int n);
+
+/* Alloue en mémoire et renvoie une matrice de permutation aléatoire de taille n
+  renvoyant info de longueur len_i sur les dernières coordonnées*/
+matrix_t *matrix_perm_random_info(const int n, const int *info, const int len_i, const int dim);
 
 /* Alloue en mémoire et renvoie la ransposée de matrix */
 matrix_t *matrix_trans(const matrix_t *matrix);
@@ -57,12 +67,21 @@ matrix_t *matrix_inv(matrix_t *mat);
 /* Alloue en mémoire et renvoie la sous-matrice de A sans la ligne a et la colonne b */
 matrix_t *matrix_sub (const matrix_t *A, int a, int b);
 
+/* met dans A la partie gauche de matrix et dans B la partie droite */
+void matrix_separate(const matrix_t *matrix, matrix_t *A, matrix_t *B);
+
 /* Alloue en mémoire et renvoie la concaténation de A et B, si mode = 0 ->(A|B), si mode != 0 ->  (A)
                                                                                                   (B) */
 matrix_t *matrix_concatenation(const matrix_t *A, const matrix_t *B, const int mode);
 
 /* Alloue en mémoire et renvoie la matrice sum = matrix1 + matrix2 */
 matrix_t *matrix_add(const matrix_t *matrix1, const matrix_t *matrix2);
+
+/* renvoie le poids de vect sur les coordonnées de subset */
+int sub_weight(const matrix_t *vect, const int *subset, const int len_s);
+
+/* renvoie un vecteur aléatoire de taille n avec son poids sur les coordonnées de info égal à t */
+matrix_t *vector_rand_weight(const int n, const int *info, const int len_i, const int t);
 
 /* Alloue en mémoire et renvoie le produit élément par élément de vect1 et vect2 */
 matrix_t *vect_scal(const matrix_t *vect1, const matrix_t *vect2);
