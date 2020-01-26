@@ -57,8 +57,7 @@ sk_t *sk_alloc(int dim_U, int dim_V, int dim) {
 }
 
 void sk_free (sk_t *sk) {
-  if (sk != NULL)
-  {
+  if (sk) {
     matrix_free(sk->parite_U);
     matrix_free(sk->parite_V);
     matrix_free(sk->S);
@@ -71,12 +70,12 @@ keys_t *key_alloc(int dim_U, int dim_V, int dim){
   keys_t *keys = malloc(sizeof(keys_t));
   if (!keys)
     return NULL;
-  keys->sk = sk_alloc (dim_U, dim_V, dim);
+  keys->sk = sk_alloc(dim_U, dim_V, dim);
   if (!keys->sk){
     free (keys);
     return NULL;
   }
-  keys->pk = matrix_alloc (SIZE-dim, SIZE);
+  keys->pk = matrix_alloc(SIZE-dim, SIZE);
   if (!keys->pk){
     sk_free(keys->sk);
     free (keys);
@@ -86,8 +85,7 @@ keys_t *key_alloc(int dim_U, int dim_V, int dim){
 }
 
 void key_free (keys_t *keys) {
-  if (keys != NULL)
-  {
+  if (keys) {
     matrix_free(keys->pk);
     sk_free(keys->sk);
   }
@@ -95,22 +93,31 @@ void key_free (keys_t *keys) {
 }
 
 matrix_t* phi (const matrix_t* x,const matrix_t* y) {
-  if (!coef_init)
+  if (!coef_init || !x || !y)
     return NULL;
-  matrix_t *res = NULL;
-  matrix_t *res_g = NULL;
-  matrix_t *res_d = NULL;
-  matrix_t *ax = NULL;
-  matrix_t *by = NULL;
-  matrix_t *cx = NULL;
-  matrix_t *dy = NULL;
-  ax = vect_scal(A,x);
-  by = vect_scal(B,y);
-  cx = vect_scal(C,x);
-  dy = vect_scal(D,y);
-  res_g = matrix_add(ax,by);
-  res_d = matrix_add(cx,dy);
-  res = matrix_concatenation (res_g, res_d, 0);
+  matrix_t *ax = vect_scal(A,x);
+  matrix_t *by = vect_scal(B,y);
+  matrix_t *cx = vect_scal(C,x);
+  matrix_t *dy = vect_scal(D,y);
+  if (!ax || !by || !cx || !dy) {
+    matrix_free(ax);
+    matrix_free(by);
+    matrix_free(cx);
+    matrix_free(dy);
+    return NULL;
+  }
+  matrix_t *res_g = matrix_add(ax,by);
+  matrix_t *res_d = matrix_add(cx,dy);
+  if (!res_g || !res_d) {
+    matrix_free(ax);
+    matrix_free(by);
+    matrix_free(cx);
+    matrix_free(dy);
+    matrix_free(res_d);
+    matrix_free(res_g);
+    return NULL;
+  }
+  matrix_t *res = matrix_concatenation (res_g, res_d, 0);
   matrix_free(ax);
   matrix_free(by);
   matrix_free(cx);
@@ -121,47 +128,59 @@ matrix_t* phi (const matrix_t* x,const matrix_t* y) {
 }
 
 matrix_t* syndrome (const matrix_t *e, const matrix_t *parite){
-  matrix_t *trans = NULL;
-  trans = matrix_trans(parite);
-  matrix_t *res = NULL;
-  res = matrix_prod (e, trans);
+  if (!e || !parite)
+    return NULL;
+  matrix_t *trans = matrix_trans(parite);
+  if (!trans)
+    return NULL;
+  matrix_t *res = matrix_prod (e, trans);
   matrix_free(trans);
   return res;
 }
 
 matrix_t* parite (const matrix_t* parite_U,const matrix_t* parite_V) {
-  matrix_t *parite_UV = NULL;
-  matrix_t *A_diag = NULL;
-  matrix_t *B_diag = NULL;
-  matrix_t *C_diag = NULL;
-  matrix_t *D_diag = NULL;
-  A_diag = matrix_vect_to_diag (A,(char)1);
-  B_diag = matrix_vect_to_diag (B,opp_Fq());
-  C_diag = matrix_vect_to_diag (C,opp_Fq());
-  D_diag = matrix_vect_to_diag (D,(char)1);
-  matrix_t *HU_D = NULL;
-  matrix_t *HU_B = NULL;
-  matrix_t *HV_C = NULL;
-  matrix_t *HV_A = NULL;
-  HU_D = matrix_prod (parite_U, D_diag);
-  HU_B = matrix_prod (parite_U, B_diag);
-  HV_C = matrix_prod (parite_V, C_diag);
-  HV_A = matrix_prod (parite_V, A_diag);
-  matrix_t *haut = NULL;
-  matrix_t *bas = NULL;
-  haut = matrix_concatenation (HU_D, HU_B, 0);
-  bas = matrix_concatenation (HV_C, HV_A, 0);
-  parite_UV = matrix_concatenation (haut,bas, 1);
-  matrix_free (haut);
-  matrix_free (bas);
-  matrix_free (HU_D);
-  matrix_free (HU_B);
-  matrix_free (HV_C);
-  matrix_free (HV_A);
-  matrix_free (A_diag);
-  matrix_free (B_diag);
-  matrix_free (C_diag);
-  matrix_free (D_diag);
+  if (!parite_U || !parite_V)
+    return NULL;
+  matrix_t *A_diag = matrix_vect_to_diag (A,(char)1);
+  matrix_t *B_diag = matrix_vect_to_diag (B,opp_Fq());
+  matrix_t *C_diag = matrix_vect_to_diag (C,opp_Fq());
+  matrix_t *D_diag = matrix_vect_to_diag (D,(char)1);
+  if (!A_diag || !B_diag || !C_diag || !D_diag) {
+    matrix_free(A_diag);
+    matrix_free(B_diag);
+    matrix_free(C_diag);
+    matrix_free(D_diag);
+    return NULL;
+  }
+  matrix_t *HU_D = matrix_prod (parite_U, D_diag);
+  matrix_t *HU_B = matrix_prod (parite_U, B_diag);
+  matrix_t *HV_C = matrix_prod (parite_V, C_diag);
+  matrix_t *HV_A = matrix_prod (parite_V, A_diag);
+  matrix_free(A_diag);
+  matrix_free(B_diag);
+  matrix_free(C_diag);
+  matrix_free(D_diag);
+  if (!HU_D || !HU_B || !HV_C || !HV_A) {
+    matrix_free(HU_D);
+    matrix_free(HU_B);
+    matrix_free(HV_C);
+    matrix_free(HV_A);
+    return NULL;
+  }
+  matrix_t *haut = matrix_concatenation (HU_D, HU_B, 0);
+  matrix_t *bas = matrix_concatenation (HV_C, HV_A, 0);
+  matrix_free(HU_D);
+  matrix_free(HU_B);
+  matrix_free(HV_C);
+  matrix_free(HV_A);
+  if (!haut || !bas) {
+    matrix_free(haut);
+    matrix_free(bas);
+    return NULL;
+  }
+  matrix_t *parite_UV = matrix_concatenation (haut,bas, 1);
+  matrix_free(haut);
+  matrix_free(bas);
   return parite_UV;
 }
 
@@ -199,12 +218,15 @@ void coeff_phi (int mode) {
         matrix_set_cell(D,0,i,d);
       }
   }
-  coef_init = true;
+  if (A && B && C && D)
+    coef_init = true;
 }
 
 keys_t *key_gen (int lambda, int mode) {
   // initialise a,b,c,d :
   coeff_phi(mode);
+  if (!coef_init)
+    return NULL;
 
   matrix_t *gen_U = NULL;
   matrix_t *gen_V = NULL;
@@ -213,14 +235,18 @@ keys_t *key_gen (int lambda, int mode) {
   bool answer = false;
   matrix_t *gen_U_temp = NULL;
   while (!answer) {
+    matrix_free(gen_U_temp);
+    matrix_free(gen_U);
     gen_U_temp = matrix_random(SIZE/2-2,SIZE/2);
+    if (!gen_U_temp)
+      continue;
     matrix_systematisation(gen_U_temp);
     gen_U = matrix_del_null_row(gen_U_temp);
-    answer = matrix_is_syst(gen_U);
-    if (!answer) {
+    if (!gen_U) {
       matrix_free(gen_U_temp);
-      matrix_free(gen_U);
+      continue;
     }
+    answer = matrix_is_syst(gen_U);
   }
   matrix_free(gen_U_temp);
 
@@ -228,14 +254,18 @@ keys_t *key_gen (int lambda, int mode) {
   matrix_t *gen_V_temp = NULL;
   // matrix_t *gen_V = NULL;
   while (!answer) {
+    matrix_free(gen_V_temp);
+    matrix_free(gen_V);
     gen_V_temp = matrix_random(SIZE/2-2,SIZE/2);
+    if (!gen_V_temp)
+      continue;
     matrix_systematisation(gen_V_temp);
     gen_V = matrix_del_null_row(gen_V_temp);
-    answer = matrix_is_syst(gen_V);
-    if (!answer) {
+    if (!gen_V) {
       matrix_free(gen_V_temp);
-      matrix_free(gen_V);
+      continue;
     }
+    answer = matrix_is_syst(gen_V);
   }
   matrix_free(gen_V_temp);
 
@@ -247,37 +277,78 @@ keys_t *key_gen (int lambda, int mode) {
   // crée H_U H_V
   matrix_t *H_U = matrix_parite(gen_U);
   matrix_t *H_V = matrix_parite(gen_V);
+  matrix_free(gen_U);
+  matrix_free(gen_V);
+  if (!H_U || !H_V) {
+    matrix_free(H_U);
+    matrix_free(H_V);
+    return NULL;
+  }
 
   // alloue la structure clés et remplie avec les matrices de parités
-  keys_t *keys = NULL;
-  keys = key_alloc(dim_U,dim_V, DIM);
+  keys_t *keys = key_alloc(dim_U,dim_V, DIM);
+  if (!keys) {
+    matrix_free(H_U);
+    matrix_free(H_V);
+    return NULL;
+  }
   matrix_copy2(keys->sk->parite_U,H_U);
-  matrix_free(H_U);
   matrix_copy2(keys->sk->parite_V,H_V);
+  matrix_free(H_U);
   matrix_free(H_V);
+  if (!keys->sk->parite_U ||! keys->sk->parite_V) {
+    key_free(keys);
+    return NULL;
+  }
 
   // crée H
   H = parite(keys->sk->parite_U, keys->sk->parite_V);
-
+  if (!H) {
+    key_free(keys);
+    return NULL;
+  }
   // S, P aléatoire
   matrix_t *S = matrix_random(SIZE-DIM,SIZE-DIM);
+  if (!S) {
+    key_free(keys);
+    return NULL;
+  }
   matrix_copy2(keys->sk->S, S);
   matrix_free(S);
+  if (!keys->sk->S) {
+    key_free(keys);
+    return NULL;
+  }
   matrix_t *permut = matrix_perm_random(SIZE);
+  if (!permut) {
+    key_free(keys);
+    return NULL;
+  }
   matrix_copy2(keys->sk->permut, permut);
   matrix_free(permut);
+  if (!keys->sk->permut) {
+    key_free(keys);
+    return NULL;
+  }
 
   // crée la clé publique SHP et la met dans la structure keys
   matrix_t *SH = matrix_prod(keys->sk->S,H);
+  if (!SH) {
+    key_free(keys);
+    return NULL;
+  }
   matrix_t *SHP = matrix_prod(SH,keys->sk->permut);
-  matrix_copy2(keys->pk, SHP);
-
-  // clean up
   matrix_free(SH);
+  if (!SHP) {
+    key_free(keys);
+    return NULL;
+  }
+  matrix_copy2(keys->pk, SHP);
   matrix_free(SHP);
-  // matrix_free(H);
-  matrix_free(gen_U);
-  matrix_free(gen_V);
+  if (!keys->pk) {
+    key_free(keys);
+    return NULL;
+  }
   return keys;
 }
 
@@ -295,54 +366,133 @@ void infoset(int *info,const int n, const int len) {
 }
 
 matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome, const int *info, const int len_i, const matrix_t *x) {
+  if (!parite || !syndrome || !x)
+    return NULL;
   // matrice de permutation envoyant info sur les DIM dernière coordonnées
   puts("A");
   matrix_t *P = matrix_perm_random_info(SIZE, info, len_i, DIM);
+  if (!P)
+    return NULL;
   puts("B");
   // (left | right) <- HP
   matrix_t *HP = matrix_prod(parite,P);
+  if (!HP) {
+    matrix_free(P);
+    return NULL;
+  }
   puts("C");
   int row_HP = matrix_get_row(HP);
   matrix_t *left = matrix_alloc(row_HP,SIZE-DIM);
   matrix_t *right = matrix_alloc(row_HP,DIM);
+  if (!left || !right) {
+    matrix_free(left);
+    matrix_free(right);
+    matrix_free(P);
+    matrix_free(HP);
+    return NULL;
+  }
   matrix_separate(HP, left, right);
+  matrix_free(HP);
+  if (!left || !right) {
+    matrix_free(left);
+    matrix_free(right);
+    matrix_free(P);
+    return NULL;
+  }
   // (zero | ep) <- x
   matrix_t *zero = matrix_alloc(1, SIZE-DIM);
   matrix_t *ep = matrix_alloc(1,DIM);
+  if (!zero || !ep) {
+    matrix_free(zero);
+    matrix_free(ep);
+    matrix_free(P);
+    matrix_free(left);
+    matrix_free(right);
+    return NULL;
+  }
   matrix_separate(x, zero, ep);
+  matrix_free(zero);
+  if (!ep) {
+    matrix_free(ep);
+    matrix_free(P);
+    matrix_free(left);
+    matrix_free(right);
+    return NULL;
+  }
   // calcul de e
   matrix_t *right_T = matrix_trans(right);
-  matrix_t *epright_T = matrix_prod(ep,right_T);
-  matrix_t *epright_Tless = matrix_mul_by_scal(epright_T, -1);
-  matrix_t *s = matrix_add(syndrome, epright_Tless);
-  matrix_t *left_inv = matrix_inv(left);
-  matrix_t *left_inv_T = matrix_trans(left_inv);
-  matrix_t *couple_left = matrix_prod(s, left_inv_T);
-  matrix_t *couple = matrix_concatenation(couple_left, ep, 0);
-  matrix_t *P_T = matrix_trans(P);
-  matrix_t *e = matrix_prod(couple, P_T);
-
-  // clean up
-  matrix_free(P);
-  matrix_free(HP);
-  matrix_free(left);
   matrix_free(right);
-  matrix_free(zero);
-  matrix_free(ep);
+  if (!right_T) {
+    matrix_free(ep);
+    matrix_free(P);
+    matrix_free(left);
+    return NULL;
+  }
+  matrix_t *epright_T = matrix_prod(ep,right_T);
   matrix_free(right_T);
+  if (!epright_T) {
+    matrix_free(ep);
+    matrix_free(P);
+    matrix_free(left);
+    return NULL;
+  }
+  matrix_t *epright_Tless = matrix_mul_by_scal(epright_T, -1);
   matrix_free(epright_T);
+  if (!epright_Tless) {
+    matrix_free(ep);
+    matrix_free(P);
+    matrix_free(left);
+    return NULL;
+  }
+  matrix_t *s = matrix_add(syndrome, epright_Tless);
   matrix_free(epright_Tless);
-  matrix_free(s);
+  if (!s) {
+    matrix_free(ep);
+    matrix_free(P);
+    matrix_free(left);
+    return NULL;
+  }
+  matrix_t *left_inv = matrix_inv(left);
+  matrix_free(left);
+  if (!left_inv) {
+    matrix_free(ep);
+    matrix_free(P);
+    return NULL;
+  }
+  matrix_t *left_inv_T = matrix_trans(left_inv);
   matrix_free(left_inv);
+  if (!left_inv_T) {
+    matrix_free(ep);
+    matrix_free(P);
+    return NULL;
+  }
+  matrix_t *couple_left = matrix_prod(s, left_inv_T);
   matrix_free(left_inv_T);
+  if (!couple_left) {
+    matrix_free(ep);
+    matrix_free(P);
+    return NULL;
+  }
+  matrix_t *couple = matrix_concatenation(couple_left, ep, 0);
   matrix_free(couple_left);
-  matrix_free(couple);
+  matrix_free(ep);
+  if (!couple) {
+    matrix_free(P);
+    return NULL;
+  }
+  matrix_t *P_T = matrix_trans(P);
+  matrix_free(P);
+  if (!P_T)
+    return NULL;
+  matrix_t *e = matrix_prod(couple, P_T);
   matrix_free(P_T);
-  // matric_free(P);
+  matrix_free(couple);
   return e;
 }
 
 matrix_t *iteration_prange(const matrix_t *parite, const matrix_t *syndrome) {
+  if (!parite || !syndrome)
+    return NULL;
   puts("1");
   // initialisation
   prng_init(time(NULL) - getpid());
@@ -362,11 +512,12 @@ matrix_t *iteration_prange(const matrix_t *parite, const matrix_t *syndrome) {
   puts("4");
   // tirage de x de poids t sur les coordonnées info
   matrix_t *x = vector_rand_weight(SIZE, info, len_i, t);
+  if (!x)
+    return NULL;
   puts("5");
   // recuperation de la solution
   matrix_t *e = prange_algebra(parite, syndrome, info, len_i, x);
   puts("6");
-  //clean up
   matrix_free(x);
   puts("7");
   return e;
@@ -509,7 +660,10 @@ int main(int argc, char **argv) {
   puts("e");
   matrix_print(e, stdout);
   puts("ep");
-  matrix_print(ep, stdout);
+  if (!ep)
+    puts("erreur...");
+  else
+    matrix_print(ep, stdout);
   matrix_free(e);
   matrix_free(synd);
   matrix_free(ep);

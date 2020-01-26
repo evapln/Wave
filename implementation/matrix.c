@@ -36,7 +36,7 @@ matrix_t *matrix_alloc(int row, int col) {
 }
 
 void matrix_free (matrix_t *matrix) {
-  if (matrix != NULL)
+  if (matrix)
   {
     for (int i = 0; i < matrix->nb_row; ++i)
     {
@@ -83,8 +83,9 @@ void matrix_set_cell(matrix_t *matrix, const int row_val, const int col_val, con
 }
 
 matrix_t *matrix_init (const int row, const int col, const char val) {
-  matrix_t *matrix = NULL;
-  matrix = matrix_alloc (row, col);
+  matrix_t *matrix = matrix_alloc (row, col);
+  if (!matrix)
+    return NULL;
   for (int i = 0; i < row; ++i)
     for (int j = 0; j < col; ++j)
       matrix->mat[i][j] = val;
@@ -103,7 +104,7 @@ matrix_t *matrix_copy(const matrix_t *matrix) {
   return copy;
 }
 
-void matrix_copy2 (const matrix_t *matrix1,const matrix_t *matrix2) {
+void matrix_copy2 (const matrix_t *matrix1, const matrix_t *matrix2) {
   if (!matrix1 || !matrix2)
     return;
   if (matrix1->nb_row != matrix2->nb_row || matrix1->nb_col != matrix2->nb_col)
@@ -115,8 +116,9 @@ void matrix_copy2 (const matrix_t *matrix1,const matrix_t *matrix2) {
 }
 
 matrix_t *matrix_identity (int size) {
-  matrix_t *id = NULL;
-  id = matrix_alloc(size,size);
+  matrix_t *id = matrix_alloc(size,size);
+  if (!id)
+    return NULL;
   for (int i = 0; i < size; i++){
     id->mat[i][i] = 1;
     for (int j = 0; j < size; j++){
@@ -128,9 +130,12 @@ matrix_t *matrix_identity (int size) {
 }
 
 matrix_t *matrix_vect_to_diag (const matrix_t *vect, const char val) {
+  if (!vect)
+    return NULL;
   int size = vect->nb_col;
-  matrix_t *diag = NULL;
-  diag = matrix_alloc (size, size);
+  matrix_t *diag = matrix_alloc (size, size);
+  if (!diag)
+    return NULL;
   for (int i = 0; i < size; i++)
     for (int j = 0; j < size; j++) {
       if (j == i)
@@ -142,8 +147,9 @@ matrix_t *matrix_vect_to_diag (const matrix_t *vect, const char val) {
 }
 
 matrix_t *matrix_random(const int row, const int col) {
-  matrix_t *rand = NULL;
-  rand = matrix_alloc(row,col);
+  matrix_t *rand = matrix_alloc(row,col);
+  if (!rand)
+    return NULL;
   for (int i = 0; i < row; ++i)
     for (int j = 0; j < col; ++j)
       rand->mat[i][j] = rand_Fq();
@@ -151,10 +157,8 @@ matrix_t *matrix_random(const int row, const int col) {
 }
 
 void shuffle(int *array, const int n) {
-  if (n > 1)
-  {
-    for (int i = 0; i < n - 1; i++)
-    {
+  if (n > 1) {
+    for (int i = 0; i < n - 1; i++) {
       prng_init(time(NULL) + getpid());
       int k = rand() % (n - i);
       int j = i + k;
@@ -166,10 +170,10 @@ void shuffle(int *array, const int n) {
 }
 
 bool is_in_array(const int *array, const int len, const int val) {
-    for (int i = 0; i < len; ++i)
-      if (array[i] == val)
-        return true;
-    return false;
+  for (int i = 0; i < len; ++i)
+    if (array[i] == val)
+      return true;
+  return false;
 }
 
 void shuffle_info(int *array, const int len_a, const int *info, const int len_i, const int dim) {
@@ -205,14 +209,15 @@ void shuffle_info(int *array, const int len_a, const int *info, const int len_i,
   shuffle(debut, len_deb);
   // concaténation
   for (int i = 0; i < len_deb; ++i)
-      array[i] = debut[i];
+    array[i] = debut[i];
   for (int i  = 0; i < dim; ++i)
-      array[i + len_deb] = fin[i];
+    array[i + len_deb] = fin[i];
 }
 
 matrix_t *matrix_perm_random(const int n) {
-  matrix_t *matrix = NULL;
-  matrix = matrix_alloc(n,n);
+  matrix_t *matrix = matrix_alloc(n,n);
+  if (!matrix)
+    return NULL;
   int indices[n];
   for (int i = 0; i < n; i++)
     indices[i] = i;
@@ -229,6 +234,8 @@ matrix_t *matrix_perm_random(const int n) {
 
 matrix_t *matrix_perm_random_info(const int n, const int *info, const int len_i, const int dim) {
   matrix_t *perm = matrix_alloc(n,n);
+  if (!perm)
+    return NULL;
   int indices[n];
   for (int i = 0; i < n; i++)
     indices[i] = i;
@@ -256,14 +263,19 @@ matrix_t *matrix_trans(const matrix_t *matrix) {
 }
 
 matrix_t *matrix_com(matrix_t *A) {
+  if (!A)
+    return NULL;
   int col = A->nb_col;
   int row = A->nb_row;
   matrix_t *com = NULL;
   com = matrix_alloc(row,col);
+  if (!com)
+    return NULL;
   for (int i = 0; i < row; i++)
     for (int j = 0; j < col; j++){
-      matrix_t *sub = NULL;
-      sub = matrix_sub(A,i,j);
+      matrix_t *sub = matrix_sub(A,i,j);
+      if (!sub)
+        return NULL;
       com->mat[i][j] = mul_Fq(pow(-1,i+j),matrix_det(sub));
       matrix_free(sub);
     }
@@ -271,21 +283,24 @@ matrix_t *matrix_com(matrix_t *A) {
 }
 
 matrix_t *matrix_inv(matrix_t *A) {
+  if (!A)
+    return NULL;
   // calcul du determinant
   char det = matrix_det(A);
-  if (det == 0) {
-    puts("non inversible");
+  if (det == 0)
     return NULL;
-  }
   // calcul de la comatrice
-  matrix_t *com = NULL;
-  com = matrix_com(A);
+  matrix_t *com = matrix_com(A);
+  if (!com)
+    return NULL;
   // calcul de la transposé de la comatrice
-  matrix_t *trans = NULL;
-  trans = matrix_trans(com);
+  matrix_t *trans = matrix_trans(com);
+  if (!trans)
+    return NULL;
   // calcul final de l'inverse
-  matrix_t *inv = NULL;
-  inv = matrix_mul_by_scal(trans, inv_Fq(det));
+  matrix_t *inv = matrix_mul_by_scal(trans, inv_Fq(det));
+  if (!inv)
+    return NULL;
   // clean up
   matrix_free(com);
   matrix_free(trans);
@@ -293,10 +308,13 @@ matrix_t *matrix_inv(matrix_t *A) {
 }
 
 matrix_t *matrix_sub (const matrix_t *A, int a, int b) {
-  matrix_t *sub = NULL;
+  if (!A)
+    return NULL;
   int row = A->nb_row;
   int col = A->nb_col;
-  sub = matrix_alloc(row - 1, col - 1);
+  matrix_t *sub = matrix_alloc(row - 1, col - 1);
+  if (!sub)
+    return NULL;
   int ind_row = 0;
   int ind_col = 0;
   for (int i = 0; i < row; i++){
@@ -315,6 +333,8 @@ matrix_t *matrix_sub (const matrix_t *A, int a, int b) {
 }
 
 void matrix_separate(const matrix_t *matrix, matrix_t *A, matrix_t *B) {
+  if (!matrix)
+    return;
   int row = matrix->nb_row;
   int col_A = A->nb_col;
   int col_B = B->nb_col;
@@ -336,6 +356,8 @@ void matrix_separate(const matrix_t *matrix, matrix_t *A, matrix_t *B) {
 }
 
 matrix_t *matrix_concatenation(const matrix_t *A, const matrix_t *B, const int mode) {
+  if (!A || !B)
+    return NULL;
   matrix_t *conc = NULL;
   if (mode == 0){
     int row = A->nb_row;
@@ -345,6 +367,8 @@ matrix_t *matrix_concatenation(const matrix_t *A, const matrix_t *B, const int m
     int col_B = B->nb_col;
     int col = col_A + col_B;
     conc = matrix_alloc(row,col);
+    if (!conc)
+      return NULL;
     for (int i = 0; i < row; i++){
       for (int j = 0; j < col_A; j++)
         conc->mat[i][j] = A->mat[i][j];
@@ -360,6 +384,8 @@ matrix_t *matrix_concatenation(const matrix_t *A, const matrix_t *B, const int m
     int row_B = B->nb_row;
     int row = row_A + row_B;
     conc = matrix_alloc(row,col);
+    if (!conc)
+      return NULL;
     for (int i = 0; i < row_A; i++)
       for (int j = 0; j < col; j++)
         conc->mat[i][j] = A->mat[i][j];
@@ -371,6 +397,8 @@ matrix_t *matrix_concatenation(const matrix_t *A, const matrix_t *B, const int m
 }
 
 matrix_t *matrix_add(const matrix_t *matrix1, const matrix_t *matrix2) {
+  if (!matrix1 || !matrix2)
+    return NULL;
   int row = matrix1->nb_row;
   if (matrix2->nb_row != row)
     return NULL;
@@ -379,6 +407,8 @@ matrix_t *matrix_add(const matrix_t *matrix1, const matrix_t *matrix2) {
     return NULL;
   matrix_t *sum = NULL;
   sum = matrix_alloc(row, col);
+  if (!sum)
+    return NULL;
   for (int i = 0; i < row; ++i)
     for (int j = 0; j < col; ++j)
       sum->mat[i][j] = add_Fq(matrix1->mat[i][j], matrix2->mat[i][j]);
@@ -386,6 +416,8 @@ matrix_t *matrix_add(const matrix_t *matrix1, const matrix_t *matrix2) {
 }
 
 int sub_weight(const matrix_t *vect, const int *subset, const int len_s) {
+  if (!vect)
+    return -1;
   int w = 0;
   for (int i = 0; i < len_s; ++i)
     if (vect->mat[0][subset[i]] % ORDER != 0)
@@ -399,6 +431,8 @@ matrix_t *vector_rand_weight(const int n, const int *info, const int len_i, cons
     return NULL;
   // allocation vecteur
   matrix_t *vect = matrix_alloc(1,n);
+  if (!vect)
+    return NULL;
   // remplissage des coordonnées sans contraintes à rand_Fq et celles avec contraintes à 0
   for (int i = 0; i < n; ++i) {
     if (!is_in_array(info, len_i, i))
@@ -411,6 +445,8 @@ matrix_t *vector_rand_weight(const int n, const int *info, const int len_i, cons
   char r;
   for (int i = 0; i < len_i; ++i) {
     w = sub_weight(vect, info, len_i);
+    if (w == -1)
+      return NULL;
     // si le poids est déjà atteint, remplissage avec des 0
     if (w == t) {
       vect->mat[0][info[i]] = 0;
@@ -431,6 +467,8 @@ matrix_t *vector_rand_weight(const int n, const int *info, const int len_i, cons
 }
 
 matrix_t *vect_scal(const matrix_t *vect1, const matrix_t *vect2) {
+  if (!vect1 || !vect2)
+    return NULL;
   int row = vect1->nb_row;
   if (vect2->nb_row != row)
     return NULL;
@@ -439,6 +477,8 @@ matrix_t *vect_scal(const matrix_t *vect1, const matrix_t *vect2) {
     return NULL;
   matrix_t *mul = NULL;
   mul = matrix_alloc(row,col);
+  if (!mul)
+    return NULL;
   for (int i = 0; i < row; ++i)
     for (int j = 0; j < col; ++j)
       mul->mat[i][j] = mul_Fq(vect1->mat[i][j], vect2->mat[i][j]);
@@ -446,10 +486,13 @@ matrix_t *vect_scal(const matrix_t *vect1, const matrix_t *vect2) {
 }
 
 matrix_t *matrix_mul_by_scal(const matrix_t *matrix, const char scal) {
+  if (!matrix)
+    return NULL;
   int row = matrix->nb_row;
   int col = matrix->nb_col;
-  matrix_t *mul = NULL;
-  mul = matrix_alloc(row,col);
+  matrix_t *mul = matrix_alloc(row,col);
+  if (!mul)
+    return NULL;
   for (int i = 0; i < row; ++i)
     for (int j = 0; j < col; ++j)
       mul->mat[i][j] = mul_Fq(matrix->mat[i][j], scal);
@@ -457,13 +500,16 @@ matrix_t *matrix_mul_by_scal(const matrix_t *matrix, const char scal) {
 }
 
 matrix_t *matrix_prod(const matrix_t *matrix1, const matrix_t *matrix2) {
+  if (!matrix1 || !matrix2)
+    return NULL;
   int k = matrix1->nb_col;
   if (k != matrix2->nb_row)
     return NULL;
   int row = matrix1->nb_row;
   int col = matrix2->nb_col;
-  matrix_t *prod = NULL;
-  prod = matrix_alloc(row,col);
+  matrix_t *prod = matrix_alloc(row,col);
+  if (!prod)
+    return NULL;
   for (int i = 0; i < row; i++) {
     for (int j = 0; j < col; j++) {
       prod->mat[i][j] = 0;
@@ -474,13 +520,16 @@ matrix_t *matrix_prod(const matrix_t *matrix1, const matrix_t *matrix2) {
   return prod;
 }
 
-matrix_t *matrix_del_row(matrix_t *matrix, const int row1) {
+matrix_t *matrix_del_row(const matrix_t *matrix, const int row1) {
+  if (!matrix)
+    return NULL;
   int row = matrix->nb_row;
   int col = matrix->nb_col;
   if (row1 > row)
     return NULL;
-  matrix_t *matrix2 = NULL;
-  matrix2 = matrix_alloc(row - 1, col);
+  matrix_t *matrix2 = matrix_alloc(row - 1, col);
+  if (!matrix2)
+    return NULL;
   int id_row = 0;
   for (int i = 0; i < row; ++i){
     if (i != row1){
@@ -494,7 +543,9 @@ matrix_t *matrix_del_row(matrix_t *matrix, const int row1) {
   return matrix2;
 }
 
-bool row_is_zero (matrix_t *matrix, const int row) {
+bool row_is_zero (const matrix_t *matrix, const int row) {
+  if (!matrix)
+    return false;
   for (int col = 0; col < matrix->nb_col; col++){
     if (matrix->mat[row][col] != 0) {
       return false;
@@ -504,6 +555,8 @@ bool row_is_zero (matrix_t *matrix, const int row) {
 }
 
 void matrix_add_row(matrix_t *matrix, const int row1, const int row2, const char coef) {
+  if (!matrix)
+    return;
   int row = matrix->nb_row;
   if (row1 > row || row2 > row)
     return;
@@ -512,6 +565,8 @@ void matrix_add_row(matrix_t *matrix, const int row1, const int row2, const char
 }
 
 void matrix_mul_row(matrix_t *matrix, const int row1, const char coef) {
+  if (!matrix)
+    return;
   if (row1 > matrix->nb_row)
     return;
   for (int i = 0; i < matrix->nb_col; ++i)
@@ -519,6 +574,8 @@ void matrix_mul_row(matrix_t *matrix, const int row1, const char coef) {
 }
 
 void matrix_exchange_row(matrix_t *matrix, const int row1, const int row2) {
+  if (!matrix)
+    return;
   int row = matrix->nb_row;
   if (row1 > row || row2 > row)
     return;
@@ -530,7 +587,9 @@ void matrix_exchange_row(matrix_t *matrix, const int row1, const int row2) {
   }
 }
 
-matrix_t *matrix_del_null_row (matrix_t *matrix) {
+matrix_t *matrix_del_null_row (const matrix_t *matrix) {
+  if (!matrix)
+    return NULL;
   int row = matrix->nb_row;
   int tab_row[row];
   for (int i = 0; i < row; ++i)
@@ -543,8 +602,9 @@ matrix_t *matrix_del_null_row (matrix_t *matrix) {
     }
   }
   int col = matrix->nb_col;
-  matrix_t *matrix2 = NULL;
-  matrix2 = matrix_alloc(nb_row, col);
+  matrix_t *matrix2 = matrix_alloc(nb_row, col);
+  if (!matrix2)
+    return NULL;
   for (int i = 0; i < nb_row; ++i) {
     for (int j = 0; j < col; ++j) {
       matrix2->mat[i][j] = matrix->mat[tab_row[i]][j];
@@ -554,13 +614,15 @@ matrix_t *matrix_del_null_row (matrix_t *matrix) {
 }
 
 matrix_t *matrix_parite(const matrix_t *gen) {
-  matrix_t *copy_gen = NULL;
-  copy_gen = matrix_copy(gen);
+  if (!gen)
+    return NULL;
+  matrix_t *copy_gen = matrix_copy(gen);
   if (!copy_gen)
     return NULL;
   matrix_systematisation(copy_gen);
-  matrix_t *syst = NULL;
-  syst = matrix_del_null_row(copy_gen);
+  matrix_t *syst = matrix_del_null_row(copy_gen);
+  if (!syst)
+    return NULL;
   matrix_free(copy_gen);
   if (!matrix_is_syst(syst)) {
     matrix_free(syst);
@@ -570,8 +632,9 @@ matrix_t *matrix_parite(const matrix_t *gen) {
   int col_syst = syst->nb_col;
   int row_p = col_syst - row_syst;
   int col_p = row_syst + row_p;
-  matrix_t *parite = NULL;
-  parite = matrix_alloc(row_p,col_p);
+  matrix_t *parite = matrix_alloc(row_p,col_p);
+  if (!parite)
+    return NULL;
   for (int i = 0; i < row_p; ++i) {
     for (int j = 0; j < row_syst; ++j)
       parite->mat[i][j] = syst->mat[j][row_syst + i];
@@ -587,6 +650,8 @@ matrix_t *matrix_parite(const matrix_t *gen) {
 }
 
 void matrix_systematisation(matrix_t *matrix) {
+  if (!matrix)
+    return;
   int row = matrix->nb_row;
   int col = matrix->nb_col;
   // étape 1
@@ -634,6 +699,8 @@ void matrix_systematisation(matrix_t *matrix) {
 }
 
 bool matrix_is_syst (matrix_t *matrix) {
+  if (!matrix)
+    return false;
   int row = matrix->nb_row;
   int col = matrix->nb_col;
   for (int i = 0; i < row; i++)
@@ -653,6 +720,8 @@ bool matrix_is_syst (matrix_t *matrix) {
 }
 
 char matrix_det(matrix_t *A) {
+  if (!A)
+    return 0;
   int size = A->nb_col;
   if (size == 2)
     return (add_Fq(mul_Fq(A->mat[0][0],A->mat[1][1]),-mul_Fq(A->mat[0][1],A->mat[1][0])));
@@ -660,6 +729,8 @@ char matrix_det(matrix_t *A) {
   matrix_t *sub = NULL;
   for (int i = 0; i < size; ++i) {
     sub = matrix_sub(A,0,i);
+    if (!sub)
+      return 0;
     char sub_det = matrix_det(sub);
     char val1 = mul_Fq(pow(-1,i),A->mat[0][i]);
     det = add_Fq(det,mul_Fq(val1,sub_det));
@@ -669,7 +740,7 @@ char matrix_det(matrix_t *A) {
 }
 
 void matrix_print(matrix_t *matrix, FILE *fd) {
-  if (matrix != NULL && matrix->mat != NULL)
+  if (matrix && matrix->mat)
   {
     int col = matrix->nb_col;
     int row = matrix->nb_row;

@@ -28,7 +28,7 @@ matrix_t *matrix_init (const int row, const int col, const char val);
 matrix_t *matrix_copy(const matrix_t *matrix);
 
 /* Copie matrix2 dans matrix1 sans toucher à aucune mémoire */
-void matrix_copy2 (const matrix_t *matrix1,const matrix_t *matrix2);
+void matrix_copy2 (const matrix_t *matrix1, const matrix_t *matrix2);
 
 /* Alloue en mémoire et renvoie une matrice identité de taille size */
 matrix_t *matrix_identity (int size);
@@ -93,10 +93,10 @@ matrix_t *matrix_mul_by_scal(const matrix_t *matrix, const char scal);
 matrix_t *matrix_prod(const matrix_t *matrix1, const matrix_t *matrix2);
 
 /* Supprime row1 de matrix. Alloue dans une nouvelle matrice et la renvoie */
-matrix_t *matrix_del_row(matrix_t *matrix, const int row1);
+matrix_t *matrix_del_row(const matrix_t *matrix, const int row1);
 
 /* Regarde si row de matrix est entièrement nulle */
-bool row_is_zero (matrix_t *matrix, const int row);
+bool row_is_zero (const matrix_t *matrix, const int row);
 
 /* Dans matrix, row1 prends row1 + coef*Row2 */
 void matrix_add_row(matrix_t *matrix, const int row1, const int row2, const char coef);
@@ -108,7 +108,7 @@ void matrix_mul_row(matrix_t *matrix, const int row1, const char coef);
 void matrix_exchange_row(matrix_t *matrix, const int row1, const int row2);
 
 /* Supprime les lignes nulles dans matrix. Renvoie une nouvelle matrice */
-matrix_t *matrix_del_null_row (matrix_t *matrix) ;
+matrix_t *matrix_del_null_row (const matrix_t *matrix) ;
 
 /* alloue en mémoire et renvoie la matrice de parité associée à la matrice génératrice */
 matrix_t *matrix_parite(const matrix_t *gen);
