@@ -259,12 +259,18 @@ keys_t *key_gen (int lambda, int mode) {
     gen_V_temp = matrix_random(SIZE/2-2,SIZE/2);
     if (!gen_V_temp)
       continue;
+    puts("gen_V_temp");
+    matrix_print(gen_V_temp, stdout);
     matrix_systematisation(gen_V_temp);
+    puts("gen_V_temp syst");
+    matrix_print(gen_V_temp, stdout);
     gen_V = matrix_del_null_row(gen_V_temp);
     if (!gen_V) {
       matrix_free(gen_V_temp);
       continue;
     }
+    puts("gen_V");
+    matrix_print(gen_V, stdout);
     answer = matrix_is_syst(gen_V);
   }
   matrix_free(gen_V_temp);
@@ -272,6 +278,7 @@ keys_t *key_gen (int lambda, int mode) {
   // dimension des codes
   int dim_U = matrix_get_row(gen_U);
   int dim_V = matrix_get_row(gen_V);
+  printf("dim de U : %d\ndim de V : %d\n", dim_U, dim_V);
   DIM = dim_U + dim_V;
 
   // crée H_U H_V
@@ -369,18 +376,15 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome, const
   if (!parite || !syndrome || !x)
     return NULL;
   // matrice de permutation envoyant info sur les DIM dernière coordonnées
-  puts("A");
   matrix_t *P = matrix_perm_random_info(SIZE, info, len_i, DIM);
   if (!P)
     return NULL;
-  puts("B");
   // (left | right) <- HP
   matrix_t *HP = matrix_prod(parite,P);
   if (!HP) {
     matrix_free(P);
     return NULL;
   }
-  puts("C");
   int row_HP = matrix_get_row(HP);
   matrix_t *left = matrix_alloc(row_HP,SIZE-DIM);
   matrix_t *right = matrix_alloc(row_HP,DIM);
@@ -455,6 +459,7 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome, const
   matrix_t *left_inv = matrix_inv(left);
   matrix_free(left);
   if (!left_inv) {
+    matrix_free(s);
     matrix_free(ep);
     matrix_free(P);
     return NULL;
@@ -462,11 +467,13 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome, const
   matrix_t *left_inv_T = matrix_trans(left_inv);
   matrix_free(left_inv);
   if (!left_inv_T) {
+    matrix_free(s);
     matrix_free(ep);
     matrix_free(P);
     return NULL;
   }
   matrix_t *couple_left = matrix_prod(s, left_inv_T);
+  matrix_free(s);
   matrix_free(left_inv_T);
   if (!couple_left) {
     matrix_free(ep);
@@ -493,33 +500,23 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome, const
 matrix_t *iteration_prange(const matrix_t *parite, const matrix_t *syndrome) {
   if (!parite || !syndrome)
     return NULL;
-  puts("1");
   // initialisation
   prng_init(time(NULL) - getpid());
-  puts("a");
   int t = rand() % DIM;
-  puts("b");
   int col_H = matrix_get_col(parite);
-  puts("c");
   int len_i = 0;
-  puts("2");
   while(len_i == 0)
     len_i = rand() % col_H;
   // choix de l'ensemble d'information info de H
   int info[len_i];
-  puts("3");
   infoset(info, col_H, len_i);
-  puts("4");
   // tirage de x de poids t sur les coordonnées info
   matrix_t *x = vector_rand_weight(SIZE, info, len_i, t);
   if (!x)
     return NULL;
-  puts("5");
   // recuperation de la solution
   matrix_t *e = prange_algebra(parite, syndrome, info, len_i, x);
-  puts("6");
   matrix_free(x);
-  puts("7");
   return e;
 }
 
@@ -655,15 +652,22 @@ int main(int argc, char **argv) {
   keys_t *keys = key_gen(0,0);
   printf("%d\n", DIM);
   matrix_t *e = matrix_random(1,SIZE);
-  matrix_t *synd = syndrome(e, H);
-  matrix_t *ep = iteration_prange(H, synd);
   puts("e");
   matrix_print(e, stdout);
+  matrix_t *synd = syndrome(e, H);
+  puts("syndrome :");
+  matrix_print(synd, stdout);
+  matrix_t *ep = NULL;
+  while (!ep) {
+    matrix_free(ep);
+    ep = iteration_prange(H, synd);
+  }
   puts("ep");
-  if (!ep)
-    puts("erreur...");
-  else
-    matrix_print(ep, stdout);
+  matrix_print(ep, stdout);
+  matrix_t *verif = syndrome(ep, H);
+  puts("verfi :");
+  matrix_print(verif, stdout);
+  matrix_free(verif);
   matrix_free(e);
   matrix_free(synd);
   matrix_free(ep);
