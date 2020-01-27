@@ -2,7 +2,7 @@
 #include "wave.h"
 
 const int SIZE = 256;
-const int OMEGA = 120;
+const int OMEGA = 118;
 matrix_t* A = NULL;
 matrix_t* B = NULL;
 matrix_t* C = NULL;
@@ -259,18 +259,18 @@ keys_t *key_gen (int lambda, int mode) {
     gen_V_temp = matrix_random(SIZE/4,SIZE/2);
     if (!gen_V_temp)
       continue;
-    puts("gen_V_temp");
-    matrix_print(gen_V_temp, stdout);
+    // puts("gen_V_temp");
+    // matrix_print(gen_V_temp, stdout);
     matrix_systematisation(gen_V_temp);
-    puts("gen_V_temp syst");
-    matrix_print(gen_V_temp, stdout);
+    // puts("gen_V_temp syst");
+    // matrix_print(gen_V_temp, stdout);
     gen_V = matrix_del_null_row(gen_V_temp);
     if (!gen_V) {
       matrix_free(gen_V_temp);
       continue;
     }
-    puts("gen_V");
-    matrix_print(gen_V, stdout);
+    // puts("gen_V");
+    // matrix_print(gen_V, stdout);
     answer = matrix_is_syst(gen_V);
   }
   matrix_free(gen_V_temp);
@@ -376,32 +376,54 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome, const
   if (!parite || !syndrome || !x)
     return NULL;
   // matrice de permutation envoyant info sur les DIM dernière coordonnées
-  matrix_t *P = matrix_perm_random_info(SIZE, info, len_i, DIM);
-  if (!P)
-    return NULL;
-  // (left | right) <- HP
-  matrix_t *HP = matrix_prod(parite,P);
-  if (!HP) {
-    matrix_free(P);
-    return NULL;
-  }
-  int row_HP = matrix_get_row(HP);
-  matrix_t *left = matrix_alloc(row_HP,SIZE-DIM);
-  matrix_t *right = matrix_alloc(row_HP,DIM);
-  if (!left || !right) {
+  matrix_t *P = NULL;
+  matrix_t *HP = NULL;
+  matrix_t *left = NULL;
+  matrix_t *right = NULL;
+  matrix_t *left_inv = NULL;
+  int row_HP;
+  int cpt = 0;
+  // choix de P pour avoir A inversible
+  while (!left_inv) {
+    // puts("left non inversible");
     matrix_free(left);
     matrix_free(right);
     matrix_free(P);
+    P = matrix_perm_random_info(SIZE, info, len_i, DIM);
+    if (!P)
+      return NULL;
+    // (left | right) <- HP
+    HP = matrix_prod(parite,P);
+    if (!HP) {
+      matrix_free(P);
+      return NULL;
+    }
+    row_HP = matrix_get_row(HP);
+    left = matrix_alloc(row_HP,SIZE-DIM);
+    right = matrix_alloc(row_HP,DIM);
+    if (!left || !right) {
+      matrix_free(left);
+      matrix_free(right);
+      matrix_free(P);
+      matrix_free(HP);
+      return NULL;
+    }
+    matrix_separate(HP, left, right);
     matrix_free(HP);
-    return NULL;
-  }
-  matrix_separate(HP, left, right);
-  matrix_free(HP);
-  if (!left || !right) {
-    matrix_free(left);
-    matrix_free(right);
-    matrix_free(P);
-    return NULL;
+    if (!left || !right) {
+      matrix_free(left);
+      matrix_free(right);
+      matrix_free(P);
+      return NULL;
+    }
+    left_inv = matrix_inv(left);
+    // if (left_inv)
+    //   matrix_print(left_inv, stdout);
+    ++cpt;
+    if (cpt > 10) {
+      puts("trop d'essais");
+      return NULL;
+    }
   }
   // (zero | ep) <- x
   matrix_t *zero = matrix_alloc(1, SIZE-DIM);
@@ -456,8 +478,7 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome, const
     matrix_free(left);
     return NULL;
   }
-  matrix_t *left_inv = matrix_inv(left);
-  // puts("sort");
+  // matrix_t *left_inv = matrix_inv(left);
   matrix_free(left);
   if (!left_inv) {
     matrix_free(s);
@@ -668,15 +689,11 @@ int main(void) {
     ind[i] = i;
   matrix_t *e = vector_rand_weight(SIZE, ind, SIZE, OMEGA);
   // matrix_t *e = matrix_random(1,SIZE);
-  puts("e");
-  matrix_print(e, stdout);
 
   // calcule s le syndrome de e
   matrix_t *synd = syndrome(e, H);
-  puts("syndrome :");
-  matrix_print(synd, stdout);
 
-  // test inv
+  // // test inv
   // matrix_t *matrix = matrix_random(20,20);
   // matrix_t *inv = matrix_inv(matrix);
   // matrix_t *prod = matrix_prod(matrix,inv);
@@ -690,17 +707,21 @@ int main(void) {
   int sb = 0;
   while (!ep || sb != OMEGA) {
     matrix_free(ep);
-    puts("ok1");
+    // puts("ok1");
     ep = iteration_prange(H, synd);
-    puts("ok2");
+    // puts("ok2");
     sb = sub_weight(ep, ind, SIZE);
-    printf("poids = %d",sb);
+    printf(" %d ",sb);
   }
+  puts("e");
+  matrix_print(e, stdout);
   puts("ep");
   matrix_print(ep, stdout);
 
   // Vérifie s = syndrome(ep)
   matrix_t *verif = syndrome(ep, H);
+  puts("syndrome :");
+  matrix_print(synd, stdout);
   puts("verif :");
   matrix_print(verif, stdout);
   matrix_free(verif);

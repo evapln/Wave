@@ -309,26 +309,26 @@ matrix_t *matrix_inv(matrix_t *A){
   matrix_t *id = matrix_identity(col);
   if (!id)
     return NULL;
-  matrix_t *conc = matrix_concatenation (A,id,0);
-  if (!conc){
+  matrix_t *conc = matrix_concatenation(A,id,0);
+  if (!conc) {
     matrix_free(id);
     return NULL;
   }
   matrix_systematisation(conc);
-  matrix_t *inv = matrix_alloc (row,col);
-  if (!inv){
+  matrix_t *inv = matrix_alloc(row,col);
+  if (!inv) {
     matrix_free(conc);
     matrix_free(id);
     return NULL;
   }
   matrix_separate(conc,id,inv);
-  if (!inv || !conc || !id){
+  if (!inv || !conc || !id) {
     matrix_free(inv);
     matrix_free(conc);
     matrix_free(id);
     return NULL;
   }
-  if (!is_identity(id)){
+  if (!is_identity(id)) {
     matrix_free(inv);
     matrix_free(conc);
     matrix_free(id);
@@ -343,11 +343,7 @@ matrix_t *matrix_inv_com(matrix_t *A) {
   if (!A)
     return NULL;
   // calcul du determinant
-  // printf("col = %d,row=%d\n",A->nb_col,A->mat[0][0]);
-  matrix_t *copy = matrix_copy(A);
-  matrix_systematisation(copy);
-  matrix_print(copy,stdout);
-  char det = matrix_det(copy);
+  char det = matrix_det(A);
   if (det == 0)
     return NULL;
   // calcul de la comatrice
