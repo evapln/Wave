@@ -61,8 +61,14 @@ matrix_t *matrix_trans(const matrix_t *matrix);
 /* Alloue en mémoire et renvoie la commatrice de mat */
 matrix_t *matrix_com(matrix_t *mat);
 
+/* Alloue en mémoire et renvoie l'inverse de mat par la comatrice et le det */
+matrix_t *matrix_inv_com(matrix_t *A);
+
 /* Alloue en mémoire et renvoie l'inverse de mat */
 matrix_t *matrix_inv(matrix_t *mat);
+
+/* vérifie A==Id */
+bool is_identity(matrix_t *A);
 
 /* Alloue en mémoire et renvoie la sous-matrice de A sans la ligne a et la colonne b */
 matrix_t *matrix_sub (const matrix_t *A, int a, int b);

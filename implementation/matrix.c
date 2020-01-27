@@ -282,11 +282,72 @@ matrix_t *matrix_com(matrix_t *A) {
   return com;
 }
 
-matrix_t *matrix_inv(matrix_t *A) {
+bool is_identity(matrix_t *A){
+  if (!A)
+    return false;
+  int row = A->nb_row;
+  int col = A->nb_col;
+  if (col != row)
+    return false;
+  for (int i = 0; i < row; i++)
+    for (int j = 0; j < col; j++){
+      if (i == j && A->mat[i][j] != 1)
+        return false;
+      if (i != j && A->mat[i][j] != 0)
+        return false;
+    }
+  return true;
+}
+
+matrix_t *matrix_inv(matrix_t *A){
+  if (!A)
+    return NULL;
+  int row = A->nb_row;
+  int col = A->nb_col;
+  if (col != row)
+    return NULL;
+  matrix_t *id = matrix_identity(col);
+  if (!id)
+    return NULL;
+  matrix_t *conc = matrix_concatenation (A,id,0);
+  if (!conc){
+    matrix_free(id);
+    return NULL;
+  }
+  matrix_systematisation(conc);
+  matrix_t *inv = matrix_alloc (row,col);
+  if (!inv){
+    matrix_free(conc);
+    matrix_free(id);
+    return NULL;
+  }
+  matrix_separate(conc,id,inv);
+  if (!inv || !conc || !id){
+    matrix_free(inv);
+    matrix_free(conc);
+    matrix_free(id);
+    return NULL;
+  }
+  if (!is_identity(id)){
+    matrix_free(inv);
+    matrix_free(conc);
+    matrix_free(id);
+    return NULL;
+  }
+  matrix_free(conc);
+  matrix_free(id);
+  return inv;
+}
+
+matrix_t *matrix_inv_com(matrix_t *A) {
   if (!A)
     return NULL;
   // calcul du determinant
-  char det = matrix_det(A);
+  // printf("col = %d,row=%d\n",A->nb_col,A->mat[0][0]);
+  matrix_t *copy = matrix_copy(A);
+  matrix_systematisation(copy);
+  matrix_print(copy,stdout);
+  char det = matrix_det(copy);
   if (det == 0)
     return NULL;
   // calcul de la comatrice
@@ -719,10 +780,32 @@ bool matrix_is_syst (matrix_t *matrix) {
   return true;
 }
 
+bool is_trigonalise (matrix_t *A){
+  int size = A->nb_row;
+  for (int i = 0; i < size; i++){
+    for (int j = 0; j < i; j++){
+      if (A->mat[i][j]%ORDER != 0)
+        return false;
+    }
+  }
+  return true;
+}
+
 char matrix_det(matrix_t *A) {
   if (!A)
     return 0;
   int size = A->nb_col;
+  if (is_trigonalise(A)){
+    // puts("ok");
+    char det = 1;
+    for (int i = 0; i < size; i++){
+      det *= A->mat[i][i];
+      if (det == 0)
+        return 0;
+    }
+    return det;
+  }
+  // printf("size = %d",size);
   if (size == 2)
     return (add_Fq(mul_Fq(A->mat[0][0],A->mat[1][1]),-mul_Fq(A->mat[0][1],A->mat[1][0])));
   char det = 0;
@@ -731,6 +814,8 @@ char matrix_det(matrix_t *A) {
     sub = matrix_sub(A,0,i);
     if (!sub)
       return 0;
+    if (A->mat[0][i] == 0)
+      continue;
     char sub_det = matrix_det(sub);
     char val1 = mul_Fq(pow(-1,i),A->mat[0][i]);
     det = add_Fq(det,mul_Fq(val1,sub_det));

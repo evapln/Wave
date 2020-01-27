@@ -2,7 +2,7 @@
 #include "wave.h"
 
 const int SIZE = 256;
-const int OMEGA;
+const int OMEGA = 120;
 matrix_t* A = NULL;
 matrix_t* B = NULL;
 matrix_t* C = NULL;
@@ -237,7 +237,7 @@ keys_t *key_gen (int lambda, int mode) {
   while (!answer) {
     matrix_free(gen_U_temp);
     matrix_free(gen_U);
-    gen_U_temp = matrix_random(SIZE/2-2,SIZE/2);
+    gen_U_temp = matrix_random(SIZE/4,SIZE/2);
     if (!gen_U_temp)
       continue;
     matrix_systematisation(gen_U_temp);
@@ -256,7 +256,7 @@ keys_t *key_gen (int lambda, int mode) {
   while (!answer) {
     matrix_free(gen_V_temp);
     matrix_free(gen_V);
-    gen_V_temp = matrix_random(SIZE/2-2,SIZE/2);
+    gen_V_temp = matrix_random(SIZE/4,SIZE/2);
     if (!gen_V_temp)
       continue;
     puts("gen_V_temp");
@@ -359,7 +359,7 @@ keys_t *key_gen (int lambda, int mode) {
   return keys;
 }
 
-void infoset(int *info,const int n, const int len) {
+void infoset(int *info, const int n, const int len) {
   prng_init(time(NULL) + getpid());
   int i = 0;
   int r;
@@ -457,6 +457,7 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome, const
     return NULL;
   }
   matrix_t *left_inv = matrix_inv(left);
+  // puts("sort");
   matrix_free(left);
   if (!left_inv) {
     matrix_free(s);
@@ -505,8 +506,10 @@ matrix_t *iteration_prange(const matrix_t *parite, const matrix_t *syndrome) {
   int t = rand() % DIM;
   int col_H = matrix_get_col(parite);
   int len_i = 0;
-  while(len_i == 0)
+  while(len_i == 0){
+    // puts("...");
     len_i = rand() % col_H;
+  }
   // choix de l'ensemble d'information info de H
   int info[len_i];
   infoset(info, col_H, len_i);
@@ -520,7 +523,7 @@ matrix_t *iteration_prange(const matrix_t *parite, const matrix_t *syndrome) {
   return e;
 }
 
-int main(int argc, char **argv) {
+int main(void) {
 
 
   // matrix_t *X = NULL;
@@ -648,24 +651,57 @@ int main(int argc, char **argv) {
   // matrix_print(keys->pk,stdout);
   // key_free(keys);
 
-  // test iteration_prange
+  // GENERATION DE CLES
   keys_t *keys = key_gen(0,0);
-  printf("%d\n", DIM);
-  matrix_t *e = matrix_random(1,SIZE);
+  if (keys == NULL) {
+    puts ("Key_gen revoit NULL\n");
+    return EXIT_FAILURE;
+  }
+
+  // printf("%d\n", DIM);
+
+  // TEST PRANGE
+
+  // Défini e
+  int ind[SIZE];
+  for (int i = 0; i < SIZE; i++)
+    ind[i] = i;
+  matrix_t *e = vector_rand_weight(SIZE, ind, SIZE, OMEGA);
+  // matrix_t *e = matrix_random(1,SIZE);
   puts("e");
   matrix_print(e, stdout);
+
+  // calcule s le syndrome de e
   matrix_t *synd = syndrome(e, H);
   puts("syndrome :");
   matrix_print(synd, stdout);
+
+  // test inv
+  // matrix_t *matrix = matrix_random(20,20);
+  // matrix_t *inv = matrix_inv(matrix);
+  // matrix_t *prod = matrix_prod(matrix,inv);
+  // printf("res = %d\n", is_identity(prod));
+  // matrix_free (matrix);
+  // matrix_free (inv);
+  // matrix_free (prod);
+
+  // calcule d'un vecteur erreur associé au syndrome s avec prange iteration
   matrix_t *ep = NULL;
-  while (!ep) {
+  int sb = 0;
+  while (!ep || sb != OMEGA) {
     matrix_free(ep);
+    puts("ok1");
     ep = iteration_prange(H, synd);
+    puts("ok2");
+    sb = sub_weight(ep, ind, SIZE);
+    printf("poids = %d",sb);
   }
   puts("ep");
   matrix_print(ep, stdout);
+
+  // Vérifie s = syndrome(ep)
   matrix_t *verif = syndrome(ep, H);
-  puts("verfi :");
+  puts("verif :");
   matrix_print(verif, stdout);
   matrix_free(verif);
   matrix_free(e);
