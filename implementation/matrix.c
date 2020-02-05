@@ -462,14 +462,34 @@ matrix_t *matrix_add(const matrix_t *matrix1, const matrix_t *matrix2) {
   int col = matrix1->nb_col;
   if (matrix2->nb_col != col)
     return NULL;
-  matrix_t *sum = NULL;
-  sum = matrix_alloc(row, col);
+  matrix_t *sum = matrix_alloc(row, col);
   if (!sum)
     return NULL;
   for (int i = 0; i < row; ++i)
     for (int j = 0; j < col; ++j)
       sum->mat[i][j] = add_Fq(matrix1->mat[i][j], matrix2->mat[i][j]);
   return sum;
+}
+
+void matrix_add_modified(matrix_t *dest, matrix_t *src, char coef) {
+  if (!dest || !src)
+    return;
+  int row = dest->nb_row;
+  if (src->nb_row != row)
+    return;
+  int col = dest->nb_col;
+  if (src->nb_col != col)
+    return;
+  for (int i = 0; i < row; ++i)
+    for (int j = 0; j < col; ++j)
+      dest->mat[i][j] = add_Fq(dest->mat[i][j], src->mat[i][j]);
+}
+
+void matrix_row(matrix_t *ligne, matrix_t *A, int row) {
+  if (!A)
+    return;
+  for (int i = 0; i < A->nb_col; ++i)
+    ligne->mat[0][i] = A->mat[row][i];
 }
 
 int sub_weight(const matrix_t *vect, const int *subset, const int len_s) {
@@ -704,6 +724,30 @@ matrix_t *matrix_parite(const matrix_t *gen) {
   }
   matrix_free(syst);
   return parite;
+}
+
+void random_word(matrix_t *c, matrix_t *G) {
+  if (!G)
+    return;
+  int row = matrix_get_row(G);
+  int col = matrix_get_col(G);
+  if (matrix_get_col(c) != col || matrix_get_row(c) != 1)
+    return;
+  matrix_t *ligne = matrix_alloc(1,col);
+  matrix_t *lambda = matrix_random(1,col);
+  if (!ligne || !lambda) {
+    matrix_free(ligne);
+    matrix_free(lambda);
+    return;
+  }
+  for (int i = 0; i < col; ++i)
+    matrix_set_cell(c, 0, i, 0);
+  for (int i = 0; i < row; ++i) {
+    matrix_row(ligne, G, i);
+    matrix_add_modified(c, ligne, lambda->mat[0][i]);
+  }
+  matrix_free(ligne);
+  matrix_free(lambda);
 }
 
 void matrix_systematisation(matrix_t *matrix) {

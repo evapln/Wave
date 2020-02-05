@@ -83,6 +83,12 @@ matrix_t *matrix_concatenation(const matrix_t *A, const matrix_t *B, const int m
 /* Alloue en mémoire et renvoie la matrice sum = matrix1 + matrix2 */
 matrix_t *matrix_add(const matrix_t *matrix1, const matrix_t *matrix2);
 
+/* met dest à dest + coef * src */
+void matrix_add_modified(matrix_t *dest, matrix_t *src, char coef);
+
+/* met A[i][*] dans ligne */
+void matrix_row(matrix_t *ligne, matrix_t *A, int row);
+
 /* renvoie le poids de vect sur les coordonnées de subset */
 int sub_weight(const matrix_t *vect, const int *subset, const int len_s);
 
@@ -118,6 +124,9 @@ matrix_t *matrix_del_null_row (const matrix_t *matrix) ;
 
 /* alloue en mémoire et renvoie la matrice de parité associée à la matrice génératrice */
 matrix_t *matrix_parite(const matrix_t *gen);
+
+/* met c à un mot aléatoire du code de matrice génératrice G */
+void random_word(matrix_t *c, matrix_t *G);
 
 /* Trigonalise matrix */
 void matrix_systematisation(matrix_t *matrix);

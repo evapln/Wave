@@ -31,6 +31,9 @@ void coeff_phi(int mode);
 /* Génère les clés */
 keys_t *key_gen(int lambda, int mode);
 
+/* decodage par ensemble d'information G est la matrice [-A|Id] avec A partie droite de H systematisée ev et synd vecteurs ligne */
+void decode_ev(matrix_t * ev, matrix_t *G, matrix_t *synd);
+
 // TO DO //
 matrix_t *sign(sk_t *sk, int m);
 bool verify(matrix_t *pk, int m, matrix_t *signature);
