@@ -66,10 +66,50 @@ Février, 2020
 
 \newpage
 \tableofcontents
-
 \newpage
+
 \section*{Introduction}
 \addcontentsline{toc}{section}{\protect\numberline{}Introduction}
+
+- pb post-quantique
+- appel d'offre NIST
+	-> tableau : aucun code correcteur en signatures
+- dur de trouver l'ensemble des syndromes facilement décodable
+- dur de créer une fonction de hachage qui envoie m dans l'ensemble des syndromes possibles
+-> pb décodage NP-complet
+- mot y de syndrome s est associé à un unique mot de code c le plus proche de y
+quand on chiffre -> ok
+quand on signe -> pas ok car dur de trouver un syndrome de cet sorte
+du coup la solution de machinx est d'enlever la restriction au mot le plus proche
+-> Wave innovation 
+Nous allons détailler le schéma de signature Wave et détailler sa sécurité.
+
+\section{Le schéma de signature Wave}
+\subsection{La famille de code (U,U+V) généralisé}
+\subsection{Le principe de signature}
+fonctions gpvm : syndrome
+\subsection{Le décodage avec trappe}
+\subsection{Implémentation et choix de paramètres}
+
+\section{Fuite d'information -> rejet}
+\subsection{Une fuite d'information}
+\subsection{La méthode du rejet}
+preuve de e uniformément distribué
+\subsection{Estimation du nombre de rejet}
+\subsection{Une famille de fonctions uniformément distribuée}
+
+\section{Sécurité du schéma}
+\subsection{Sécurité EUF-CMA}
+réduction au pb DOOM
+-> à la fin ajouter que même avec la fonction de hachage, la réduction reste possible
+\subsection{Distinction d'une matrice de parité d'un code (U,U+V) et d'une matrice aléatoire}
+réduction à un pb NP-complet
+ne pas oublier de rappeler que normalement on ajoute S et P pour masquer la forme de la matrice.
+
+\section*{Conclusion}
+\addcontentsline{toc}{section}{\protect\numberline{}Conclusion}
+
+\newpage
 
 
 \bibliographystyle{plain}
