@@ -4,7 +4,7 @@
 typedef struct matrix_t matrix_t;
 
 /* Alloue en mémoire et renvoie une matrice de taille row x col vide */
-matrix_t *matrix_alloc(int row, int col);
+matrix_t *matrix_alloc(const int row, const int col);
 
 /* Libère la mémoire allouée pour matrix */
 void matrix_free (matrix_t *matrix);
@@ -31,7 +31,7 @@ matrix_t *matrix_copy(const matrix_t *matrix);
 void matrix_copy2 (const matrix_t *matrix1, const matrix_t *matrix2);
 
 /* Alloue en mémoire et renvoie une matrice identité de taille size */
-matrix_t *matrix_identity (int size);
+matrix_t *matrix_identity (const int size);
 
 /* Renvoie une matrice diagonale ayant val*vect en diagonale */
 matrix_t *matrix_vect_to_diag (const matrix_t *vect, const char val);
@@ -59,19 +59,19 @@ matrix_t *matrix_perm_random_info(const int n, const int *info, const int len_i,
 matrix_t *matrix_trans(const matrix_t *matrix);
 
 /* Alloue en mémoire et renvoie la commatrice de mat */
-matrix_t *matrix_com(matrix_t *mat);
+matrix_t *matrix_com(const matrix_t *mat);
 
 /* Alloue en mémoire et renvoie l'inverse de mat par la comatrice et le det */
-matrix_t *matrix_inv_com(matrix_t *A);
+matrix_t *matrix_inv_com(const matrix_t *A);
 
 /* Alloue en mémoire et renvoie l'inverse de mat */
-matrix_t *matrix_inv(matrix_t *mat);
+matrix_t *matrix_inv(const matrix_t *mat);
 
 /* vérifie A==Id */
-bool is_identity(matrix_t *A);
+bool is_identity(const matrix_t *A);
 
 /* Alloue en mémoire et renvoie la sous-matrice de A sans la ligne a et la colonne b */
-matrix_t *matrix_sub (const matrix_t *A, int a, int b);
+matrix_t *matrix_sub (const matrix_t *A, const int a, const int b);
 
 /* met dans A la partie gauche de matrix et dans B la partie droite */
 void matrix_separate(const matrix_t *matrix, matrix_t *A, matrix_t *B);
@@ -84,10 +84,10 @@ matrix_t *matrix_concatenation(const matrix_t *A, const matrix_t *B, const int m
 matrix_t *matrix_add(const matrix_t *matrix1, const matrix_t *matrix2);
 
 /* met dest à dest + coef * src */
-void matrix_add_modified(matrix_t *dest, matrix_t *src, char coef);
+void matrix_add_modified(matrix_t *dest, const matrix_t *src, const char coef);
 
 /* met A[i][*] dans ligne */
-void matrix_row(matrix_t *ligne, matrix_t *A, int row);
+void matrix_row(matrix_t *ligne, const matrix_t *A, const int row);
 
 /* renvoie le poids de vect sur les coordonnées de subset */
 int sub_weight(const matrix_t *vect, const int *subset, const int len_s);
@@ -126,16 +126,19 @@ matrix_t *matrix_del_null_row (const matrix_t *matrix) ;
 matrix_t *matrix_parite(const matrix_t *gen);
 
 /* met c à un mot aléatoire du code de matrice génératrice G */
-void random_word(matrix_t *c, matrix_t *G);
+void random_word(matrix_t *c, const matrix_t *G);
 
 /* Trigonalise matrix */
 void matrix_systematisation(matrix_t *matrix);
 
 /* Vérifie si la matrice est correctement systématisée */
-bool matrix_is_syst(matrix_t *matrix);
+bool matrix_is_syst(const matrix_t *matrix);
+
+/* Vérifie si la matrice est triangulaire */
+bool is_trigonalise (const matrix_t *A);
 
 /* Renvoie le determinant de la matrice A */
-char matrix_det(matrix_t *A);
+char matrix_det(const matrix_t *A);
 
 /* Ecrit matrix dans fd */
-void matrix_print(matrix_t *matrix, FILE *fd);
+void matrix_print(const matrix_t *matrix, FILE *fd);

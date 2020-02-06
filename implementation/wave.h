@@ -40,6 +40,12 @@ bool verify(matrix_t *pk, int m, matrix_t *signature);
 int inversion_of_f(matrix_t *parite_U, matrix_t *parite_V, matrix_t *inv);
 matrix_t *invert_alg(sk_t *sk, matrix_t *S);
 
+
+
+
+
+// fonctions pour PRANGE
+
 /* renvoie un tableau de longueur len aléatoire don les coefficients sont inférieurs à n */
 void infoset(int *info, const int n, const int len);
 

@@ -12,11 +12,11 @@ matrix_t *gen_U = NULL;
 matrix_t *gen_V = NULL;
 int DIM;
 
-matrix_t *H_V = NULL;
-
 
 static bool coef_init = false;
 
+
+/////////////////////////// structures et allocation de structure //////////////
 struct keys_t {
   sk_t *sk;
   matrix_t *pk;
@@ -98,6 +98,7 @@ void key_free (keys_t *keys) {
   free(keys);
 }
 
+///////////////////////////// fonctions autres /////////////////////////////////
 matrix_t* phi (const matrix_t* x,const matrix_t* y) {
   if (!coef_init || !x || !y)
     return NULL;
@@ -228,6 +229,8 @@ void coeff_phi (int mode) {
     coef_init = true;
 }
 
+
+/////////////////////////////// génération des clefs ///////////////////////////
 keys_t *key_gen (int lambda, int mode) {
   // initialise a,b,c,d :
   coeff_phi(mode);
@@ -360,18 +363,16 @@ keys_t *key_gen (int lambda, int mode) {
   return keys;
 }
 
+
+////////////////////////////// algorithme d'inversion //////////////////////////
 void decode_ev(matrix_t * ev, matrix_t *G, matrix_t *synd) {
   if (!G || !synd)
     return;
-  int row = matrix_get_row(G);
+  // int row = matrix_get_row(G);
   int col = matrix_get_col(G);
   if (matrix_get_col(ev) != col && matrix_get_row(ev) != 1)
     return;
   random_word(ev, G);
-  matrix_t *syndrome_c = syndrome(ev, H_V);
-  puts("doit etre 0");
-  matrix_print(syndrome_c,stdout);
-  matrix_free(syndrome_c);
   matrix_t *s = matrix_alloc(1,col);
   int col_synd = matrix_get_col(synd);
   for (int i = 0; i < col - col_synd; ++i)
@@ -382,6 +383,8 @@ void decode_ev(matrix_t * ev, matrix_t *G, matrix_t *synd) {
   matrix_free(s);
 }
 
+
+///////////////////////////// fonction pour PRANGE /////////////////////////////
 void infoset(int *info, const int n, const int len) {
   prng_init(time(NULL) + getpid());
   int i = 0;
@@ -567,6 +570,9 @@ matrix_t *iteration_prange(const matrix_t *parite, const matrix_t *syndrome) {
   return e;
 }
 
+
+
+// main (à mettre dans un autre fichier peut-être)
 int main(void) {
 
 
@@ -696,7 +702,7 @@ int main(void) {
   // key_free(keys);
 
 
-  // GENERATION DE CLES
+  /////////////////////////////////// GENERATION DE CLES
   keys_t *keys = key_gen(0,0);
   if (keys == NULL) {
     puts ("Key_gen revoit NULL\n");
@@ -704,20 +710,16 @@ int main(void) {
   }
 
 
-  // test decode_ev
+
+  ///////////////////////////////////////////test decode_ev
   matrix_t *ev = matrix_alloc(1,SIZE/2);
-  puts("1");
   matrix_t *e = matrix_random(1,SIZE/2);
-  puts("2");
-  H_V = matrix_copy(keys->sk->parite_V);
   matrix_t *synd = syndrome(e, keys->sk->parite_V);
-  puts("3");
   if (!ev || !e || !synd) {
     puts("error 1");
     return EXIT_FAILURE;
   }
   decode_ev(ev, gen_V, synd);
-  puts("aa");
   puts("syndrome : ");
   if (!ev) {
     puts("error 2");
@@ -731,12 +733,73 @@ int main(void) {
   }
   puts("verif : ");
   matrix_print(verif, stdout);
+  puts("e de base : ");
+  matrix_print(e, stdout);
+  puts("ev calculé : ");
+  matrix_print(ev, stdout);
 
   matrix_free(ev);
   matrix_free(e);
   matrix_free(synd);
   matrix_free(verif);
   key_free(keys);
+
+  ///////////////////////////////////////////// test random_word
+  // matrix_t *G = matrix_random(4,6);
+  // if (!G)
+  //   return EXIT_FAILURE;
+  // matrix_systematisation(G);
+  // if (!G)
+  //   return EXIT_FAILURE;
+  // while (!matrix_is_syst(G)) {
+  //   matrix_free(G);
+  //   G = matrix_random(4,6);
+  //   if (!G)
+  //     return EXIT_FAILURE;
+  //   matrix_systematisation(G);
+  //   if (!G)
+  //     return EXIT_FAILURE;
+  // }
+  // matrix_t *c = matrix_alloc(1,6);
+  // if (!G || !c) {
+  //   matrix_free(G);
+  //   matrix_free(c);
+  //   return EXIT_FAILURE;
+  // }
+  // random_word(c,G);
+  // if (!c){
+  //   puts("erreur random_word");
+  //   matrix_free(G);
+  //   return EXIT_FAILURE;
+  // }
+  // matrix_t *H = matrix_parite(G);
+  // if (!H) {
+  //   puts("erreur matrix_parite");
+  //   matrix_free(G);
+  //   matrix_free(c);
+  //   return EXIT_FAILURE;
+  // }
+  // matrix_t *syndrome_c = syndrome(c,H);
+  // if (!syndrome_c) {
+  //   puts("erreur syndrome");
+  //   matrix_free(G);
+  //   matrix_free(H);
+  //   matrix_free(c);
+  //   return EXIT_FAILURE;
+  // }
+  // puts("G :");
+  // matrix_print(G, stdout);
+  // puts("H :");
+  // matrix_print(H, stdout);
+  // puts("c :");
+  // matrix_print(c, stdout);
+  // puts("syndrome :");
+  // matrix_print(syndrome_c, stdout);
+  // matrix_free(G);
+  // matrix_free(H);
+  // matrix_free(c);
+  // matrix_free(syndrome_c);
+
 
 
   // printf("%d\n", DIM);
@@ -798,6 +861,5 @@ int main(void) {
   matrix_free(H);
   matrix_free(gen_U);
   matrix_free(gen_V);
-  matrix_free(H_V);
   return EXIT_SUCCESS;
 }
