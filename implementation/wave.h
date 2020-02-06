@@ -31,8 +31,19 @@ void coeff_phi(int mode);
 /* Génère les clés */
 keys_t *key_gen(int lambda, int mode);
 
-/* decodage par ensemble d'information G est la matrice [-A|Id] avec A partie droite de H systematisée ev et synd vecteurs ligne */
-void decode_ev(matrix_t * ev, matrix_t *G, matrix_t *synd);
+/* decodage par ensemble d'information :
+  G est la matrice [-A|Id] avec A partie droite de H_V systematisée
+  synd vecteur ligne est le syndrome cherché
+  ev vecteur ligne est la sortie */
+void decode_ev(matrix_t * ev, const matrix_t *G, const matrix_t *synd);
+
+/* decodage par ensemble d'information :
+  G est la matrice [-A|Id] avec A partie droite de H_U systematisée
+  synd vecteur ligne est le syndrome cherché
+  ev vecteur ligne estla sortie de decode_ev
+  eu vecteur ligne est la sortie */
+void decode_eu(matrix_t * eu, const matrix_t *G, const matrix_t *synd, const matrix_t *ev, const int dim_U);
+
 
 // TO DO //
 matrix_t *sign(sk_t *sk, int m);

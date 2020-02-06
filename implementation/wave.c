@@ -27,6 +27,8 @@ struct sk_t {
   matrix_t *parite_V;
   matrix_t *S;
   matrix_t *permut;
+  int dim_U;
+  int dim_V;
 };
 
 sk_t *sk_alloc(int dim_U, int dim_V, int dim) {
@@ -341,6 +343,8 @@ keys_t *key_gen (int lambda, int mode) {
     key_free(keys);
     return NULL;
   }
+  keys->sk->dim_U = dim_U;
+  keys->sk->dim_V = dim_V;
 
   // crée la clé publique SHP et la met dans la structure keys
   matrix_t *SH = matrix_prod(keys->sk->S,H);
@@ -365,12 +369,11 @@ keys_t *key_gen (int lambda, int mode) {
 
 
 ////////////////////////////// algorithme d'inversion //////////////////////////
-void decode_ev(matrix_t * ev, matrix_t *G, matrix_t *synd) {
-  if (!G || !synd)
+void decode_ev(matrix_t * ev,const matrix_t *G, const matrix_t *synd) {
+  if (!ev || !G || !synd)
     return;
-  // int row = matrix_get_row(G);
   int col = matrix_get_col(G);
-  if (matrix_get_col(ev) != col && matrix_get_row(ev) != 1)
+  if (matrix_get_col(ev) != col || matrix_get_row(ev) != 1)
     return;
   random_word(ev, G);
   matrix_t *s = matrix_alloc(1,col);
@@ -383,6 +386,26 @@ void decode_ev(matrix_t * ev, matrix_t *G, matrix_t *synd) {
   matrix_free(s);
 }
 
+void decode_eu(matrix_t * eu, const matrix_t *G, const matrix_t *synd, const matrix_t *ev, const int dim_U) {
+  if (!eu || !G || !synd || !ev)
+    return;
+  int col = matrix_get_col(G);
+  if (matrix_get_col(ev) != col || matrix_get_row(ev) != 1 || matrix_get_col(eu) != col || matrix_get_row(eu) != 1)
+    return;
+    // création du tablau contenant les k_u positions choisies
+  int ind[dim_U];
+  int r;
+  prng_init(time(NULL) + getpid());
+  int i = 0;
+  while (i < dim_U) {
+    r = rand() % col;
+    if (!is_in_array(ind, dim_U, r)) {
+      ind[i] = r;
+      ++i;
+    }
+  }
+  // reste à résoudre les système linéaire
+}
 
 ///////////////////////////// fonction pour PRANGE /////////////////////////////
 void infoset(int *info, const int n, const int len) {
