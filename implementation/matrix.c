@@ -6,7 +6,7 @@ struct matrix_t {
   char** mat;
 };
 
-matrix_t *matrix_alloc(int row, int col) {
+matrix_t *matrix_alloc(const int row, const int col) {
   matrix_t *matrix = malloc(sizeof(matrix_t));
   if (!matrix)
     return NULL;
@@ -115,7 +115,7 @@ void matrix_copy2 (const matrix_t *matrix1, const matrix_t *matrix2) {
   return;
 }
 
-matrix_t *matrix_identity (int size) {
+matrix_t *matrix_identity (const int size) {
   matrix_t *id = matrix_alloc(size,size);
   if (!id)
     return NULL;
@@ -262,7 +262,7 @@ matrix_t *matrix_trans(const matrix_t *matrix) {
   return trans;
 }
 
-matrix_t *matrix_com(matrix_t *A) {
+matrix_t *matrix_com(const matrix_t *A) {
   if (!A)
     return NULL;
   int col = A->nb_col;
@@ -282,7 +282,7 @@ matrix_t *matrix_com(matrix_t *A) {
   return com;
 }
 
-bool is_identity(matrix_t *A){
+bool is_identity(const matrix_t *A){
   if (!A)
     return false;
   int row = A->nb_row;
@@ -299,7 +299,7 @@ bool is_identity(matrix_t *A){
   return true;
 }
 
-matrix_t *matrix_inv(matrix_t *A){
+matrix_t *matrix_inv(const matrix_t *A){
   if (!A)
     return NULL;
   int row = A->nb_row;
@@ -339,7 +339,7 @@ matrix_t *matrix_inv(matrix_t *A){
   return inv;
 }
 
-matrix_t *matrix_inv_com(matrix_t *A) {
+matrix_t *matrix_inv_com(const matrix_t *A) {
   if (!A)
     return NULL;
   // calcul du determinant
@@ -364,7 +364,7 @@ matrix_t *matrix_inv_com(matrix_t *A) {
   return inv;
 }
 
-matrix_t *matrix_sub (const matrix_t *A, int a, int b) {
+matrix_t *matrix_sub (const matrix_t *A, const int a, const int b) {
   if (!A)
     return NULL;
   int row = A->nb_row;
@@ -471,7 +471,7 @@ matrix_t *matrix_add(const matrix_t *matrix1, const matrix_t *matrix2) {
   return sum;
 }
 
-void matrix_add_modified(matrix_t *dest, matrix_t *src, char coef) {
+void matrix_add_modified(matrix_t *dest, const matrix_t *src, const char coef) {
   if (!dest || !src)
     return;
   int row = dest->nb_row;
@@ -482,10 +482,10 @@ void matrix_add_modified(matrix_t *dest, matrix_t *src, char coef) {
     return;
   for (int i = 0; i < row; ++i)
     for (int j = 0; j < col; ++j)
-      dest->mat[i][j] = add_Fq(dest->mat[i][j], src->mat[i][j]);
+      dest->mat[i][j] = add_Fq(dest->mat[i][j], mul_Fq(src->mat[i][j], coef));
 }
 
-void matrix_row(matrix_t *ligne, matrix_t *A, int row) {
+void matrix_row(matrix_t *ligne, const matrix_t *A, const int row) {
   if (!A)
     return;
   for (int i = 0; i < A->nb_col; ++i)
@@ -714,7 +714,7 @@ matrix_t *matrix_parite(const matrix_t *gen) {
     return NULL;
   for (int i = 0; i < row_p; ++i) {
     for (int j = 0; j < row_syst; ++j)
-      parite->mat[i][j] = syst->mat[j][row_syst + i];
+      parite->mat[i][j] = mul_Fq(-1,syst->mat[j][row_syst + i]);
     for (int j = row_syst; j < col_p; ++j) {
       if (j - row_syst == i)
         parite->mat[i][j] = 1;
@@ -726,7 +726,7 @@ matrix_t *matrix_parite(const matrix_t *gen) {
   return parite;
 }
 
-void random_word(matrix_t *c, matrix_t *G) {
+void random_word(matrix_t *c, const matrix_t *G) {
   if (!G)
     return;
   int row = matrix_get_row(G);
@@ -799,7 +799,7 @@ void matrix_systematisation(matrix_t *matrix) {
   }
 }
 
-bool matrix_is_syst (matrix_t *matrix) {
+bool matrix_is_syst (const matrix_t *matrix) {
   if (!matrix)
     return false;
   int row = matrix->nb_row;
@@ -820,7 +820,7 @@ bool matrix_is_syst (matrix_t *matrix) {
   return true;
 }
 
-bool is_trigonalise (matrix_t *A){
+bool is_trigonalise (const matrix_t *A) {
   int size = A->nb_row;
   for (int i = 0; i < size; i++){
     for (int j = 0; j < i; j++){
@@ -831,7 +831,7 @@ bool is_trigonalise (matrix_t *A){
   return true;
 }
 
-char matrix_det(matrix_t *A) {
+char matrix_det(const matrix_t *A) {
   if (!A)
     return 0;
   int size = A->nb_col;
@@ -864,7 +864,7 @@ char matrix_det(matrix_t *A) {
   return det;
 }
 
-void matrix_print(matrix_t *matrix, FILE *fd) {
+void matrix_print(const matrix_t *matrix, FILE *fd) {
   if (matrix && matrix->mat)
   {
     int col = matrix->nb_col;
