@@ -71,23 +71,23 @@ Février, 2020
 \section*{Introduction}
 \addcontentsline{toc}{section}{\protect\numberline{}Introduction}
 
-- probleme post-quantique
-- appel d'offre NIST
-	-> tableau : aucun code correcteur en signatures
-- dur de trouver l'ensemble des syndromes facilement décodable
-- dur de créer une fonction de hachage qui envoie m dans l'ensemble des syndromes possibles
--> pb décodage NP-complet
-- mot y de syndrome s est associé à un unique mot de code c le plus proche de y
-quand on chiffre -> ok
-quand on signe -> pas ok car dur de trouver un syndrome de cet sorte
-du coup la solution de machinx est d'enlever la restriction au mot le plus proche
--> Wave innovation 
-Nous allons détailler le schéma de signature Wave et détailler sa sécurité.
+- passage au post-quantique \\
+- appel d'offre NIST \\
+	-> tableau : aucun code correcteur en signatures \\
+- dur de trouver l'ensemble des syndromes facilement décodable \\
+- dur de créer une fonction de hachage qui envoie m dans l'ensemble des syndromes possibles \\
+- problème du décodage NP-complet \\
+- mot y de syndrome s est associé à un unique mot de code c le plus proche de y \\
+quand on chiffre -> ne pose pas de problème \\
+quand on signe -> pose un problème car il est dur de trouver un syndrome de cette sorte \\
+la solution Wave est d'enlever la restriction au mot le plus proche \\
+Nous allons détailler le schéma de signature Wave et détailler sa sécurité. \\
 
 \section{Le schéma de signature Wave}
 Pour répondre aux problèmes : \\
-- Des fonctions GPV en moyenne
-- Un schéma de signature utilisant les codes (U,U+V)-généralisés
+- Définition des codes (U,U+V)-généralisés \\
+- Des fonctions GPV en moyenne \\
+- Un schéma de signature de type hash et signe utilisant ces codes \\
 
 \subsection{La famille de codes (U,U+V)-généralisés}
 Définition des codes (U,U+V)-généralisés: \\
@@ -106,7 +106,10 @@ De plus, ces fonctions sont (1) bien distribuées, (2) sans fuite d'info en moye
 
 \subsection{Le décodage avec trappe}
 Détail de l'algorithme invertAlg avec utilisation de la trappe: \\
-- Les différents $\omega$ \\
+- Conditions sur le poids de e: \\
+--> facile \\
+--> facile avec trappe \\
+--> difficile \\
 - Inverser le syndrome sur le code UV <==> inverser le syndrome sur U et sur V et prendre son image par Phi. \\
 - Prendre un ev par un algo de décodage quelconque, utiliser les propriétés du code UV pour en déduire un eu, vérifier le poids de e, recommencer. \\
 - Différences gros poids et petits poids \\
@@ -114,7 +117,7 @@ Détail de l'algorithme invertAlg avec utilisation de la trappe: \\
 \subsection{Implémentation et choix de paramètres}
 TODO \\
 
-\section{Fuite d'information -> rejet}
+\section{Uniformisation des signatures et syndromes}
 
 \subsection{Une fuite d'information}
 - Malheureusement, fuite d'information en raison des correspondance entre e[i] et e[i+n/2] ! \\
@@ -122,27 +125,28 @@ TODO \\
 - Pourquoi c'est problématique \\ 
 
 \subsection{La méthode du rejet}
-Idée générale : On attent pour que les sorties aient l'air uniforme (soient suffisemment proche de l'uniforme): \\
+Idée générale : On attend pour que les sorties aient l'air uniforme (soient suffisemment proches de l'uniforme): \\
 - On choisit ev de façon a ce qu'il soit uniforme dans son ensemble \\
-- On met des conditions de rejets sur eu en fonction de ev pour que eu ait l'air uniforme \\
+- On met des conditions de rejet sur eu en fonction de ev pour que eu ait l'air uniforme \\
 - On obtient un e qui a l'air uniforme \\
 
 \subsection{Estimation du nombre de rejet}
 TODO \\
 
 \subsection{Une famille de fonctions uniformément distribuée}
-On a donc le point (2) de la def des fonctions GPV qui est ok. On va montrer le point (1), à savoir nos fonctions sont bien distribuées avec les codes (U,U+V)-généralisés \\
+On a donc le point (2) de la definition des fonctions GPV qui est obtenu dans la section précédente. On va montrer le point (1), à savoir, notre famille de fonctions syndrômes est uniformément distribuée avec les codes (U,U+V)-généralisés \\
 
 \section{Sécurité du schéma}
 
 \subsection{Sécurité EUF-CMA}
-\subsubsection{Définition sécurité EUF-CMA}
+\subsubsection{Définitions}
 \subsubsection{Réduction au problème DOOM}
 \subsubsection{Et la fonction de hachage ?}
 
-\subsection{Distinction d'une matrice de parité d'un code (U,U+V) et d'une matrice aléatoire}
-réduction à un pb NP-complet
-ne pas oublier de rappeler que normalement on ajoute S et P pour masquer la forme de la matrice.
+\subsection{Indistinguabilité des codes (U,U+V)-généralisés}
+Distinguer une matrice de parité d'un code (U,U+V)-généralisé d'une matrice de parité aléatoire. \\
+Réduction à un problème NP-complet. \\
+Utilisation de S et P pour masquer les propriétés de la matrice. \\
 
 \section*{Conclusion}
 \addcontentsline{toc}{section}{\protect\numberline{}Conclusion}
