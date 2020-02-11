@@ -42,7 +42,10 @@ void decode_ev(matrix_t * ev, const matrix_t *G, const matrix_t *synd);
   synd vecteur ligne est le syndrome cherché
   ev vecteur ligne estla sortie de decode_ev
   eu vecteur ligne est la sortie */
-void decode_eu(matrix_t * eu, const matrix_t *G, const matrix_t *synd, const matrix_t *ev, const int dim_U);
+void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *G, const matrix_t *synd, const matrix_t *ev, const int dim_U);
+
+/* alloue en mémoire en renvoie le vecteur x tel que Ax=y */
+// matrix_t *resol_syst(const matrix_t *A, const matrix_t *y);
 
 
 // TO DO //

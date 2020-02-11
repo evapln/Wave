@@ -49,11 +49,11 @@ void matrix_free (matrix_t *matrix) {
 
 char matrix_get_cell(const matrix_t *matrix,const int row_val, const int col_val) {
   if (!matrix)
-    return 2;
+    return 'e';
   int row = matrix->nb_row;
   int col = matrix->nb_col;
   if (row_val > row || col_val > col)
-    return 2;
+    return 'e';
   return matrix->mat[row_val][col_val];
 }
 
@@ -76,9 +76,12 @@ void matrix_set_cell(matrix_t *matrix, const int row_val, const int col_val, con
   int col = matrix->nb_col;
   if (row_val >= row || col_val >= col)
     return;
-  char tmp = val % ORDER;
-  if (tmp < 0)
-    tmp += ORDER;
+  char tmp = val;
+  if (tmp == '*') {
+    char tmp = val % ORDER;
+    if (tmp < 0)
+      tmp += ORDER;
+  }
   matrix->mat[row_val][col_val] = tmp;
 }
 
@@ -492,6 +495,26 @@ void matrix_row(matrix_t *ligne, const matrix_t *A, const int row) {
     ligne->mat[0][i] = A->mat[row][i];
 }
 
+int weight(const matrix_t *vect) {
+  if (!vect)
+    return -1;
+  int row = vect->nb_row;
+  int col = vect->nb_col;
+  if (row != 1 && col != 1)
+    return -1; // ce n'est pas un vecteur
+  int w = 0;
+  if (col != 1) {
+    for (int i = 0; i < col; ++i)
+      if (vect->mat[0][i] % ORDER != 0)
+        ++w;
+  } else {
+    for (int i = 0; i < row; ++i)
+      if (vect->mat[i][0] % ORDER != 0)
+        ++w;
+  }
+  return w;
+}
+
 int sub_weight(const matrix_t *vect, const int *subset, const int len_s) {
   if (!vect)
     return -1;
@@ -875,7 +898,9 @@ void matrix_print(const matrix_t *matrix, FILE *fd) {
       for (int j = 0; j < col; ++j)
       {
         val = matrix_get_cell(matrix,i,j);
-        if (val == 2 && ORDER == 3)
+        if (val == '*')
+          fprintf(fd, " * ");
+        else if (val == 2 && ORDER == 3)
           fprintf(fd,"-1 ");
         else
           fprintf(fd," %d ", val);

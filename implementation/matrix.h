@@ -89,6 +89,9 @@ void matrix_add_modified(matrix_t *dest, const matrix_t *src, const char coef);
 /* met A[i][*] dans ligne */
 void matrix_row(matrix_t *ligne, const matrix_t *A, const int row);
 
+/* renvoie le pods du vecteur */
+int weight(const matrix_t *vect);
+
 /* renvoie le poids de vect sur les coordonnées de subset */
 int sub_weight(const matrix_t *vect, const int *subset, const int len_s);
 
