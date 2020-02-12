@@ -396,21 +396,27 @@ void decode_ev(matrix_t * ev,const matrix_t *G, const matrix_t *synd) {
 // }
 
 void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *G, const matrix_t *synd, const matrix_t *ev, const int dim_U) {
+  // Vérification des entrées
   if (!eu || !G || !synd || !ev)
     return;
   int col = matrix_get_col(G);
   if (matrix_get_col(ev) != col || matrix_get_row(ev) != 1 || matrix_get_col(eu) != col || matrix_get_row(eu) != 1)
     return;
+  // initialistaions
+  int a, b, c, d, w;
+  char no1, no2, evi, eui, eui_not;
   matrix_t * eu_not = matrix_alloc(1,SIZE/2);
+  if (!eu_not)
+    return;
   for (int i = 0; i < SIZE/2; ++i) {
     matrix_set_cell(eu, 0, i, '*');
     matrix_set_cell(eu_not, 0, i, '*');
   }
   // matrix_print(eu, stdout);
-  // création du tablau contenant les k_u positions choisies
-  int ind[dim_U];
+  // création du tableau J contenant les k_u positions choisies
+  int J[dim_U];
   for (int i = 0; i < dim_U; ++i)
-    ind[i] = i;
+    J[i] = i;
   // tableau random
   int r;
   prng_init(time(NULL) + getpid());
@@ -422,20 +428,22 @@ void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *G, const matri
   //     ++i;
   //   }
   // }
+
   //// reste à résoudre le système linéaire
-  // sur les ku positions choisies, on fixe eu de telle sorte que A(i)*eu(i) + B(i)*ev(i) != 0 et  C(i)*eu(i) + D(i)*ev(i) != 0
-  // quand on a une solution exacte, on met dans eu, quand on a juste une impossibilité, on met dans eu_not
+
+  // sur les ku positions choisies (dans J), on fixe eu de telle sorte que
+  // A(i)*eu(i) + B(i)*ev(i) != 0 et  C(i)*eu(i) + D(i)*ev(i) != 0
+  // quand on a une solution exacte, on met dans eu,
+  // quand on a juste une impossibilité, on met dans eu_not
   for (int i = 0; i < dim_U; ++i)
-    printf("%d\t", ind[i]);
+    printf("%d\t", J[i]);
   puts("");
-  int a, b, c, d, w;
-  char no1, no2, evi, eui, eui_not;
   for (int i = 0; i < dim_U; ++i) {
-    a = matrix_get_cell(A,0,ind[i]);
-    b = matrix_get_cell(B,0,ind[i]);
-    c = matrix_get_cell(C,0,ind[i]);
-    d = matrix_get_cell(D,0,ind[i]);
-    evi = matrix_get_cell(ev,0,ind[i]);
+    a = matrix_get_cell(A,0,J[i]);
+    b = matrix_get_cell(B,0,J[i]);
+    c = matrix_get_cell(C,0,J[i]);
+    d = matrix_get_cell(D,0,J[i]);
+    evi = matrix_get_cell(ev, 0, J[i]);
     no1 = mul_Fq(inv_Fq(a), mul_Fq(evi, -b));
     no2 = mul_Fq(inv_Fq(c), mul_Fq(evi, -d));
     if (no1 != no2) {
@@ -445,10 +453,10 @@ void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *G, const matri
         eui = 1;
       if (no1 != 2 && no2 != 2)
         eui = 2;
-      matrix_set_cell(eu, 0, ind[i], eui);
+      matrix_set_cell(eu, 0, J[i], eui);
     }
     else
-      matrix_set_cell(eu_not, 0, ind[i], no1);
+      matrix_set_cell(eu_not, 0, J[i], no1);
   }
   puts("eu"); matrix_print(eu, stdout);
   puts("eu_not"); matrix_print(eu_not, stdout);
@@ -468,7 +476,7 @@ void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *G, const matri
   matrix_t *eu_int = NULL;
   matrix_t *e = NULL;
   do {
-    eu_int = prange_algebra(keys->sk->parite_U, synd, ind, dim_U, x);
+    eu_int = prange_algebra(keys->sk->parite_U, synd, J, dim_U, x);
     if(!eu_int) {
       puts("pas de eu int");
       return;
@@ -483,6 +491,43 @@ void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *G, const matri
   matrix_free(x);
   matrix_free(eu_not);
 }
+
+// int *freeset(const matrix_t *H, const matrix_t *ev, const int k) {
+//   if (!H || !ev)
+//     return NULL;
+//   // création su supp de ev
+//   int *supp;
+//   int len_supp = 0;
+//   int col = matrix_get_col(ev);
+//   for (int j = 0; j < col; ++j) {
+//     if (matrix_get_cell(ev,0,j) != 0 % ORDER) {
+//       supp[len_supp] = j;
+//       ++len_supp;
+//     }
+//   }
+//   // création de [1,n]\supp(ev)
+//   int len_inv_supp = SIZE - len_supp;
+//   int inv_supp[len_inv_supp];
+//   int i = 0;
+//   for (int j = 0; j < SIZE; ++j) {
+//     if (!is_in_array(supp, len_supp, j)) {
+//       inv_supp[i] = j;
+//       ++i;
+//     }
+//   }
+//   int J1[k];
+//   int J2[DIM - SIZE - k];
+//   while () {
+//     // création de J1
+//     shuffle(supp, len_supp);
+//     for (int j = 0; j < k; ++j)
+//       J1[j] = supp[j];
+//     // création de J2
+//     shuffle(inv_supp, len_inv_supp);
+//     for (int j = 0; j < DIM-SIZE-k; ++j)
+//       J1[j] = supp[j];
+//   }
+// }
 
 ///////////////////////////// fonction pour PRANGE /////////////////////////////
 void infoset(int *info, const int n, const int len) {
@@ -810,34 +855,34 @@ int main(void) {
 
 
 
-  ///////////////////////////////////////////test decode_ev
-  // matrix_t *ev = matrix_alloc(1,SIZE/2);
-  // matrix_t *eu = matrix_alloc(1,SIZE/2);
-  // matrix_t *e = matrix_random(1,SIZE/2);
-  // matrix_t *synd = syndrome(e, keys->sk->parite_V);
-  // if (!ev || !e || !synd) {
-  //   puts("error 1");
-  //   return EXIT_FAILURE;
-  // }
-  // decode_ev(ev, gen_V, synd);
-  // // puts("syndrome : ");
-  // if (!ev) {
-  //   puts("error 2");
-  //   return EXIT_FAILURE;
-  // }
-  // printf("col : %d, row : %d\n",matrix_get_col(synd), matrix_get_row(synd));
-  // matrix_print(synd, stdout);
-  // matrix_t *verif = syndrome(ev, keys->sk->parite_V);
-  // if (!verif) {
-  //   puts("error 3");
-  //   return EXIT_FAILURE;
-  // }
-  // puts("verif : ");
-  // matrix_print(verif, stdout);
+  /////////////////////////////////////////test decode_ev
+  matrix_t *ev = matrix_alloc(1,SIZE/2);
+  matrix_t *eu = matrix_alloc(1,SIZE/2);
+  matrix_t *e = matrix_random(1,SIZE/2);
+  matrix_t *synd = syndrome(e, keys->sk->parite_V);
+  if (!ev || !e || !synd) {
+    puts("error 1");
+    return EXIT_FAILURE;
+  }
+  decode_ev(ev, gen_V, synd);
+  // puts("syndrome : ");
+  if (!ev) {
+    puts("error 2");
+    return EXIT_FAILURE;
+  }
+  printf("col : %d, row : %d\n",matrix_get_col(synd), matrix_get_row(synd));
+  matrix_print(synd, stdout);
+  matrix_t *verif = syndrome(ev, keys->sk->parite_V);
+  if (!verif) {
+    puts("error 3");
+    return EXIT_FAILURE;
+  }
+  puts("verif : ");
+  matrix_print(verif, stdout);
 
-
-  // puts("matrice génératrice de U"); matrix_print(gen_U, stdout);
-  // decode_eu(eu, keys, gen_U, synd, ev, keys->sk->dim_U);
+  /////////////////////////////////////////test decode_ev
+  puts("matrice génératrice de U"); matrix_print(gen_U, stdout);
+  decode_eu(eu, keys, gen_U, synd, ev, keys->sk->dim_U);
 
 
 
@@ -851,11 +896,13 @@ int main(void) {
   // matrix_free(gen_U_T);
   // matrix_free(gen_U_T_inv);
   // matrix_free(ver);
-  // matrix_free(ev);
-  // matrix_free(eu);
-  // matrix_free(e);
-  // matrix_free(synd);
-  // key_free(keys);
+
+  matrix_free(ev);
+  matrix_free(eu);
+  matrix_free(verif);
+  matrix_free(e);
+  matrix_free(synd);
+  key_free(keys);
 
   ///////////////////////////////////////////// test random_word
   // matrix_t *G = matrix_random(4,6);
@@ -920,14 +967,14 @@ int main(void) {
   // TEST PRANGE
 
   // Défini e
-  int ind[SIZE];
-  for (int i = 0; i < SIZE; i++)
-    ind[i] = i;
-  matrix_t *e = vector_rand_weight(SIZE, ind, SIZE, OMEGA);
-  // matrix_t *e = matrix_random(1,SIZE);
-
-  // calcule s le syndrome de e
-  matrix_t *synd = syndrome(e, H);
+  // int ind[SIZE];
+  // for (int i = 0; i < SIZE; i++)
+  //   ind[i] = i;
+  // matrix_t *e = vector_rand_weight(SIZE, ind, SIZE, OMEGA);
+  // // matrix_t *e = matrix_random(1,SIZE);
+  //
+  // // calcule s le syndrome de e
+  // matrix_t *synd = syndrome(e, H);
 
   // // test inv
   // matrix_t *matrix = matrix_random(20,20);
@@ -938,33 +985,33 @@ int main(void) {
   // matrix_free (inv);
   // matrix_free (prod);
 
-  // calcule d'un vecteur erreur associé au syndrome s avec prange iteration
-  matrix_t *ep = NULL;
-  int sb = 0;
-  while (!ep || sb != OMEGA) {
-    matrix_free(ep);
-    // puts("ok1");
-    ep = iteration_prange(H, synd);
-    // puts("ok2");
-    sb = sub_weight(ep, ind, SIZE);
-    printf(" %d ",sb);
-  }
-  puts("e");
-  matrix_print(e, stdout);
-  puts("ep");
-  matrix_print(ep, stdout);
-
-  // Vérifie s = syndrome(ep)
-  matrix_t *verif = syndrome(ep, H);
-  puts("syndrome :");
-  matrix_print(synd, stdout);
-  puts("verif :");
-  matrix_print(verif, stdout);
-  matrix_free(verif);
-  matrix_free(e);
-  matrix_free(synd);
-  matrix_free(ep);
-  key_free(keys);
+  // // calcule d'un vecteur erreur associé au syndrome s avec prange iteration
+  // matrix_t *ep = NULL;
+  // int sb = 0;
+  // while (!ep || sb != OMEGA) {
+  //   matrix_free(ep);
+  //   // puts("ok1");
+  //   ep = iteration_prange(H, synd);
+  //   // puts("ok2");
+  //   sb = sub_weight(ep, ind, SIZE);
+  //   printf(" %d ",sb);
+  // }
+  // puts("e");
+  // matrix_print(e, stdout);
+  // puts("ep");
+  // matrix_print(ep, stdout);
+  //
+  // // Vérifie s = syndrome(ep)
+  // matrix_t *verif = syndrome(ep, H);
+  // puts("syndrome :");
+  // matrix_print(synd, stdout);
+  // puts("verif :");
+  // matrix_print(verif, stdout);
+  // matrix_free(verif);
+  // matrix_free(e);
+  // matrix_free(synd);
+  // matrix_free(ep);
+  // key_free(keys);
 
   // clean up
   matrix_free(A);

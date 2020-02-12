@@ -60,7 +60,7 @@ matrix_t *invert_alg(sk_t *sk, matrix_t *S);
 
 // fonctions pour PRANGE
 
-/* renvoie un tableau de longueur len aléatoire don les coefficients sont inférieurs à n */
+/* renvoie un tableau de longueur len aléatoire dont les coefficients sont inférieurs à n */
 void infoset(int *info, const int n, const int len);
 
 /* calcul de e, appelé par iteration_prange */
