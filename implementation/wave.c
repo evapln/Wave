@@ -15,8 +15,6 @@ int DIM;
 
 static bool coef_init = false;
 
-
-/////////////////////////// structures et allocation de structure //////////////
 struct keys_t {
   sk_t *sk;
   matrix_t *pk;
@@ -30,6 +28,11 @@ struct sk_t {
   int dim_U;
   int dim_V;
 };
+
+
+////////////////////////////////////////////////////////////////////////////////
+//////////////////////////// gestion de la mémoire /////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 sk_t *sk_alloc(int dim_U, int dim_V, int dim) {
   sk_t *sk = malloc(sizeof(sk_t));
@@ -100,7 +103,11 @@ void key_free (keys_t *keys) {
   free(keys);
 }
 
-///////////////////////////// fonctions autres /////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// fonctions secondaires //////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 matrix_t* phi (const matrix_t* x,const matrix_t* y) {
   if (!coef_init || !x || !y)
     return NULL;
@@ -231,9 +238,11 @@ void coeff_phi (int mode) {
     coef_init = true;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////// génération des clés /////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
-/////////////////////////////// génération des clefs ///////////////////////////
-keys_t *key_gen (int lambda, int mode) {
+keys_t *key_gen (int mode) {
   // initialise a,b,c,d :
   coeff_phi(mode);
   if (!coef_init)
@@ -367,8 +376,10 @@ keys_t *key_gen (int lambda, int mode) {
   return keys;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////// décodage /////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////// algorithme d'inversion //////////////////////////
 void decode_ev(matrix_t * ev,const matrix_t *G, const matrix_t *synd) {
   if (!ev || !G || !synd)
     return;
@@ -395,7 +406,8 @@ void decode_ev(matrix_t * ev,const matrix_t *G, const matrix_t *synd) {
 //     return NULL;
 // }
 
-void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *G, const matrix_t *synd, const matrix_t *ev, const int dim_U) {
+void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *G,
+              const matrix_t *synd, const matrix_t *ev, const int dim_U) {
   // Vérification des entrées
   if (!eu || !G || !synd || !ev)
     return;
@@ -529,7 +541,11 @@ void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *G, const matri
 //   }
 // }
 
-///////////////////////////// fonction pour PRANGE /////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////// PRANGE ///////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void infoset(int *info, const int n, const int len) {
   prng_init(time(NULL) + getpid());
   int i = 0;
@@ -543,7 +559,8 @@ void infoset(int *info, const int n, const int len) {
   }
 }
 
-matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome, const int *info, const int len_i, const matrix_t *x) {
+matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome,
+                         const int *info, const int len_i, const matrix_t *x) {
   if (!parite || !syndrome || !x)
     return NULL;
   // matrice de permutation envoyant info sur les DIM dernière coordonnées
@@ -716,6 +733,9 @@ matrix_t *iteration_prange(const matrix_t *parite, const matrix_t *syndrome) {
 }
 
 
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////// fonction main ////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 // main (à mettre dans un autre fichier peut-être)
 int main(void) {
@@ -847,7 +867,7 @@ int main(void) {
   // key_free(keys);
 
   /////////////////////////////////// GENERATION DE CLES
-  keys_t *keys = key_gen(0,1);
+  keys_t *keys = key_gen(1);
   if (keys == NULL) {
     puts ("Key_gen revoit NULL\n");
     return EXIT_FAILURE;
@@ -889,7 +909,8 @@ int main(void) {
   // matrix_t *gen_U_T = matrix_trans(gen_U);
   // puts("matrice génératrice de U transposée"); matrix_print(gen_U_T, stdout);
   // matrix_t *gen_U_T_inv = matrix_inv(gen_U_T);
-  // puts("inverse de la matrice génératrice de U transposée"); matrix_print(gen_U_T_inv, stdout);
+  // puts("inverse de la matrice génératrice de U transposée");
+  // matrix_print(gen_U_T_inv, stdout);
   // matrix_t *ver = matrix_prod(gen_U_T, gen_U_T_inv);
   // puts("doit être identité"); matrix_print(ver, stdout);
   //

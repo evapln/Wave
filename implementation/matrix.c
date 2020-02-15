@@ -6,6 +6,10 @@ struct matrix_t {
   char** mat;
 };
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////// gestion de la mémoire ///////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 matrix_t *matrix_alloc(const int row, const int col) {
   matrix_t *matrix = malloc(sizeof(matrix_t));
   if (!matrix)
@@ -47,6 +51,12 @@ void matrix_free (matrix_t *matrix) {
   }
 }
 
+
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////// gestion des paramètres de matrix_t //////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 char matrix_get_cell(const matrix_t *matrix,const int row_val, const int col_val) {
   if (!matrix)
     return 'e';
@@ -84,6 +94,11 @@ void matrix_set_cell(matrix_t *matrix, const int row_val, const int col_val, con
   }
   matrix->mat[row_val][col_val] = tmp;
 }
+
+
+////////////////////////////////////////////////////////////////////////////////
+//////////////////////// création de matrices spécifiques //////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 matrix_t *matrix_init (const int row, const int col, const char val) {
   matrix_t *matrix = matrix_alloc (row, col);
@@ -159,64 +174,6 @@ matrix_t *matrix_random(const int row, const int col) {
   return rand;
 }
 
-void shuffle(int *array, const int n) {
-  if (n > 1) {
-    for (int i = 0; i < n - 1; i++) {
-      prng_init(time(NULL) + getpid());
-      int k = rand() % (n - i);
-      int j = i + k;
-      int t = array[j];
-      array[j] = array[i];
-      array[i] = t;
-    }
-  }
-}
-
-bool is_in_array(const int *array, const int len, const int val) {
-  for (int i = 0; i < len; ++i)
-    if (array[i] == val)
-      return true;
-  return false;
-}
-
-void shuffle_info(int *array, const int len_a, const int *info, const int len_i, const int dim) {
-  // test longueurs correctes
-  if (len_i > len_a || dim > len_a || dim < len_i)
-    return;
-  prng_init(time(NULL) + getpid());
-  // initialisation du tableau contenant les dim dernières coordonnées pas encore mélangées
-  int fin[dim];
-  int i;
-  for (i  = 0; i < len_i; ++i)
-    fin[i] = info[i];
-  int random;
-  while (i < dim) {
-    random = rand() % len_a;
-    if (!is_in_array(fin, i, array[random])) {
-      fin[i] = array[random];
-      ++i;
-    }
-  }
-  // initialisation du tableau contenant les indices de début de array privés de ceux de fin
-  int len_deb = len_a - dim;
-  int debut[len_deb];
-  int j = 0;
-  for (int i = 0; i < len_a; ++i) {
-    if (!is_in_array(fin, dim, array[i])) {
-      debut[j] = array[i];
-      ++j;
-    }
-  }
-  // mélange
-  shuffle(fin, dim);
-  shuffle(debut, len_deb);
-  // concaténation
-  for (int i = 0; i < len_deb; ++i)
-    array[i] = debut[i];
-  for (int i  = 0; i < dim; ++i)
-    array[i + len_deb] = fin[i];
-}
-
 matrix_t *matrix_perm_random(const int n) {
   matrix_t *matrix = matrix_alloc(n,n);
   if (!matrix)
@@ -283,23 +240,6 @@ matrix_t *matrix_com(const matrix_t *A) {
       matrix_free(sub);
     }
   return com;
-}
-
-bool is_identity(const matrix_t *A){
-  if (!A)
-    return false;
-  int row = A->nb_row;
-  int col = A->nb_col;
-  if (col != row)
-    return false;
-  for (int i = 0; i < row; i++)
-    for (int j = 0; j < col; j++){
-      if (i == j && A->mat[i][j] != 1)
-        return false;
-      if (i != j && A->mat[i][j] != 0)
-        return false;
-    }
-  return true;
 }
 
 matrix_t *matrix_inv(const matrix_t *A){
@@ -488,12 +428,286 @@ void matrix_add_modified(matrix_t *dest, const matrix_t *src, const char coef) {
       dest->mat[i][j] = add_Fq(dest->mat[i][j], mul_Fq(src->mat[i][j], coef));
 }
 
-void matrix_row(matrix_t *ligne, const matrix_t *A, const int row) {
-  if (!A)
-    return;
-  for (int i = 0; i < A->nb_col; ++i)
-    ligne->mat[0][i] = A->mat[row][i];
+matrix_t *matrix_mul_by_scal(const matrix_t *matrix, const char scal) {
+  if (!matrix)
+    return NULL;
+  int row = matrix->nb_row;
+  int col = matrix->nb_col;
+  matrix_t *mul = matrix_alloc(row,col);
+  if (!mul)
+    return NULL;
+  for (int i = 0; i < row; ++i)
+    for (int j = 0; j < col; ++j)
+      mul->mat[i][j] = mul_Fq(matrix->mat[i][j], scal);
+  return mul;
 }
+
+matrix_t *matrix_prod(const matrix_t *matrix1, const matrix_t *matrix2) {
+  if (!matrix1 || !matrix2)
+    return NULL;
+  int k = matrix1->nb_col;
+  if (k != matrix2->nb_row)
+    return NULL;
+  int row = matrix1->nb_row;
+  int col = matrix2->nb_col;
+  matrix_t *prod = matrix_alloc(row,col);
+  if (!prod)
+    return NULL;
+  for (int i = 0; i < row; i++) {
+    for (int j = 0; j < col; j++) {
+      prod->mat[i][j] = 0;
+      for (int ind = 0; ind < k; ind++)
+        prod->mat[i][j] = add_Fq(mul_Fq(matrix1->mat[i][ind], matrix2->mat[ind][j]), prod->mat[i][j]);
+    }
+  }
+  return prod;
+}
+
+matrix_t *matrix_parite(const matrix_t *gen) {
+  if (!gen)
+    return NULL;
+  matrix_t *copy_gen = matrix_copy(gen);
+  if (!copy_gen)
+    return NULL;
+  matrix_systematisation(copy_gen);
+  matrix_t *syst = matrix_del_null_row(copy_gen);
+  if (!syst)
+    return NULL;
+  matrix_free(copy_gen);
+  if (!matrix_is_syst(syst)) {
+    matrix_free(syst);
+    return NULL;
+  }
+  int row_syst = syst->nb_row;
+  int col_syst = syst->nb_col;
+  int row_p = col_syst - row_syst;
+  int col_p = row_syst + row_p;
+  matrix_t *parite = matrix_alloc(row_p,col_p);
+  if (!parite)
+    return NULL;
+  for (int i = 0; i < row_p; ++i) {
+    for (int j = 0; j < row_syst; ++j)
+      parite->mat[i][j] = mul_Fq(-1,syst->mat[j][row_syst + i]);
+    for (int j = row_syst; j < col_p; ++j) {
+      if (j - row_syst == i)
+        parite->mat[i][j] = 1;
+      else
+        parite->mat[i][j] = 0;
+    }
+  }
+  matrix_free(syst);
+  return parite;
+}
+
+void matrix_systematisation(matrix_t *matrix) {
+  if (!matrix)
+    return;
+  int row = matrix->nb_row;
+  int col = matrix->nb_col;
+  // étape 1
+  // pour toutes les colonnes
+  for (int j = 0; j < col; ++j) {
+    // parcours de chaque colonne
+    for (int i = j; i < row; ++i) {
+      // on met un coefficient non nul en haut de chaque colonne
+      if (i != j && matrix->mat[i][j] % ORDER != 0) {
+        matrix_exchange_row(matrix, j, i);
+        break;
+      }
+    }
+    // annulation du reste de la colonne
+    for (int i = j + 1; i < row; ++i) {
+      char coef = mul_Fq(matrix->mat[i][j], inv_Fq(matrix->mat[j][j]));
+      if (coef != 0) {
+        matrix_add_row(matrix, i, j, -coef);
+      }
+    }
+  }
+
+  // on met tous les pivots à 1
+  // pour toutes les lignes
+  for (int i = 0; i < row; ++i) {
+    // on parcours les lignes
+    for (int j = 0; j < col; ++j) {
+      // on trouve le premier coef non nul, le pivot
+      if (matrix->mat[i][j] != 0) {
+        matrix_mul_row(matrix, i, inv_Fq(matrix->mat[i][j]));
+        break;
+      }
+    }
+  }
+  for (int i = row - 1; i >= 0; --i) {
+    // parcours de la ligne
+    int j = 0;
+    while ((matrix->mat[i][j] == 0) && (j != col - 1))
+      j += 1;
+    for (int k = 0; k < i; ++k) {
+      if (matrix->mat[k][j] != 0)
+        matrix_add_row(matrix, k, i, -inv_Fq(matrix->mat[k][j]));
+    }
+  }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////// calcul de determinant ////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+char matrix_det(const matrix_t *A) {
+  if (!A)
+    return 0;
+  int size = A->nb_col;
+  if (is_trigonalise(A)){
+    // puts("ok");
+    char det = 1;
+    for (int i = 0; i < size; i++){
+      det *= A->mat[i][i];
+      if (det == 0)
+        return 0;
+    }
+    return det;
+  }
+  // printf("size = %d",size);
+  if (size == 2)
+    return (add_Fq(mul_Fq(A->mat[0][0],A->mat[1][1]),-mul_Fq(A->mat[0][1],A->mat[1][0])));
+  char det = 0;
+  matrix_t *sub = NULL;
+  for (int i = 0; i < size; ++i) {
+    sub = matrix_sub(A,0,i);
+    if (!sub)
+      return 0;
+    if (A->mat[0][i] == 0)
+      continue;
+    char sub_det = matrix_det(sub);
+    char val1 = mul_Fq(pow(-1,i),A->mat[0][i]);
+    det = add_Fq(det,mul_Fq(val1,sub_det));
+    matrix_free(sub);
+  }
+  return det;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+//////////////////////////// test de la forme des matrices /////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+bool is_identity(const matrix_t *A){
+  if (!A)
+    return false;
+  int row = A->nb_row;
+  int col = A->nb_col;
+  if (col != row)
+    return false;
+  for (int i = 0; i < row; i++)
+    for (int j = 0; j < col; j++){
+      if (i == j && A->mat[i][j] != 1)
+        return false;
+      if (i != j && A->mat[i][j] != 0)
+        return false;
+    }
+  return true;
+}
+
+bool matrix_is_syst (const matrix_t *matrix) {
+  if (!matrix)
+    return false;
+  int row = matrix->nb_row;
+  int col = matrix->nb_col;
+  for (int i = 0; i < row; i++)
+    for (int j = 0; j < col && j < row; j++){
+      // char mat = matrix2->mat[i][j];
+      if (i == j && (matrix->mat[i][j] != 1)){
+        // matrix_free(matrix2);
+        return false;
+      }
+      if (i != j && (matrix->mat[i][j] != 0)){
+        // matrix_free(matrix2);
+        return false;
+      }
+    }
+  // matrix_free(matrix2);
+  return true;
+}
+
+bool is_trigonalise (const matrix_t *A) {
+  int size = A->nb_row;
+  for (int i = 0; i < size; i++){
+    for (int j = 0; j < i; j++){
+      if (A->mat[i][j]%ORDER != 0)
+        return false;
+    }
+  }
+  return true;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////// utilisation de tableaux //////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+bool is_in_array(const int *array, const int len, const int val) {
+  for (int i = 0; i < len; ++i)
+    if (array[i] == val)
+      return true;
+  return false;
+}
+
+void shuffle(int *array, const int n) {
+  if (n > 1) {
+    for (int i = 0; i < n - 1; i++) {
+      prng_init(time(NULL) + getpid());
+      int k = rand() % (n - i);
+      int j = i + k;
+      int t = array[j];
+      array[j] = array[i];
+      array[i] = t;
+    }
+  }
+}
+
+void shuffle_info(int *array, const int len_a, const int *info, const int len_i, const int dim) {
+  // test longueurs correctes
+  if (len_i > len_a || dim > len_a || dim < len_i)
+    return;
+  prng_init(time(NULL) + getpid());
+  // initialisation du tableau contenant les dim dernières coordonnées pas encore mélangées
+  int fin[dim];
+  int i;
+  for (i  = 0; i < len_i; ++i)
+    fin[i] = info[i];
+  int random;
+  while (i < dim) {
+    random = rand() % len_a;
+    if (!is_in_array(fin, i, array[random])) {
+      fin[i] = array[random];
+      ++i;
+    }
+  }
+  // initialisation du tableau contenant les indices de début de array privés de ceux de fin
+  int len_deb = len_a - dim;
+  int debut[len_deb];
+  int j = 0;
+  for (int i = 0; i < len_a; ++i) {
+    if (!is_in_array(fin, dim, array[i])) {
+      debut[j] = array[i];
+      ++j;
+    }
+  }
+  // mélange
+  shuffle(fin, dim);
+  shuffle(debut, len_deb);
+  // concaténation
+  for (int i = 0; i < len_deb; ++i)
+    array[i] = debut[i];
+  for (int i  = 0; i < dim; ++i)
+    array[i + len_deb] = fin[i];
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////// gestion de vecteurs /////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 int weight(const matrix_t *vect) {
   if (!vect)
@@ -585,39 +799,16 @@ matrix_t *vect_scal(const matrix_t *vect1, const matrix_t *vect2) {
   return mul;
 }
 
-matrix_t *matrix_mul_by_scal(const matrix_t *matrix, const char scal) {
-  if (!matrix)
-    return NULL;
-  int row = matrix->nb_row;
-  int col = matrix->nb_col;
-  matrix_t *mul = matrix_alloc(row,col);
-  if (!mul)
-    return NULL;
-  for (int i = 0; i < row; ++i)
-    for (int j = 0; j < col; ++j)
-      mul->mat[i][j] = mul_Fq(matrix->mat[i][j], scal);
-  return mul;
-}
 
-matrix_t *matrix_prod(const matrix_t *matrix1, const matrix_t *matrix2) {
-  if (!matrix1 || !matrix2)
-    return NULL;
-  int k = matrix1->nb_col;
-  if (k != matrix2->nb_row)
-    return NULL;
-  int row = matrix1->nb_row;
-  int col = matrix2->nb_col;
-  matrix_t *prod = matrix_alloc(row,col);
-  if (!prod)
-    return NULL;
-  for (int i = 0; i < row; i++) {
-    for (int j = 0; j < col; j++) {
-      prod->mat[i][j] = 0;
-      for (int ind = 0; ind < k; ind++)
-        prod->mat[i][j] = add_Fq(mul_Fq(matrix1->mat[i][ind], matrix2->mat[ind][j]), prod->mat[i][j]);
-    }
-  }
-  return prod;
+////////////////////////////////////////////////////////////////////////////////
+////////////////// calculs et tests sur les lignes d'une matrice ///////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void matrix_row(matrix_t *ligne, const matrix_t *A, const int row) {
+  if (!A)
+    return;
+  for (int i = 0; i < A->nb_col; ++i)
+    ligne->mat[0][i] = A->mat[row][i];
 }
 
 matrix_t *matrix_del_row(const matrix_t *matrix, const int row1) {
@@ -713,41 +904,10 @@ matrix_t *matrix_del_null_row (const matrix_t *matrix) {
   return matrix2;
 }
 
-matrix_t *matrix_parite(const matrix_t *gen) {
-  if (!gen)
-    return NULL;
-  matrix_t *copy_gen = matrix_copy(gen);
-  if (!copy_gen)
-    return NULL;
-  matrix_systematisation(copy_gen);
-  matrix_t *syst = matrix_del_null_row(copy_gen);
-  if (!syst)
-    return NULL;
-  matrix_free(copy_gen);
-  if (!matrix_is_syst(syst)) {
-    matrix_free(syst);
-    return NULL;
-  }
-  int row_syst = syst->nb_row;
-  int col_syst = syst->nb_col;
-  int row_p = col_syst - row_syst;
-  int col_p = row_syst + row_p;
-  matrix_t *parite = matrix_alloc(row_p,col_p);
-  if (!parite)
-    return NULL;
-  for (int i = 0; i < row_p; ++i) {
-    for (int j = 0; j < row_syst; ++j)
-      parite->mat[i][j] = mul_Fq(-1,syst->mat[j][row_syst + i]);
-    for (int j = row_syst; j < col_p; ++j) {
-      if (j - row_syst == i)
-        parite->mat[i][j] = 1;
-      else
-        parite->mat[i][j] = 0;
-    }
-  }
-  matrix_free(syst);
-  return parite;
-}
+
+////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// gestion d'un code //////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 void random_word(matrix_t *c, const matrix_t *G) {
   if (!G)
@@ -773,119 +933,10 @@ void random_word(matrix_t *c, const matrix_t *G) {
   matrix_free(lambda);
 }
 
-void matrix_systematisation(matrix_t *matrix) {
-  if (!matrix)
-    return;
-  int row = matrix->nb_row;
-  int col = matrix->nb_col;
-  // étape 1
-  // pour toutes les colonnes
-  for (int j = 0; j < col; ++j) {
-    // parcours de chaque colonne
-    for (int i = j; i < row; ++i) {
-      // on met un coefficient non nul en haut de chaque colonne
-      if (i != j && matrix->mat[i][j] % ORDER != 0) {
-        matrix_exchange_row(matrix, j, i);
-        break;
-      }
-    }
-    // annulation du reste de la colonne
-    for (int i = j + 1; i < row; ++i) {
-      char coef = mul_Fq(matrix->mat[i][j], inv_Fq(matrix->mat[j][j]));
-      if (coef != 0) {
-        matrix_add_row(matrix, i, j, -coef);
-      }
-    }
-  }
 
-  // on met tous les pivots à 1
-  // pour toutes les lignes
-  for (int i = 0; i < row; ++i) {
-    // on parcours les lignes
-    for (int j = 0; j < col; ++j) {
-      // on trouve le premier coef non nul, le pivot
-      if (matrix->mat[i][j] != 0) {
-        matrix_mul_row(matrix, i, inv_Fq(matrix->mat[i][j]));
-        break;
-      }
-    }
-  }
-  for (int i = row - 1; i >= 0; --i) {
-    // parcours de la ligne
-    int j = 0;
-    while ((matrix->mat[i][j] == 0) && (j != col - 1))
-      j += 1;
-    for (int k = 0; k < i; ++k) {
-      if (matrix->mat[k][j] != 0)
-        matrix_add_row(matrix, k, i, -inv_Fq(matrix->mat[k][j]));
-    }
-  }
-}
-
-bool matrix_is_syst (const matrix_t *matrix) {
-  if (!matrix)
-    return false;
-  int row = matrix->nb_row;
-  int col = matrix->nb_col;
-  for (int i = 0; i < row; i++)
-    for (int j = 0; j < col && j < row; j++){
-      // char mat = matrix2->mat[i][j];
-      if (i == j && (matrix->mat[i][j] != 1)){
-        // matrix_free(matrix2);
-        return false;
-      }
-      if (i != j && (matrix->mat[i][j] != 0)){
-        // matrix_free(matrix2);
-        return false;
-      }
-    }
-  // matrix_free(matrix2);
-  return true;
-}
-
-bool is_trigonalise (const matrix_t *A) {
-  int size = A->nb_row;
-  for (int i = 0; i < size; i++){
-    for (int j = 0; j < i; j++){
-      if (A->mat[i][j]%ORDER != 0)
-        return false;
-    }
-  }
-  return true;
-}
-
-char matrix_det(const matrix_t *A) {
-  if (!A)
-    return 0;
-  int size = A->nb_col;
-  if (is_trigonalise(A)){
-    // puts("ok");
-    char det = 1;
-    for (int i = 0; i < size; i++){
-      det *= A->mat[i][i];
-      if (det == 0)
-        return 0;
-    }
-    return det;
-  }
-  // printf("size = %d",size);
-  if (size == 2)
-    return (add_Fq(mul_Fq(A->mat[0][0],A->mat[1][1]),-mul_Fq(A->mat[0][1],A->mat[1][0])));
-  char det = 0;
-  matrix_t *sub = NULL;
-  for (int i = 0; i < size; ++i) {
-    sub = matrix_sub(A,0,i);
-    if (!sub)
-      return 0;
-    if (A->mat[0][i] == 0)
-      continue;
-    char sub_det = matrix_det(sub);
-    char val1 = mul_Fq(pow(-1,i),A->mat[0][i]);
-    det = add_Fq(det,mul_Fq(val1,sub_det));
-    matrix_free(sub);
-  }
-  return det;
-}
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////// affichage ////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 void matrix_print(const matrix_t *matrix, FILE *fd) {
   if (matrix && matrix->mat)
