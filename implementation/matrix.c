@@ -499,6 +499,21 @@ matrix_t *matrix_parite(const matrix_t *gen) {
   return parite;
 }
 
+matrix_t *sub_col_matrix(const matrix_t *A, const int *ind_col, const int len) {
+  if (!A)
+    return NULL;
+  int row = A->nb_row;
+  matrix_t *B = matrix_alloc(row,len);
+  if (!B)
+    return NULL;
+  for (int i = 0; i < row; ++i) {
+    for (int j = 0; j < len; ++j) {
+      B->mat[i][j] = A->mat[i][ind_col[j]];
+    }
+  }
+  return B;
+}
+
 void matrix_systematisation(matrix_t *matrix) {
   if (!matrix)
     return;
@@ -586,6 +601,23 @@ char matrix_det(const matrix_t *A) {
   return det;
 }
 
+int matrix_rank(const matrix_t *A) {
+  if (!A)
+    return 0;
+  matrix_t *B = matrix_copy(A);
+  if (!B)
+    return 0;
+  matrix_systematisation(B);
+  if (!B)
+    return 0;
+  matrix_t *C = matrix_del_null_row(B);
+  if (!C)
+    return 0;
+  matrix_free(B);
+  int rank = C->nb_row;
+  matrix_free(C);
+  return rank;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////////////// test de la forme des matrices /////////////////////

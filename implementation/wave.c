@@ -3,6 +3,7 @@
 
 const int SIZE = 16;
 const int OMEGA = 7;
+const int d = 3;
 matrix_t* A = NULL;
 matrix_t* B = NULL;
 matrix_t* C = NULL;
@@ -406,97 +407,120 @@ void decode_ev(matrix_t * ev,const matrix_t *G, const matrix_t *synd) {
 //     return NULL;
 // }
 
-void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *G,
-              const matrix_t *synd, const matrix_t *ev, const int dim_U) {
+void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *synd,
+               const matrix_t *ev) {
   // Vérification des entrées
-  if (!eu || !G || !synd || !ev)
+  if (!eu || !synd || !ev)
     return;
-  int col = matrix_get_col(G);
-  if (matrix_get_col(ev) != col || matrix_get_row(ev) != 1 || matrix_get_col(eu) != col || matrix_get_row(eu) != 1)
+  // int col = matrix_get_col(G);
+  if (matrix_get_row(ev) != 1 || matrix_get_row(eu) != 1)
     return;
   // initialistaions
-  int a, b, c, d, w;
+  int dim_U = keys->sk->dim_U;
+  int a, b, c, d, w, r;
   char no1, no2, evi, eui, eui_not;
+  matrix_t *eu_int = NULL;
+  matrix_t *x = NULL;
+  matrix_t *e = NULL;
   matrix_t * eu_not = matrix_alloc(1,SIZE/2);
   if (!eu_not)
     return;
-  for (int i = 0; i < SIZE/2; ++i) {
-    matrix_set_cell(eu, 0, i, '*');
-    matrix_set_cell(eu_not, 0, i, '*');
-  }
   // matrix_print(eu, stdout);
-  // création du tableau J contenant les k_u positions choisies
-  int J[dim_U];
-  for (int i = 0; i < dim_U; ++i)
-    J[i] = i;
-  // tableau random
-  int r;
-  prng_init(time(NULL) + getpid());
-  // int i = 0;
-  // while (i < dim_U) {
-  //   r = rand() % col;
-  //   if (!is_in_array(ind, dim_U, r)) {
-  //     ind[i] = r;
-  //     ++i;
-  //   }
-  // }
+  // création de I ensemble d'information de H : [1,k] k la dimension de H
+  int ens_I[DIM];
+  for (int i = 0; i < DIM; ++i)
+    ens_I[i] = i;
 
-  //// reste à résoudre le système linéaire
-
-  // sur les ku positions choisies (dans J), on fixe eu de telle sorte que
-  // A(i)*eu(i) + B(i)*ev(i) != 0 et  C(i)*eu(i) + D(i)*ev(i) != 0
-  // quand on a une solution exacte, on met dans eu,
-  // quand on a juste une impossibilité, on met dans eu_not
-  for (int i = 0; i < dim_U; ++i)
-    printf("%d\t", J[i]);
-  puts("");
-  for (int i = 0; i < dim_U; ++i) {
-    a = matrix_get_cell(A,0,J[i]);
-    b = matrix_get_cell(B,0,J[i]);
-    c = matrix_get_cell(C,0,J[i]);
-    d = matrix_get_cell(D,0,J[i]);
-    evi = matrix_get_cell(ev, 0, J[i]);
-    no1 = mul_Fq(inv_Fq(a), mul_Fq(evi, -b));
-    no2 = mul_Fq(inv_Fq(c), mul_Fq(evi, -d));
-    if (no1 != no2) {
-      if (no1 != 0 && no2 !=0)
-        eui = 0;
-      if (no1 != 1 && no2 != 1)
-        eui = 1;
-      if (no1 != 2 && no2 != 2)
-        eui = 2;
-      matrix_set_cell(eu, 0, J[i], eui);
-    }
-    else
-      matrix_set_cell(eu_not, 0, J[i], no1);
-  }
-  puts("eu"); matrix_print(eu, stdout);
-  puts("eu_not"); matrix_print(eu_not, stdout);
-  // on choisi un x aléatoire avec les contraintes précédentes
-  matrix_t *x = matrix_copy(eu);
-  for (int i = 0; i < SIZE/2; ++i) {
-    if(matrix_get_cell(x,0,i) == '*') {
-      eui_not = matrix_get_cell(eu_not,0,i);
-      do {
-        r = rand_Fq();
-      } while (r == eui_not);
-      matrix_set_cell(x, 0, i, r);
-    }
-  }
-  puts("x"); matrix_print(x, stdout);
-  // on résoud le système en appelant prange_algebra
-  matrix_t *eu_int = NULL;
-  matrix_t *e = NULL;
   do {
-    eu_int = prange_algebra(keys->sk->parite_U, synd, J, dim_U, x);
-    if(!eu_int) {
-      puts("pas de eu int");
-      return;
+    while (!eu_int) {
+      for (int i = 0; i < SIZE/2; ++i) {
+        matrix_set_cell(eu, 0, i, '*');
+        matrix_set_cell(eu_not, 0, i, '*');
+      }
+      // création du tableau J contenant les k_u positions choisies parmi I
+      shuffle(ens_I, DIM);
+      int ens_J[dim_U];
+      for (int i = 0; i < dim_U; ++i)
+        ens_J[i] = ens_I[i];
+      //   ens_J[i] = i;
+      // tableau random
+      // int r;
+      // prng_init(time(NULL) + getpid());
+      // int i = 0;
+      // while (i < dim_U) {
+      //   r = rand() % col;
+      //   if (!is_in_array(ind, dim_U, r)) {
+      //     ind[i] = r;
+      //     ++i;
+      //   }
+      // }
+
+      //// reste à résoudre le système linéaire
+
+      // sur les ku positions choisies (dans J), on fixe eu de telle sorte que
+      // A(i)*eu(i) + B(i)*ev(i) != 0 et  C(i)*eu(i) + D(i)*ev(i) != 0
+      // quand on a une solution exacte, on met dans eu,
+      // quand on a juste une impossibilité, on met dans eu_not
+      for (int i = 0; i < dim_U; ++i)
+        printf("%d\t", ens_J[i]);
+      puts("");
+      for (int i = 0; i < dim_U; ++i) {
+        a = matrix_get_cell(A,0,ens_J[i]);
+        b = matrix_get_cell(B,0,ens_J[i]);
+        c = matrix_get_cell(C,0,ens_J[i]);
+        d = matrix_get_cell(D,0,ens_J[i]);
+        evi = matrix_get_cell(ev, 0, ens_J[i]);
+        no1 = mul_Fq(inv_Fq(a), mul_Fq(evi, -b));
+        no2 = mul_Fq(inv_Fq(c), mul_Fq(evi, -d));
+        if (no1 != no2) {
+          if (no1 != 0 && no2 !=0)
+            eui = 0;
+          if (no1 != 1 && no2 != 1)
+            eui = 1;
+          if (no1 != 2 && no2 != 2)
+            eui = 2;
+          matrix_set_cell(eu, 0, ens_J[i], eui);
+        }
+        else
+          matrix_set_cell(eu_not, 0, ens_J[i], no1);
+      }
+      puts("eu"); matrix_print(eu, stdout);
+      puts("eu_not"); matrix_print(eu_not, stdout);
+
+
+      // on choisit les ensembldes libres I et J
+      // int *ens_I = freeset(keys->sk->parite_U,ev,8);
+
+      // on choisi un x aléatoire avec les contraintes précédentes
+      x =  matrix_copy(eu);
+      for (int i = 0; i < SIZE/2; ++i) {
+        if(matrix_get_cell(x,0,i) == '*') {
+          eui_not = matrix_get_cell(eu_not,0,i);
+          do {
+            r = rand_Fq();
+          } while (r == eui_not);
+          matrix_set_cell(x, 0, i, r);
+        }
+      }
+      // puts("x"); matrix_print(x, stdout);
+
+      // on résoud le système en appelant prange_algebra
+      eu_int = prange_algebra(keys->sk->parite_U, synd, ens_I, DIM, x);
     }
+    puts("eu"); matrix_print(eu, stdout);
+    puts("eu_not"); matrix_print(eu_not, stdout);
+    puts("x"); matrix_print(x, stdout);
+    // if(!eu_int) {
+    //   matrix_free(x);
+    //   matrix_free(eu_not);
+    //   puts("pas de eu int");
+    //   return;
+    // }
     e = phi(eu_int, ev);
     w = weight(e);
     puts("e"); matrix_print(e, stdout); printf("poids : %d\n", w);
   } while (w != OMEGA);
+
   // on clean
   matrix_free(eu_int);
   matrix_free(e);
@@ -504,42 +528,68 @@ void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *G,
   matrix_free(eu_not);
 }
 
-// int *freeset(const matrix_t *H, const matrix_t *ev, const int k) {
-//   if (!H || !ev)
-//     return NULL;
-//   // création su supp de ev
-//   int *supp;
-//   int len_supp = 0;
-//   int col = matrix_get_col(ev);
-//   for (int j = 0; j < col; ++j) {
-//     if (matrix_get_cell(ev,0,j) != 0 % ORDER) {
-//       supp[len_supp] = j;
-//       ++len_supp;
-//     }
-//   }
-//   // création de [1,n]\supp(ev)
-//   int len_inv_supp = SIZE - len_supp;
-//   int inv_supp[len_inv_supp];
-//   int i = 0;
-//   for (int j = 0; j < SIZE; ++j) {
-//     if (!is_in_array(supp, len_supp, j)) {
-//       inv_supp[i] = j;
-//       ++i;
-//     }
-//   }
-//   int J1[k];
-//   int J2[DIM - SIZE - k];
-//   while () {
-//     // création de J1
-//     shuffle(supp, len_supp);
-//     for (int j = 0; j < k; ++j)
-//       J1[j] = supp[j];
-//     // création de J2
-//     shuffle(inv_supp, len_inv_supp);
-//     for (int j = 0; j < DIM-SIZE-k; ++j)
-//       J1[j] = supp[j];
-//   }
-// }
+int *freeset(const matrix_t *H, const matrix_t *ev, const int k) {
+  if (!H || !ev)
+    return NULL;
+  // création su supp de ev
+  int len_supp = 0;
+  int col = matrix_get_col(ev);
+  for (int j = 0; j < col; ++j) {
+    if (matrix_get_cell(ev,0,j) != 0 % ORDER) {
+      ++len_supp;
+    }
+  }
+  int supp[len_supp];
+  int i = 0;
+  for (int j = 0; j < col; ++j) {
+    if (matrix_get_cell(ev,0,j) != 0 % ORDER) {
+      supp[i] = j;
+      ++i;
+    }
+  }
+  // création de [1,n]\supp(ev)
+  int len_inv_supp = SIZE - len_supp;
+  int inv_supp[len_inv_supp];
+  // int i = 0;
+  for (int j = 0; j < SIZE; ++j) {
+    if (!is_in_array(supp, len_supp, j)) {
+      inv_supp[i] = j;
+      ++i;
+    }
+  }
+  // int J1[k];
+  // int J2[DIM - SIZE - k];
+  int J[DIM-d];
+  int rank = 0;
+  while (rank != SIZE - DIM) {
+    // création de J = J1 U J2
+    // ajout de J1 dans la première partie de J
+    shuffle(supp, len_supp);
+    for (int j = 0; j < k; ++j)
+      J[j] = supp[j];
+    // ajout de J2 dans la deuxième partie de J
+    shuffle(inv_supp, len_inv_supp);
+    for (int j = 0; j < DIM-d-k; ++j)
+      J[j+k] = supp[j];
+    // créatino de [1,SIZE]\J : inv_J
+    int len_inv_J = SIZE - DIM - d;
+    int inv_J[len_inv_J];
+    int i = 0;
+    for (int j = 0; j < SIZE; ++j) {
+      if (!is_in_array(J, DIM-d, j)) {
+        inv_J[i] = j;
+        ++i;
+      }
+    }
+    matrix_t *sub_H = sub_col_matrix(H, inv_J, len_inv_J);
+    puts("sub_H : ");
+    matrix_print(sub_H,stdout);
+    rank = matrix_rank(sub_H);
+    printf("rang de sub_H : %d\nn-k = %d\nd = %d\n", rank, SIZE-DIM, d);
+    matrix_free(sub_H);
+  }
+  return NULL;
+}
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -571,21 +621,27 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome,
   matrix_t *left_inv = NULL;
   int row_HP;
   int cpt = 0;
+  int n = matrix_get_col(parite);
   // choix de P pour avoir A inversible
   while (!left_inv) {
     // puts("left non inversible");
     matrix_free(left);
     matrix_free(right);
     matrix_free(P);
-    P = matrix_perm_random_info(SIZE, info, len_i, DIM);
+    P = matrix_perm_random_info(n, info, len_i, DIM);
     if (!P)
       return NULL;
+    // puts("ok1");
     // (left | right) <- HP
+    // puts("H : "); matrix_print(parite,stdout);
+    // puts("P : "); matrix_print(P,stdout);
     HP = matrix_prod(parite,P);
     if (!HP) {
+      puts("pb HP");
       matrix_free(P);
       return NULL;
     }
+    // puts("ok2");
     row_HP = matrix_get_row(HP);
     left = matrix_alloc(row_HP,SIZE-DIM);
     right = matrix_alloc(row_HP,DIM);
@@ -596,6 +652,7 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome,
       matrix_free(HP);
       return NULL;
     }
+    // puts("ok3");
     matrix_separate(HP, left, right);
     matrix_free(HP);
     if (!left || !right) {
@@ -604,14 +661,16 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome,
       matrix_free(P);
       return NULL;
     }
+    // puts("ok4");
     left_inv = matrix_inv(left);
     // if (left_inv)
     //   matrix_print(left_inv, stdout);
     ++cpt;
-    if (cpt > 10) {
+    if (cpt > 20) {
       puts("trop d'essais");
       return NULL;
     }
+    // puts("ok5");
   }
   // (zero | ep) <- x
   matrix_t *zero = matrix_alloc(1, SIZE-DIM);
@@ -624,6 +683,7 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome,
     matrix_free(right);
     return NULL;
   }
+  // puts("ok6");
   matrix_separate(x, zero, ep);
   matrix_free(zero);
   if (!ep) {
@@ -633,6 +693,7 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome,
     matrix_free(right);
     return NULL;
   }
+  // puts("ok7");
   // calcul de e
   matrix_t *right_T = matrix_trans(right);
   matrix_free(right);
@@ -642,6 +703,7 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome,
     matrix_free(left);
     return NULL;
   }
+  // puts("ok8");
   matrix_t *epright_T = matrix_prod(ep,right_T);
   matrix_free(right_T);
   if (!epright_T) {
@@ -650,6 +712,7 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome,
     matrix_free(left);
     return NULL;
   }
+  // puts("ok9");
   matrix_t *epright_Tless = matrix_mul_by_scal(epright_T, -1);
   matrix_free(epright_T);
   if (!epright_Tless) {
@@ -666,6 +729,7 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome,
     matrix_free(left);
     return NULL;
   }
+  // puts("ok10");
   // matrix_t *left_inv = matrix_inv(left);
   matrix_free(left);
   if (!left_inv) {
@@ -682,6 +746,7 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome,
     matrix_free(P);
     return NULL;
   }
+  // puts("ok11");
   matrix_t *couple_left = matrix_prod(s, left_inv_T);
   matrix_free(s);
   matrix_free(left_inv_T);
@@ -697,6 +762,7 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome,
     matrix_free(P);
     return NULL;
   }
+  // puts("ok12");
   matrix_t *P_T = matrix_trans(P);
   matrix_free(P);
   if (!P_T)
@@ -861,12 +927,12 @@ int main(void) {
   // matrix_free(left);
   // matrix_free(right);
 
-  //// test key_gen
-  // keys_t *keys = key_gen(0,0);
+  // test key_gen
+  // keys_t *keys = key_gen(0);
   // matrix_print(keys->pk,stdout);
   // key_free(keys);
 
-  /////////////////////////////////// GENERATION DE CLES
+  ///////////////////////////////// GENERATION DE CLES
   keys_t *keys = key_gen(1);
   if (keys == NULL) {
     puts ("Key_gen revoit NULL\n");
@@ -901,8 +967,8 @@ int main(void) {
   matrix_print(verif, stdout);
 
   /////////////////////////////////////////test decode_ev
-  puts("matrice génératrice de U"); matrix_print(gen_U, stdout);
-  decode_eu(eu, keys, gen_U, synd, ev, keys->sk->dim_U);
+  puts("matrice de parité de U"); matrix_print(keys->sk->parite_U, stdout);
+  decode_eu(eu, keys, synd, ev);
 
 
 
@@ -924,6 +990,30 @@ int main(void) {
   matrix_free(e);
   matrix_free(synd);
   key_free(keys);
+
+
+  ///////////////////////////////////////////// test matrix_rank
+  // matrix_t *m = NULL;
+  // m = matrix_random(160,207);
+  // int rang = matrix_rank(m);
+  // //puts("A"); matrix_print(m,stdout);
+  // printf("rang : %d\n",rang);
+  // matrix_free(m);
+
+  ///////////////////////////////////////////// test sub_col_matrix
+  // matrix_t *m = matrix_random(10,12);
+  // int ind[6] = {0,3,4,6,7,11};
+  // for (int i = 0; i < 6; ++i)
+  //   printf("%d\t",ind[i]);
+  // puts("");
+  // matrix_t *sub = sub_col_matrix(m,ind,6);
+  // puts("m"); matrix_print(m, stdout);
+  // printf("rang de m : %d\n",matrix_rank(m));
+  // puts("sub"); matrix_print(sub, stdout);
+  // printf("rang de sub : %d\n", matrix_rank(sub));
+  // matrix_free(m);
+  // matrix_free(sub);
+
 
   ///////////////////////////////////////////// test random_word
   // matrix_t *G = matrix_random(4,6);
@@ -985,9 +1075,9 @@ int main(void) {
 
   // printf("%d\n", DIM);
 
-  // TEST PRANGE
-
-  // Défini e
+  // // TEST PRANGE
+  //
+  // // Défini e
   // int ind[SIZE];
   // for (int i = 0; i < SIZE; i++)
   //   ind[i] = i;
@@ -1006,13 +1096,15 @@ int main(void) {
   // matrix_free (inv);
   // matrix_free (prod);
 
-  // // calcule d'un vecteur erreur associé au syndrome s avec prange iteration
+  // // // calcule d'un vecteur erreur associé au syndrome s avec prange iteration
   // matrix_t *ep = NULL;
   // int sb = 0;
   // while (!ep || sb != OMEGA) {
   //   matrix_free(ep);
   //   // puts("ok1");
   //   ep = iteration_prange(H, synd);
+  //   if(!ep)
+  //     puts("pas de ep");
   //   // puts("ok2");
   //   sb = sub_weight(ep, ind, SIZE);
   //   printf(" %d ",sb);

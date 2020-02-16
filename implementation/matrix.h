@@ -105,19 +105,24 @@ matrix_t *matrix_prod(const matrix_t *matrix1, const matrix_t *matrix2);
 /* alloue et renvoie la matrice de parité associée à la matrice génératrice */
 matrix_t *matrix_parite(const matrix_t *gen);
 
-/* Trigonalise matrix */
+/* alloue et renvoie une sous-matrice contenant les colonnes de A spécifées dans
+   ind_col */
+matrix_t *sub_col_matrix(const matrix_t *A, const int *ind_col, const int len);
+
+/* systematise matrix */
 void matrix_systematisation(matrix_t *matrix);
 
 
 
 ////////////////////////////////////////////////////////////////////////////////
-///////////////////////////// calcul de determinant ////////////////////////////
+///////////////////////////// calcul sur matrices //////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
 /* Renvoie le determinant de la matrice A */
 char matrix_det(const matrix_t *A);
 
-
+/* Renvoie le rang de la matrice A */
+int matrix_rank(const matrix_t *A);
 
 
 ////////////////////////////////////////////////////////////////////////////////
