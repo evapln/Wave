@@ -210,8 +210,25 @@ Un schéma hash et signe utilisant la fonction syndrome comme fonction à sens u
 De plus, ces fonctions sont (1) bien distribuées, (2) sans fuite d'info en moyenne, (3) sens unique sans la trappe \\
 - Le schéma : un algo signe et un algo verify. \\
 
-Notre schéma de signature utilisera donc la fonction syndrôme, sous l'hypothèse de la difficulté de décoder un code aléatoire. \\
+Notre schéma de signature utilisera donc les codes $(U,U+V)$-généralisés et la fonction syndrôme comme fonction à sens unique, sous l'hypothèse de la difficulté de résoudre le problème du décodage. \\
 
+\begin{defi} (Fonctions GPVM). On appelle fonction GPV en moyenne une paire d'algorithmes (\verb|Trapdoor|,\verb|InvertAlg|) ainsi qu'un triplet de fonctions ($n(\lambda),k(\lambda),\omega(\lambda)$) en fonction d'un paramètre de sécurité $\lambda$, tels que :
+\begin{itemize}
+\item \verb|Trapdoor| est un algorithme probabiliste et polynomial en $1^\lambda$ et renvoyant le couple $(H,T)$ où $H \in \F_q^{(n-k) \times n}$ de rang $n-k$ et $T$ est la trappe associée.
+\item \verb|InvertAlg| est un algorithme probabiliste et polynomial prenant en entrée la trappe $T$ et un syndrôme $s \in \F_q^{n-k}$, et renvoyant $e \in \F_q^{n}$ de poids $\omega$ tel que $eH^T = s$.
+\end{itemize}
+De plus, pour \textit{presque toutes} matrice $H$ renvoyée par \verb|Trapdoor|, la fonction est :
+\begin{enumerate}
+\item bien distribuée : \\
+$\rho(eH^T,s) \in \text{negl}(\lambda)$ où $e$ est pris uniformément dans l'ensemble des mots de poids $\omega$ et de longueur $n$ et $s$ est pris uniformément dans $\F_q^{n-k}$. 
+\item sans fuite d'information \textit{en moyenne} : \\
+$ \rho(\verb|InvertAlg|(s,T),e) \in \text{negl}(\lambda)$ où $e$ est pris uniformément dans l'ensemble des mots de poids $\omega$ et de longueur $n$ et $s$ est pris uniformément dans $\F_q^{n-k}$. 
+\item \`A sens unique sans la trappe : \\
+Pour tout algorithme probabiliste polynomial $\{A}$, on a 
+$$\mathbb{P}(\{A}(H,s) = e | eH^T = s) \in \text{negl}(\lambda).$$
+\end{enumerate}
+C'est une définition relaxée des fonctions GPV.
+\end{defi}
 
 
 \subsection{Le décodage avec trappe}
