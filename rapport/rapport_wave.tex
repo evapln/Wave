@@ -85,18 +85,124 @@ Nous allons détailler le schéma de signature Wave et détailler sa sécurité.
 
 \section{Le schéma de signature Wave}
 Pour répondre aux problèmes : \\
-- Définition des codes (U,U+V)-généralisés \\
+
+- Des codes UV-généralisés \\
 - Des fonctions GPV en moyenne \\
 - Un schéma de signature de type hash et signe utilisant ces codes \\
 
 \subsection{La famille de codes (U,U+V)-généralisés}
 Définition des codes (U,U+V)-généralisés: \\
-- Comment les créer  \\
-- Choix des paramètres a,b,c,d \\
-- Liens entre les matrices des codes U et V et du code UV \\
-- Les dimensions et différents paramètres \\
-- Calcul du hull ==> q > 2 \\
+- Comment les créer  FAIT \\
+- Choix des paramètres a,b,c,d \`A DETAILLER \\
+- Liens entre les matrices des codes U et V et du code UV EN COURS \\
+- Les dimensions et différents paramètres  EN COURS \\
+- Calcul du hull ==> q > 2 TODO \\
 - ...? \\
+
+
+\begin{defi} Soient $U$ et $V$ deux codes de même longueur $n/2$ et de dimension respectives $k_u$ et $k_v$. Un code $(U,U+V)$ est un code de longueur $n$ et de dimension $k=k_u+k_v$ et tel que :
+\begin{center}
+$(U,U+V) = \{(u,u+v)$ tel que $u \in U$ et $v \in V \}$
+\end{center}
+\end{defi}
+
+\begin{defi} (codes $(U,U+V)$-généralisés) Soient $n$ un entier pair et $a$,$b$,$c$,$d$ quatres vecteurs de $\F_q^{n/2}$ tels que pour tout $i \in {1,n/2}$ :
+$$ a_ic_i \neq 0 $$
+$$ a_id_i - b_ic_i \neq 0 $$
+Soient U et V deux codes définis comme précédemment. Le code $(U,U+V)$-généralisé correspond à l'ensemble :
+\begin{center}
+$\{(a.u + b.v, c.u + d.v)$ tel que $u \in U$ et $v \in V \}$
+\end{center}
+où $x.y$ est le produit coordonnée par coordonnée des $x_i$ et $y_i$.
+\end{defi}
+
+\begin{remarque}
+Dans la suite, on prend $a$,$b$,$c$,$d$ tels que 
+$$ a_id_i - b_ic_i = 1 \text{ pour tout } i \in {1,n/2}.$$ 
+\end{remarque}
+
+\begin{propo} Soient $U$, $V$, $a$, $b$, $c$ et $d$ définis comme précédemment. Soit $UV$ le code $(U,U+V)$-généralisé associé. Alors
+$$ k = \dim UV = k_u + k_v.$$
+De plus soient $G_U \in \F_q^{k_u \times n/2}$ (respectivement $G_V \in \F_q^{k_v \times n/2}$) et $H_U \in \F_q^{(n/2-k_u) \times n/2}$ (respectivement $H_V \in \F_q^{(n/2-k_v) \times n/2}$) les matrices génératrices et de parité des codes $U$ et $V$. Soient $A$, $B$, $C$, $D$ de $\F_q^{n \times n}$ les matrices diagonales de diagonales respectives les vecteurs $a$, $b$, $c$ et $d$.  \\
+\vspace{0.2in}
+Alors la matrice de $\F_q^{(k_u + k_v) \times n}$: 
+
+\vspace{0.1in}
+
+$$
+G := 
+\begin{pmatrix}
+\begin{array}{c|c}
+G_uA & G_uC \\
+ \hline 
+G_vB & G_VD \\
+\end{array} \\
+\end{pmatrix}
+$$
+
+\noindent et la matrice $\F_q^{(n - k_u - k_v) \times n}$:
+
+\vspace{0.1in}
+$$ 
+H :=
+\begin{pmatrix}
+\begin{array}{c|c}
+H_uD & -H_uB \\
+ \hline 
+-H_vC & H_VA \\
+\end{array} \\
+\end{pmatrix}
+$$
+\vspace{0.1in}
+
+\noindent sont des matrices génératrices et de parité du code $UV$. 
+\end{propo}
+
+\begin{proof}[Preuve]
+Remarquons d'abord que G engendre bien le code $UV$. Remarquons aussi que 
+
+$$
+\begin{pmatrix}
+\begin{array}{c|c}
+G_uA & G_uC \\
+ \hline 
+G_vB & G_VD \\
+\end{array} \\
+\end{pmatrix}
+= 
+\begin{pmatrix}
+\begin{array}{c|c}
+G_u & 0 \\
+ \hline 
+0 & G_V \\
+\end{array} \\
+\end{pmatrix} 
+\begin{pmatrix}
+\begin{array}{c|c}
+A & C \\
+ \hline 
+B & D \\
+\end{array} \\
+\end{pmatrix}
+$$
+
+Par définition des matrices $G_V$ et $G_U$, la matrice $ 
+\begin{pmatrix}
+\begin{array}{c|c}
+G_u & 0 \\
+ \hline 
+0 & G_V \\
+\end{array} \\
+\end{pmatrix} $ est de rang $k_u + k_v$. De plus les matrices $A$, $B$, $C$, $D$ étant diagonales, le déterminant de la matrice $\begin{pmatrix}
+\begin{array}{c|c}
+A & C \\
+ \hline 
+B & D \\
+\end{array} \\
+\end{pmatrix}$
+est le produit des $(a_id_i - b_ic_i)$ pour $i \in {1, n/2}$, et donc non-nul par définition des vecteurs $a,b,c,d$. On a donc bien $k = k_u + k_v$. \\
+On remarque aussi que $GH^T = 0$ et que $H$ est de rang pleins par le même raisonnement que précédemment, ce qui conclut la preuve.
+\end{proof}
 
 \subsection{Le principe de signature}
 Un schéma hash et signe utilisant la fonction syndrome comme fonction à sens unique : \\
