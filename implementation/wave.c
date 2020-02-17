@@ -1,12 +1,18 @@
 #include <lapacke.h>
 #include "wave.h"
 
-const float LAMBDA = 3,08;
-const int SIZE = LAMBDA/0.0154;
+const float LAMBDA = 3.08;
+const int SIZE = 26;
 const int OMEGA = 0.9261*SIZE;
 const int d = 0;
 const int K_U = 0.7978*SIZE/2;
 const int K_V = 0.4201*SIZE/2;
+// const float LAMBDA = 3.08;
+// const int SIZE = 16;
+// const int OMEGA = 13;
+// const int d = 0;
+// const int K_U = SIZE/4;
+// const int K_V = SIZE/4;
 matrix_t* A = NULL;
 matrix_t* B = NULL;
 matrix_t* C = NULL;
@@ -287,9 +293,11 @@ keys_t *key_gen (int mode) {
     // puts("gen_V_temp");
     // matrix_print(gen_V_temp, stdout);
     matrix_systematisation(gen_V_temp);
+    // puts("gen_V_temp"); matrix_print(gen_V_temp, stdout);
     // puts("gen_V_temp syst");
     // matrix_print(gen_V_temp, stdout);
     gen_V = matrix_del_null_row(gen_V_temp);
+    // puts("gen_V"); matrix_print(gen_V, stdout);
     if (!gen_V) {
       matrix_free(gen_V_temp);
       continue;
@@ -303,13 +311,16 @@ keys_t *key_gen (int mode) {
   // dimension des codes
   int dim_U = matrix_get_row(gen_U);
   int dim_V = matrix_get_row(gen_V);
-  printf("\tc'est bon on les a !\tla dimension de U est %d et celle de V est %d\n", dim_U, dim_V);
+  // printf("dim_U : %d\n dim_V : %d\n", dim_U, dim_V);
+  // printf("\tc'est bon on les a !\tla dimension de U est %d et celle de V est %d\n", dim_U, dim_V);
   DIM = dim_U + dim_V;
 
   // crée H_U H_V
   puts("\ton crée les matrices de parités associées...");
   matrix_t *H_U = matrix_parite(gen_U);
   matrix_t *H_V = matrix_parite(gen_V);
+  // puts("parité V"); matrix_print(H_V,stdout);
+  printf("Hu : %d x %d\nHv : %d x %d\n", matrix_get_row(H_U),matrix_get_col(H_U),matrix_get_row(H_V),matrix_get_col(H_V));
   if (!H_U || !H_V) {
     matrix_free(H_U);
     matrix_free(H_V);
@@ -367,23 +378,27 @@ keys_t *key_gen (int mode) {
 
   // crée la clé publique SHP et la met dans la structure keys
   puts("\tet enfin notre clé publique...");
+  // printf("H : %d x %d\nS : %d x %d\n", matrix_get_row(H),matrix_get_col(H),matrix_get_row(keys->sk->S),matrix_get_col(keys->sk->S));
   matrix_t *SH = matrix_prod(keys->sk->S,H);
   if (!SH) {
     key_free(keys);
     return NULL;
   }
+  // puts("a");
   matrix_t *SHP = matrix_prod(SH,keys->sk->permut);
   matrix_free(SH);
   if (!SHP) {
     key_free(keys);
     return NULL;
   }
+  // puts("b");
   matrix_copy2(keys->pk, SHP);
   matrix_free(SHP);
   if (!keys->pk) {
     key_free(keys);
     return NULL;
   }
+  // puts("c");
   return keys;
 }
 
@@ -447,15 +462,15 @@ void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *synd,
   shuffle(ens,SIZE/2);
   // prng_init(time(NULL) + getpid());
   int len_I = rand() % (DIM - dim_U - 2) + dim_U + 1; // aléa entre dim_U + 1 et DIM - 1
-  printf("longueur de I : %d\n",len_I);
+  // printf("longueur de I : %d\n",len_I);
   int ens_I[len_I];
   for (int i = 0; i < len_I; ++i)
     ens_I[i] = ens[i];
 
-  printf("I = {");
-  for (int i = 0; i < len_I; ++i)
-    printf(" %d", ens_I[i]);
-  printf(" }\n");
+  // printf("I = {");
+  // for (int i = 0; i < len_I; ++i)
+  //   printf(" %d", ens_I[i]);
+  // printf(" }\n");
 
   do {
     while (!eu_int) {
@@ -480,10 +495,10 @@ void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *synd,
       //     ++i;
       //   }
       // }
-      printf("J = {");
-      for (int i = 0; i < dim_U; ++i)
-        printf(" %d", ens_J[i]);
-      printf(" }\n");
+      // printf("J = {");
+      // for (int i = 0; i < dim_U; ++i)
+      //   printf(" %d", ens_J[i]);
+      // printf(" }\n");
 
       //// reste à résoudre le système linéaire
 
@@ -512,8 +527,8 @@ void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *synd,
         else
           matrix_set_cell(eu_not, 0, ens_J[i], no1);
       }
-      puts("eu"); matrix_print(eu, stdout);
-      puts("eu_not"); matrix_print(eu_not, stdout);
+      // puts("eu"); matrix_print(eu, stdout);
+      // puts("eu_not"); matrix_print(eu_not, stdout);
 
 
       // on choisit les ensembldes libres I et J
@@ -530,14 +545,20 @@ void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *synd,
           matrix_set_cell(x, 0, i, r);
         }
       }
-      puts("x"); matrix_print(x, stdout);
+      // puts("x"); matrix_print(x, stdout);
 
       // on résoud le système en appelant prange_algebra
+      // puts("Hu:"); matrix_print(keys->sk->parite_U,stdout);
+      // puts("synd:"); matrix_print(synd,stdout);
+      // puts("Hu:"); matrix_print(keys->sk->parite_U,stdout);
       eu_int = prange_algebra(keys->sk->parite_U, synd, ens_I, len_I, x);
+      puts("eu_int :"); matrix_print(eu_int, stdout);
+      // puts("non");
     }
-    puts("eu"); matrix_print(eu, stdout);
-    puts("eu_not"); matrix_print(eu_not, stdout);
-    puts("x"); matrix_print(x, stdout);
+    puts("oui");
+    // puts("eu"); matrix_print(eu, stdout);
+    // puts("eu_not"); matrix_print(eu_not, stdout);
+    // puts("x"); matrix_print(x, stdout);
     // if(!eu_int) {
     //   matrix_free(x);
     //   matrix_free(eu_not);
@@ -546,7 +567,8 @@ void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *synd,
     // }
     e = phi(eu_int, ev);
     w = weight(e);
-    puts("e"); matrix_print(e, stdout); printf("poids : %d\n", w);
+    printf("we = %d\n", w);
+    // puts("e"); matrix_print(e, stdout); printf("poids : %d\n", w);
   } while (w != OMEGA);
 
   // on clean
@@ -647,16 +669,19 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome,
   matrix_t *left = NULL;
   matrix_t *right = NULL;
   matrix_t *left_inv = NULL;
-  int row_HP;
+  int row_HP, col_HP;
   int cpt = 0;
   int n = matrix_get_col(parite);
+  printf("H: %d x %d\n", matrix_get_row(parite), matrix_get_col(parite));
+  printf("n : %d\n",n);
   // choix de P pour avoir A inversible
   while (!left_inv) {
-    puts("left non inversible");
+    // puts("left non inversible");
     matrix_free(left);
     matrix_free(right);
     matrix_free(P);
-    P = matrix_perm_random_info(n, info, len_i, DIM);
+    P = matrix_perm_random_info(n, info, len_i, n);
+    // printf("P: %d x %d\n", matrix_get_row(P), matrix_get_col(P));
     if (!P)
       return NULL;
     // puts("ok1");
@@ -669,10 +694,13 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome,
       matrix_free(P);
       return NULL;
     }
-    // puts("ok2");
+    puts("ok2");
     row_HP = matrix_get_row(HP);
-    left = matrix_alloc(row_HP,SIZE-DIM);
-    right = matrix_alloc(row_HP,DIM);
+    col_HP = matrix_get_col(HP);
+    printf("HP: %d x %d\n", matrix_get_row(HP), matrix_get_col(HP));
+    matrix_print(HP,stdout);
+    left = matrix_alloc(row_HP,row_HP);
+    right = matrix_alloc(row_HP,col_HP-row_HP);
     if (!left || !right) {
       matrix_free(left);
       matrix_free(right);
@@ -680,7 +708,7 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome,
       matrix_free(HP);
       return NULL;
     }
-    // puts("ok3");
+    puts("ok3");
     matrix_separate(HP, left, right);
     matrix_free(HP);
     if (!left || !right) {
@@ -689,17 +717,20 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome,
       matrix_free(P);
       return NULL;
     }
-    // puts("ok4");
+    puts("ok4");
+    printf("A: %d x %d\n", matrix_get_row(left), matrix_get_col(left));
     left_inv = matrix_inv(left);
-    // if (left_inv)
-    //   matrix_print(left_inv, stdout);
+    if (!left_inv)
+      puts("non inve");
+      // matrix_print(left_inv, stdout);
     ++cpt;
-    if (cpt > 20) {
-      puts("trop d'essais");
+    if (cpt > 50) {
+      // puts("trop d'essais");
       return NULL;
     }
-    // puts("ok5");
+    puts("ok5");
   }
+  puts("ok");
   // (zero | ep) <- x
   matrix_t *zero = matrix_alloc(1, SIZE-DIM);
   matrix_t *ep = matrix_alloc(1,DIM);
@@ -711,7 +742,7 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome,
     matrix_free(right);
     return NULL;
   }
-  // puts("ok6");
+  puts("ok6");
   matrix_separate(x, zero, ep);
   matrix_free(zero);
   if (!ep) {
@@ -721,7 +752,7 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome,
     matrix_free(right);
     return NULL;
   }
-  // puts("ok7");
+  puts("ok7");
   // calcul de e
   matrix_t *right_T = matrix_trans(right);
   matrix_free(right);
@@ -731,8 +762,10 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome,
     matrix_free(left);
     return NULL;
   }
-  // puts("ok8");
+  puts("ok8");
   matrix_t *epright_T = matrix_prod(ep,right_T);
+  printf("ep: %d x %d\n", matrix_get_row(ep), matrix_get_col(ep));
+  printf("right_T: %d x %d\n", matrix_get_row(right_T), matrix_get_col(right_T));
   matrix_free(right_T);
   if (!epright_T) {
     matrix_free(ep);
@@ -740,7 +773,7 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome,
     matrix_free(left);
     return NULL;
   }
-  // puts("ok9");
+  puts("ok9");
   matrix_t *epright_Tless = matrix_mul_by_scal(epright_T, -1);
   matrix_free(epright_T);
   if (!epright_Tless) {
@@ -757,7 +790,7 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome,
     matrix_free(left);
     return NULL;
   }
-  // puts("ok10");
+  puts("ok10");
   // matrix_t *left_inv = matrix_inv(left);
   matrix_free(left);
   if (!left_inv) {
@@ -774,7 +807,7 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome,
     matrix_free(P);
     return NULL;
   }
-  // puts("ok11");
+  puts("ok11");
   matrix_t *couple_left = matrix_prod(s, left_inv_T);
   matrix_free(s);
   matrix_free(left_inv_T);
@@ -790,7 +823,7 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome,
     matrix_free(P);
     return NULL;
   }
-  // puts("ok12");
+  puts("ok12");
   matrix_t *P_T = matrix_trans(P);
   matrix_free(P);
   if (!P_T)
@@ -973,23 +1006,28 @@ int main(void) {
 
 
   /////////////////////////////////////////test decode_ev
-  puts("test de decode_ev...");
+
   matrix_t *ev = matrix_alloc(1,SIZE/2);
   matrix_t *eu = matrix_alloc(1,SIZE/2);
-  matrix_t *e = matrix_random(1,SIZE/2);
-  matrix_t *synd = syndrome(e, keys->sk->parite_V);
-  if (!ev || !e || !synd) {
+  matrix_t *e = matrix_random(1,SIZE);
+  matrix_t *synd = syndrome(e, keys->pk);
+  matrix_t *synd_U = matrix_alloc(1,SIZE/2 - K_U);
+  matrix_t *synd_V = matrix_alloc(1,SIZE/2 - K_V);
+  matrix_separate(synd, synd_U, synd_V);
+  if (!ev || !e || !synd || !synd_U || !synd_V) {
     puts("error 1");
     return EXIT_FAILURE;
   }
-  decode_ev(ev, gen_V, synd);
+  puts("test de decode_ev...");
+  // printf("dim V %d\n", keys->sk->dim_V);
+  decode_ev(ev, gen_V, synd_V);
   // puts("syndrome : ");
   if (!ev) {
     puts("error 2");
     return EXIT_FAILURE;
   }
-  printf("col : %d, row : %d\n",matrix_get_col(synd), matrix_get_row(synd));
-  matrix_print(synd, stdout);
+  printf("col : %d, row : %d\n",matrix_get_col(synd_V), matrix_get_row(synd_V));
+  matrix_print(synd_V, stdout);
   matrix_t *verif = syndrome(ev, keys->sk->parite_V);
   if (!verif) {
     puts("error 3");
@@ -1001,8 +1039,21 @@ int main(void) {
   /////////////////////////////////////////test decode_ev
   puts("test de decove_ev...");
   puts("matrice de parité de U"); matrix_print(keys->sk->parite_U, stdout);
-  decode_eu(eu, keys, synd, ev);
-
+  // matrix_t *synd_U = syndrome(e, keys->sk->parite_U);
+  decode_eu(eu, keys, synd_U, ev);
+  if (!eu) {
+    puts("error 2");
+    return EXIT_FAILURE;
+  }
+  printf("col : %d, row : %d\n",matrix_get_col(synd_U), matrix_get_row(synd_U));
+  matrix_print(synd_U, stdout);
+  matrix_t *verif2 = syndrome(eu, keys->sk->parite_U);
+  if (!verif2) {
+    puts("error 3");
+    return EXIT_FAILURE;
+  }
+  puts("verif : ");
+  matrix_print(verif2, stdout);
 
 
   // matrix_t *gen_U_T = matrix_trans(gen_U);
@@ -1019,8 +1070,10 @@ int main(void) {
   matrix_free(ev);
   matrix_free(eu);
   matrix_free(verif);
+  // matrix_free(verif2);
   matrix_free(e);
-  matrix_free(synd);
+  matrix_free(synd_V);
+  matrix_free(synd_U);
   key_free(keys);
 
 
