@@ -1,9 +1,12 @@
 #include <lapacke.h>
 #include "wave.h"
 
-const int SIZE = 16;
-const int OMEGA = 7;
-const int d = 3;
+const float LAMBDA = 3,08;
+const int SIZE = LAMBDA/0.0154;
+const int OMEGA = 0.9261*SIZE;
+const int d = 0;
+const int K_U = 0.7978*SIZE/2;
+const int K_V = 0.4201*SIZE/2;
 matrix_t* A = NULL;
 matrix_t* B = NULL;
 matrix_t* C = NULL;
@@ -245,17 +248,20 @@ void coeff_phi (int mode) {
 
 keys_t *key_gen (int mode) {
   // initialise a,b,c,d :
+  puts("\tchoix des coefficients de la fonction phi...");
   coeff_phi(mode);
   if (!coef_init)
     return NULL;
 
   // crée les matrices génératrices de U et V et vérifie qu'elles sont ok:
+  puts("\tchoix des matrices génératrices des codes U et V...");
   bool answer = false;
   matrix_t *gen_U_temp = NULL;
   while (!answer) {
     matrix_free(gen_U_temp);
     matrix_free(gen_U);
-    gen_U_temp = matrix_random(SIZE/4,SIZE/2);
+    // on impose la dimensionde H_V à K_V
+    gen_U_temp = matrix_random(K_U,SIZE/2);
     if (!gen_U_temp)
       continue;
     matrix_systematisation(gen_U_temp);
@@ -274,7 +280,8 @@ keys_t *key_gen (int mode) {
   while (!answer) {
     matrix_free(gen_V_temp);
     matrix_free(gen_V);
-    gen_V_temp = matrix_random(SIZE/4,SIZE/2);
+    // on impose la dimensionde H_V à K_V
+    gen_V_temp = matrix_random(K_V,SIZE/2);
     if (!gen_V_temp)
       continue;
     // puts("gen_V_temp");
@@ -288,7 +295,7 @@ keys_t *key_gen (int mode) {
       continue;
     }
     // puts("gen_V");
-    // matrix_print(gen_V, stdout);
+    // matrix_print(gen_V, stdout)
     answer = matrix_is_syst(gen_V);
   }
   matrix_free(gen_V_temp);
@@ -296,10 +303,11 @@ keys_t *key_gen (int mode) {
   // dimension des codes
   int dim_U = matrix_get_row(gen_U);
   int dim_V = matrix_get_row(gen_V);
-  printf("dim de U : %d\ndim de V : %d\n", dim_U, dim_V);
+  printf("\tc'est bon on les a !\tla dimension de U est %d et celle de V est %d\n", dim_U, dim_V);
   DIM = dim_U + dim_V;
 
   // crée H_U H_V
+  puts("\ton crée les matrices de parités associées...");
   matrix_t *H_U = matrix_parite(gen_U);
   matrix_t *H_V = matrix_parite(gen_V);
   if (!H_U || !H_V) {
@@ -325,6 +333,7 @@ keys_t *key_gen (int mode) {
   }
 
   // crée H
+  puts("\tpuis la matrice de parité du code (U,U+V)...");
   H = parite(keys->sk->parite_U, keys->sk->parite_V);
   if (!H) {
     key_free(keys);
@@ -357,6 +366,7 @@ keys_t *key_gen (int mode) {
   keys->sk->dim_V = dim_V;
 
   // crée la clé publique SHP et la met dans la structure keys
+  puts("\tet enfin notre clé publique...");
   matrix_t *SH = matrix_prod(keys->sk->S,H);
   if (!SH) {
     key_free(keys);
@@ -427,9 +437,25 @@ void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *synd,
     return;
   // matrix_print(eu, stdout);
   // création de I ensemble d'information de H : [1,k] k la dimension de H
-  int ens_I[DIM];
-  for (int i = 0; i < DIM; ++i)
-    ens_I[i] = i;
+  // int ens_I[DIM];
+  // for (int i = 0; i < DIM; ++i)
+  //   ens_I[i] = i;
+  // création de I aléatoirement
+  int ens[SIZE/2];
+  for (int i = 0; i < SIZE/2; ++i)
+    ens[i] = i;
+  shuffle(ens,SIZE/2);
+  // prng_init(time(NULL) + getpid());
+  int len_I = rand() % (DIM - dim_U - 2) + dim_U + 1; // aléa entre dim_U + 1 et DIM - 1
+  printf("longueur de I : %d\n",len_I);
+  int ens_I[len_I];
+  for (int i = 0; i < len_I; ++i)
+    ens_I[i] = ens[i];
+
+  printf("I = {");
+  for (int i = 0; i < len_I; ++i)
+    printf(" %d", ens_I[i]);
+  printf(" }\n");
 
   do {
     while (!eu_int) {
@@ -438,7 +464,7 @@ void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *synd,
         matrix_set_cell(eu_not, 0, i, '*');
       }
       // création du tableau J contenant les k_u positions choisies parmi I
-      shuffle(ens_I, DIM);
+      shuffle(ens_I, len_I);
       int ens_J[dim_U];
       for (int i = 0; i < dim_U; ++i)
         ens_J[i] = ens_I[i];
@@ -454,6 +480,10 @@ void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *synd,
       //     ++i;
       //   }
       // }
+      printf("J = {");
+      for (int i = 0; i < dim_U; ++i)
+        printf(" %d", ens_J[i]);
+      printf(" }\n");
 
       //// reste à résoudre le système linéaire
 
@@ -461,9 +491,6 @@ void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *synd,
       // A(i)*eu(i) + B(i)*ev(i) != 0 et  C(i)*eu(i) + D(i)*ev(i) != 0
       // quand on a une solution exacte, on met dans eu,
       // quand on a juste une impossibilité, on met dans eu_not
-      for (int i = 0; i < dim_U; ++i)
-        printf("%d\t", ens_J[i]);
-      puts("");
       for (int i = 0; i < dim_U; ++i) {
         a = matrix_get_cell(A,0,ens_J[i]);
         b = matrix_get_cell(B,0,ens_J[i]);
@@ -472,6 +499,7 @@ void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *synd,
         evi = matrix_get_cell(ev, 0, ens_J[i]);
         no1 = mul_Fq(inv_Fq(a), mul_Fq(evi, -b));
         no2 = mul_Fq(inv_Fq(c), mul_Fq(evi, -d));
+        // printf("ev(%d) doit être différent de %d et de %d\n", ens_J[i], no1, no2);
         if (no1 != no2) {
           if (no1 != 0 && no2 !=0)
             eui = 0;
@@ -502,10 +530,10 @@ void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *synd,
           matrix_set_cell(x, 0, i, r);
         }
       }
-      // puts("x"); matrix_print(x, stdout);
+      puts("x"); matrix_print(x, stdout);
 
       // on résoud le système en appelant prange_algebra
-      eu_int = prange_algebra(keys->sk->parite_U, synd, ens_I, DIM, x);
+      eu_int = prange_algebra(keys->sk->parite_U, synd, ens_I, len_I, x);
     }
     puts("eu"); matrix_print(eu, stdout);
     puts("eu_not"); matrix_print(eu_not, stdout);
@@ -624,7 +652,7 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome,
   int n = matrix_get_col(parite);
   // choix de P pour avoir A inversible
   while (!left_inv) {
-    // puts("left non inversible");
+    puts("left non inversible");
     matrix_free(left);
     matrix_free(right);
     matrix_free(P);
@@ -933,15 +961,19 @@ int main(void) {
   // key_free(keys);
 
   ///////////////////////////////// GENERATION DE CLES
+  puts("génération des clés de chiffrement avec les paramètres :");
+  printf("lambda = %f, n = %d, w = %d, Ku = %d, Kv = %d\n",LAMBDA, SIZE, OMEGA, K_U, K_V);
   keys_t *keys = key_gen(1);
   if (keys == NULL) {
     puts ("Key_gen revoit NULL\n");
     return EXIT_FAILURE;
   }
+  puts("\tgénération des clés terminée !!");
 
 
 
   /////////////////////////////////////////test decode_ev
+  puts("test de decode_ev...");
   matrix_t *ev = matrix_alloc(1,SIZE/2);
   matrix_t *eu = matrix_alloc(1,SIZE/2);
   matrix_t *e = matrix_random(1,SIZE/2);
@@ -967,6 +999,7 @@ int main(void) {
   matrix_print(verif, stdout);
 
   /////////////////////////////////////////test decode_ev
+  puts("test de decove_ev...");
   puts("matrice de parité de U"); matrix_print(keys->sk->parite_U, stdout);
   decode_eu(eu, keys, synd, ev);
 
@@ -983,7 +1016,6 @@ int main(void) {
   // matrix_free(gen_U_T);
   // matrix_free(gen_U_T_inv);
   // matrix_free(ver);
-
   matrix_free(ev);
   matrix_free(eu);
   matrix_free(verif);
@@ -1127,6 +1159,7 @@ int main(void) {
   // key_free(keys);
 
   // clean up
+  puts("Maintenant on nettoie notre bazard...");
   matrix_free(A);
   matrix_free(B);
   matrix_free(C);
