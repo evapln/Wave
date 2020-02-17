@@ -94,7 +94,7 @@ Pour répondre aux problèmes : \\
 Définition des codes (U,U+V)-généralisés: \\
 - Comment les créer  FAIT \\
 - Choix des paramètres a,b,c,d \`A DETAILLER \\
-- Liens entre les matrices des codes U et V et du code UV EN COURS \\
+- Liens entre les matrices des codes U et V et du code UV FAIT \\
 - Les dimensions et différents paramètres  EN COURS \\
 - Calcul du hull ==> q > 2 TODO \\
 - ...? \\
@@ -201,14 +201,18 @@ B & D \\
 \end{array} \\
 \end{pmatrix}$
 est le produit des $(a_id_i - b_ic_i)$ pour $i \in {1, n/2}$, et donc non-nul par définition des vecteurs $a,b,c,d$. On a donc bien $k = k_u + k_v$. \\
-On remarque aussi que $GH^T = 0$ et que $H$ est de rang pleins par le même raisonnement que précédemment, ce qui conclut la preuve.
+On remarque aussi que $GH^T = 0$ et que $H$ est de rang plein par le même raisonnement que précédemment, ce qui conclut la preuve.
 \end{proof}
 
 \subsection{Le principe de signature}
 Un schéma hash et signe utilisant la fonction syndrome comme fonction à sens unique : \\
 - Définition des fonctions GPVM, un couple (Trapdoor, InvertAlg) où trapdoor est un algo poly proba renvoyant une matrice de parité et la trappe associée, et où InvertAlg est un algo poly proba prenant en entrée la trappe et renvoyant l'inverse de la fonction syndrome. \\
 De plus, ces fonctions sont (1) bien distribuées, (2) sans fuite d'info en moyenne, (3) sens unique sans la trappe \\
-- Le schéma : un algo signe et un algo verify.
+- Le schéma : un algo signe et un algo verify. \\
+
+Notre schéma de signature utilisera donc la fonction syndrôme, sous l'hypothèse de la difficulté de décoder un code aléatoire. \\
+
+
 
 \subsection{Le décodage avec trappe}
 Détail de l'algorithme invertAlg avec utilisation de la trappe: \\
