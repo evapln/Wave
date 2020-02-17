@@ -771,43 +771,33 @@ int sub_weight(const matrix_t *vect, const int *subset, const int len_s) {
   return w;
 }
 
-matrix_t *vector_rand_weight(const int n, const int *info, const int len_i, const int t) {
-  // test valeur rentées
-  if (t > len_i)
-    return NULL;
-  // allocation vecteur
+matrix_t *vector_rand(const int n) {
   matrix_t *vect = matrix_alloc(1,n);
   if (!vect)
     return NULL;
-  // remplissage des coordonnées sans contraintes à rand_Fq et celles avec contraintes à 0
-  for (int i = 0; i < n; ++i) {
-    if (!is_in_array(info, len_i, i))
-      vect->mat[0][i] = rand_Fq();
-    else
-      vect->mat[0][i] = 0;
+  for (int i = 0; i < n; ++i)
+    vect->mat[0][i] = rand_Fq();
+  return vect;
+}
+
+matrix_t *vector_rand_weight(const int n, const int w) {
+  matrix_t *vect = NULL;
+  int w_vect = 0;
+  while (!vect || w_vect != w) {
+    matrix_free(vect);
+    vect = vector_rand(n);
+    w_vect = weight(vect);
   }
-  // remplissage des coordonnées avec contraintes avec des rand_Fq
-  int w;
-  char r;
-  for (int i = 0; i < len_i; ++i) {
-    w = sub_weight(vect, info, len_i);
-    if (w == -1)
-      return NULL;
-    // si le poids est déjà atteint, remplissage avec des 0
-    if (w == t) {
-      vect->mat[0][info[i]] = 0;
-    } else {
-      // si il reste juste assez de cases vides pour obtenir le poids souhaité, remplissage avec des valeurs non nulles
-      if (len_i - i <= t - w) {
-        r = 0;
-        while (r == 0)
-          r = rand_Fq();
-        vect->mat[0][info[i]] = r;
-      } else {
-        // aucun des deux cas précédents, on remplie aléatoirement
-        vect->mat[0][info[i]] = rand_Fq();
-      }
-    }
+  return vect;
+}
+
+matrix_t *vector_rand_sub_weight(const int n, const int *info, const int len_i, const int t) {
+  matrix_t *vect = NULL;
+  int w_vect = 0;
+  while (!vect || w_vect != t) {
+    matrix_free(vect);
+    vect = vector_rand(n);
+    w_vect = sub_weight(vect, info, len_i);
   }
   return vect;
 }

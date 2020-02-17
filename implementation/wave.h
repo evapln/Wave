@@ -52,10 +52,10 @@ keys_t *key_gen(int mode);
 ////////////////////////////////////////////////////////////////////////////////
 
 /* decodage par ensemble d'information :
-  G est la matrice [-A|Id] avec A partie droite de H_V systematisée
+  G est la matrice génératrice du code V
   synd vecteur ligne est le syndrome cherché
   ev vecteur ligne est la sortie */
-void decode_ev(matrix_t * ev, const matrix_t *G, const matrix_t *synd);
+void decode_ev(matrix_t * ev, const matrix_t *G, const matrix_t *synd, keys_t *keys);
 
 /* decodage par ensemble d'information :
   G est la matrice [-A|Id] avec A partie droite de H_U systematisée

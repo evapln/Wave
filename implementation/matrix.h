@@ -167,9 +167,15 @@ int weight(const matrix_t *vect);
 /* renvoie le poids de vect sur les coordonnées de subset */
 int sub_weight(const matrix_t *vect, const int *subset, const int len_s);
 
+/* alloue en mémoire et renvoie un vecteur aléatoire de taille n */
+matrix_t *vector_rand(const int n);
+
+/* alloue en mémoire et renvoie un vecteur aléatoire de poids w et de taille n */
+matrix_t *vector_rand_weight(const int n, const int w);
+
 /* renvoie un vecteur aléatoire de taille n avec son poids sur les coordonnées
    de info égal à t */
-matrix_t *vector_rand_weight(const int n, const int *info, const int len_i,
+matrix_t *vector_rand_sub_weight(const int n, const int *info, const int len_i,
                              const int t);
 
 /* Alloue et renvoie le produit élément par élément de vect1 et vect2 */
