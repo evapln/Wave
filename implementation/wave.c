@@ -456,20 +456,13 @@ void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *synd,
   matrix_t *eu_int = NULL;
   matrix_t *x = NULL;
   matrix_t *e = NULL;
-  matrix_t * eu_not = matrix_alloc(1,SIZE/2);
-  if (!eu_not)
-    return;
+  matrix_t * eu_not = NULL;
   // matrix_print(eu, stdout);
   // création de I ensemble d'information de H : [1,k] k la dimension de H
   // int ens_I[DIM];
   // for (int i = 0; i < DIM; ++i)
   //   ens_I[i] = i;
 
-
-  // printf("I = {");
-  // for (int i = 0; i < len_I; ++i)
-  //   printf(" %d", ens_I[i]);
-  // printf(" }\n");
   int ens[SIZE/2];
   for (int i = 0; i < SIZE/2; ++i)
     ens[i] = i;
@@ -477,16 +470,23 @@ void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *synd,
     matrix_free(eu_int);
     // création de I aléatoirement
     shuffle(ens,SIZE/2);
-    int len_I = rand() % (DIM - dim_U) + dim_U; // aléa entre dim_U et DIM
-    printf("\tlongueur de I : %d\n",len_I);
+    int len_I = rand() % (SIZE/2 - dim_U) + dim_U; // aléa entre dim_U et DIM
+    // printf("\tlongueur de I : %d\n",len_I);
     int ens_I[len_I];
     for (int i = 0; i < len_I; ++i)
       ens_I[i] = ens[i];
+    // printf("I = {");
+    // for (int i = 0; i < len_I; ++i)
+    //   printf(" %d", ens_I[i]);
+    // printf(" }\n");
     // if(eu_int)
     //   puts("existe");
     // while (!eu_int) {
     do {
       // puts("ah");
+      eu_not = matrix_alloc(1,SIZE/2);
+      if (!eu_not)
+        return;
       for (int i = 0; i < SIZE/2; ++i) {
         matrix_set_cell(eu, 0, i, '*');
         matrix_set_cell(eu_not, 0, i, '*');
@@ -520,11 +520,14 @@ void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *synd,
       // quand on a une solution exacte, on met dans eu,
       // quand on a juste une impossibilité, on met dans eu_not
       for (int i = 0; i < dim_U; ++i) {
+        // printf("abcd %d\n", ens_J[i]);
         a = matrix_get_cell(A,0,ens_J[i]);
         b = matrix_get_cell(B,0,ens_J[i]);
         c = matrix_get_cell(C,0,ens_J[i]);
         d = matrix_get_cell(D,0,ens_J[i]);
+        // puts("evi");
         evi = matrix_get_cell(ev, 0, ens_J[i]);
+        // puts("no");
         no1 = mul_Fq(inv_Fq(a), mul_Fq(evi, -b));
         no2 = mul_Fq(inv_Fq(c), mul_Fq(evi, -d));
         // printf("ev(%d) doit être différent de %d et de %d\n", ens_J[i], no1, no2);
@@ -548,8 +551,9 @@ void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *synd,
       // int *ens_I = freeset(keys->sk->parite_U,ev,8);
 
       // on choisi un x aléatoire avec les contraintes précédentes
-      x =  matrix_copy(eu);
+      x = matrix_copy(eu);
       for (int i = 0; i < SIZE/2; ++i) {
+        // puts("*");
         if(matrix_get_cell(x,0,i) == '*') {
           eui_not = matrix_get_cell(eu_not,0,i);
           do {
@@ -558,6 +562,7 @@ void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *synd,
           matrix_set_cell(x, 0, i, r);
         }
       }
+      matrix_free(eu_not);
       // puts("x"); matrix_print(x, stdout);
 
       // on résoud le système en appelant prange_algebra
@@ -565,6 +570,7 @@ void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *synd,
       // puts("synd:"); matrix_print(synd,stdout);
       // puts("Hu:"); matrix_print(keys->sk->parite_U,stdout);
       eu_int = prange_algebra(keys->sk->parite_U, synd, ens_I, len_I, x);
+      matrix_free(x);
       printf("\teu_int : "); matrix_print(eu_int, stdout);
       // puts("non");
     } while(!eu_int);
@@ -580,15 +586,16 @@ void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *synd,
     // }
     e = phi(eu_int, ev);
     w = weight(e);
+    matrix_free(e);
     printf("\twe = %d\n", w);
     // puts("e"); matrix_print(e, stdout); printf("poids : %d\n", w);
   } while (w != OMEGA);
 
   // on clean
   matrix_free(eu_int);
-  matrix_free(e);
-  matrix_free(x);
-  matrix_free(eu_not);
+  // matrix_free(e);
+  // matrix_free(x);
+  // matrix_free(eu_not);
 }
 
 int *freeset(const matrix_t *H, const matrix_t *ev, const int k) {
@@ -1116,8 +1123,9 @@ int main(void) {
   matrix_free(ev);
   matrix_free(eu);
   matrix_free(verif);
-  // matrix_free(verif2);
+  matrix_free(verif2);
   matrix_free(e);
+  matrix_free(synd);
   matrix_free(synd_V);
   matrix_free(synd_U);
   key_free(keys);
