@@ -8,6 +8,7 @@
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{appendix}
+\usepackage{multicol}
 
 \theoremstyle{definition}
 \newtheorem{thm}{Théorème}[section]
@@ -106,7 +107,7 @@ $(U,U+V) = \{(u,u+v)$ tel que $u \in U$ et $v \in V \}$
 \end{center}
 \end{defi}
 
-\begin{defi} (codes $(U,U+V)$-généralisés) Soient $n$ un entier pair et $a$,$b$,$c$,$d$ quatres vecteurs de $\F_q^{n/2}$ tels que pour tout $i \in {1,n/2}$ :
+\begin{defi} \label{UV-normalise} (codes $(U,U+V)$-généralisés) Soient $n$ un entier pair et $a$,$b$,$c$,$d$ quatres vecteurs de $\F_q^{n/2}$ tels que pour tout $i \in {1,n/2}$ :
 $$ a_ic_i \neq 0 $$
 $$ a_id_i - b_ic_i \neq 0 $$
 Soient U et V deux codes définis comme précédemment. Le code $(U,U+V)$-généralisé correspond à l'ensemble :
@@ -212,6 +213,14 @@ De plus, ces fonctions sont (1) bien distribuées, (2) sans fuite d'info en moye
 
 Notre schéma de signature utilisera donc les codes $(U,U+V)$-généralisés et la fonction syndrôme comme fonction à sens unique, sous l'hypothèse de la difficulté de résoudre le problème du décodage. \\
 
+Nous allons définir la notion de fonctions GPV en moyenne (GPVM). Pour cela, introduisons d'abord la notion de distance statistique.
+
+\begin{defi}
+Soient $X$ et $Y$ deux variables aléatoires à valeurs dans le même espace $\epsilon$. 
+Soient $\mathcal{D}_X$ et $\mathcal{D}_Y$ leurs distributions respectives. On définit la distance statistique entre ces deux distributions comme :
+$$ \rho(\mathcal{D}_X,\mathcal{D}_Y) := \frac{1}{2} \sum_{x \in \epsilon} |\mathcal{D}_X(x) \mathcal{D}_Y(x)|.$$
+\end{defi}
+
 \begin{defi} (Fonctions GPVM). On appelle fonction GPV en moyenne une paire d'algorithmes (\verb|Trapdoor|,\verb|InvertAlg|) ainsi qu'un triplet de fonctions ($n(\lambda),k(\lambda),\omega(\lambda)$) en fonction d'un paramètre de sécurité $\lambda$, tels que :
 \begin{itemize}
 \item \verb|Trapdoor| est un algorithme probabiliste et polynomial en $1^\lambda$ et renvoyant le couple $(H,T)$ où $H \in \F_q^{(n-k) \times n}$ de rang $n-k$ et $T$ est la trappe associée.
@@ -224,11 +233,27 @@ $\rho(eH^T,s) \in \text{negl}(\lambda)$ où $e$ est pris uniformément dans l'en
 \item sans fuite d'information \textit{en moyenne} : \\
 $ \rho(\verb|InvertAlg|(s,T),e) \in \text{negl}(\lambda)$ où $e$ est pris uniformément dans l'ensemble des mots de poids $\omega$ et de longueur $n$ et $s$ est pris uniformément dans $\F_q^{n-k}$. 
 \item \`A sens unique sans la trappe : \\
-Pour tout algorithme probabiliste polynomial $\{A}$, on a 
-$$\mathbb{P}(\{A}(H,s) = e | eH^T = s) \in \text{negl}(\lambda).$$
+Pour tout algorithme probabiliste polynomial $\mathcal{A}$, on a 
+$$\mathbb{P}(\mathcal{A}(H,s) = e | eH^T = s) \in \text{negl}(\lambda).$$
 \end{enumerate}
 C'est une définition relaxée des fonctions GPV.
 \end{defi}
+
+Nous pouvons maintenant définir notre système de signature.
+\begin{multicols}{2}
+\begin{flushleft}
+$\verb|Sign|^{sk}(s)$:\\
+	$\quad$ e $\leftarrow$  \verb|InvertAlg|(s,T) \\
+	$\quad$ \verb|renvoie| e
+\end{flushleft}
+\begin{flushleft}
+$\verb|Verify|^{pk}(s,e')$: \\
+	$\quad \verb| Si | e'H^T = s \verb| et | |e'| = \omega $ \\
+	$\quad \quad$ \verb|renvoie 1| \\
+	$\quad$ \verb|renvoie 0|
+\end{flushleft}
+\end{multicols}
+
 
 
 \subsection{Le décodage avec trappe}
@@ -240,6 +265,51 @@ Détail de l'algorithme invertAlg avec utilisation de la trappe: \\
 - Inverser le syndrome sur le code UV <==> inverser le syndrome sur U et sur V et prendre son image par Phi. \\
 - Prendre un ev par un algo de décodage quelconque, utiliser les propriétés du code UV pour en déduire un eu, vérifier le poids de e, recommencer. \\
 - Différences gros poids et petits poids \\
+
+En partant de l'hypothèse que la matrice de parité $\mathbf{H}$ du code $(U,U+V)$-généralisé ressemble à une matrice aléatoire, la difficulté de créer une fausse signature sans connaître la trappe $\mathbf{T}$ est exactement celle de résoudre le problème du décodage d'un code aléatoire, que l'on sait difficile. Nous allons expliciter dans cette section l'algorithme d'inversion de la fonction syndrôme, et discuter sa difficulté en fonction du poids $\omega$ de $e$. \\
+
+Notons $\mathcal{S}_{\omega,n}$ l'ensemble des mots de poids $\omega$ et de longueur $n$. On notera $\mathcal{S}_{\omega}$ s'il n'y a pas d'ambiguité sur la longueur. On rappelle que l'agorithme \verb|InvertAlg| cherche à inverser la fonction syndrôme : 
+$$\begin{array}{ccccc}
+f_{\omega,\mathbf{H}} & : & \mathcal{S}_{\omega,n} & \to & \F_q^{n-k} \\
+ & & \mathbf{e} & \mapsto & \mathbf{eH^T} \\
+\end{array}$$
+
+On rappelle que la fonction $f_{\omega,\mathbf{H}}$ avec $\mathbf{H} \in \F_q^{(n-k)\times n}$ s'inverse génériquement si $\omega \in \{\omega_{easy}^-,\omega_{easy}^+\}$, où :
+$$ \omega_{easy}^- := \frac{q-1}{q}(n-k) \qquad \text{ et }\qquad  \omega_{easy}^+\} := k + \frac{q-1}{q}(n-k).$$
+
+\begin{proof}[Preuve] TODO
+\end{proof}
+
+
+On rappelle aussi que la fonction $f_{\omega,\mathbf{H}}$ admet un inverse pour toute entrée $s \in \F_q^{n-k}$ si $\omega \in \{\omega^-,\omega^+\}$, où :
+$$ \omega^- := ??? \qquad \text{ et }\qquad  \omega^+\} := ???.$$
+
+\begin{proof}[Preuve] TODO
+\end{proof}
+
+
+Nous voulons donc un moyen d'inverser la fonction syndrôme pour $\omega \in \{\omega_{UV}^-,\omega_{UV}^+\}$ avec $\omega_{UV}^-$ et $\omega_{UV}^+$ tels que :
+
+$$\{\omega_{easy}^-,\omega_{easy}^+\} \subsetneq \{\omega_{UV}^-,\omega_{UV}^+\} \subset  \{\omega^-,\omega^+\}$$
+
+INSERER SCHEMA !! \\
+
+Afin d'expliciter le décodage, introduisons la fonction :
+
+$$\begin{array}{ccccc}
+\varphi_{\mathbf{a},\mathbf{b},\mathbf{c},\mathbf{d}} & : & \F_q^{n/2} \times  \F_q^{n/2} & \to & \F_q^{n/2} \times  \F_q^{n/2} \\
+ & & (\mathbf{x} , \mathbf{y}) & \mapsto &  (\mathbf{a}.\mathbf{x} + \mathbf{b}.\mathbf{y}, \mathbf{c}.\mathbf{x} + \mathbf{d}.\mathbf{y}) \\
+\end{array}$$
+
+Si cette fonction respecte les conditions sur les vecteurs $\mathbf{a},\mathbf{b},\mathbf{c},\mathbf{d}$ définies dans la définition \ref{UV-normalise}, on dit qu'elle est UV-normalisée. Dans ce cas on peut vérifier qu'elle est bijective d'inverse :
+
+$$\begin{array}{ccccc}
+\varphi^{-1}_{\mathbf{a},\mathbf{b},\mathbf{c},\mathbf{d}} & : & \F_q^{n/2} \times  \F_q^{n/2} & \to & \F_q^{n/2} \times  \F_q^{n/2} \\
+ & & (\mathbf{x} , \mathbf{y}) & \mapsto &  (\mathbf{d}.\mathbf{x} - \mathbf{b}.\mathbf{y}, -\mathbf{c}.\mathbf{x} + \mathbf{a}.\mathbf{y}) \\
+\end{array}$$
+
+\begin{remarque} Fonction de hash
+\end{remarque}
 
 \subsection{Implémentation et choix de paramètres}
 TODO \\
