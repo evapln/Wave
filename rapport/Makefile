@@ -7,7 +7,7 @@ all:
 	pdflatex $(FILENAME).tex
 
 clean:
-	rm -f $(FILENAME).log $(FILENAME).aux $(FILENAME).toc
+	rm -f $(FILENAME).log $(FILENAME).aux $(FILENAME).toc *.gz
 
 help:
 	@echo "Usage:"

@@ -16,6 +16,7 @@
 \newtheorem{remarque}[thm]{Remarque}
 \newtheorem{defi}[thm]{Définition}
 \newtheorem{propo}[thm]{Proposition}
+\newtheorem{nota}[thm]{Notation}
 
 \renewcommand{\a}{\alpha}
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}} 
@@ -205,6 +206,10 @@ est le produit des $(a_id_i - b_ic_i)$ pour $i \in {1, n/2}$, et donc non-nul pa
 On remarque aussi que $GH^T = 0$ et que $H$ est de rang plein par le même raisonnement que précédemment, ce qui conclut la preuve.
 \end{proof}
 
+
+$q=2$ --> calcul du hull --> fuite d'info. \\
+On pose donc $q=3$ pour toute la suite du rapport.
+
 \subsection{Le principe de signature}
 Un schéma hash et signe utilisant la fonction syndrome comme fonction à sens unique : \\
 - Définition des fonctions GPVM, un couple (Trapdoor, InvertAlg) où trapdoor est un algo poly proba renvoyant une matrice de parité et la trappe associée, et où InvertAlg est un algo poly proba prenant en entrée la trappe et renvoyant l'inverse de la fonction syndrome. \\
@@ -234,7 +239,7 @@ $\rho(eH^T,s) \in \text{negl}(\lambda)$ où $e$ est pris uniformément dans l'en
 $ \rho(\verb|InvertAlg|(s,T),e) \in \text{negl}(\lambda)$ où $e$ est pris uniformément dans l'ensemble des mots de poids $\omega$ et de longueur $n$ et $s$ est pris uniformément dans $\F_q^{n-k}$. 
 \item \`A sens unique sans la trappe : \\
 Pour tout algorithme probabiliste polynomial $\mathcal{A}$, on a 
-$$\mathbb{P}(\mathcal{A}(H,s) = e | eH^T = s) \in \text{negl}(\lambda).$$
+$$\mathbb{P}(\mathcal{A}(H,s) = e \;| \;eH^T = s) \in \text{negl}(\lambda).$$
 \end{enumerate}
 C'est une définition relaxée des fonctions GPV.
 \end{defi}
@@ -321,11 +326,14 @@ où $\mathbf{s} = (\mathbf{s}^U, \mathbf{s}^V)$ avec $\mathbf{s}^U \in \F_q^{n/2
 
 Ainsi, on on aura : \\
 \begin{flushleft}
+\leftskip=2cm
 \verb|InvertAlg|$(\mathbf{s},\mathbf{T}) : $\\
 $\qquad (\mathbf{s}_U, \mathbf{s}_V) = s $\\
 $\qquad \mathbf{e}_U = \verb|DECODE_U|(\mathbf{s}_U) $\\
 $\qquad \mathbf{e}_V = \verb|DECODE_V|(\mathbf{s}_V)$ \\
 $\qquad \verb|renvoie | \varphi_{\mathbf{a},\mathbf{b},\mathbf{c},\mathbf{d}}(\mathbf{e_U},\mathbf{e_V})$ \\
+\leftskip=0cm
+\vspace{0.1in}
 
 \end{flushleft}
 Si l'on choisit un algorithme générique pour \verb|DECODE_U| et \verb|DECODE_V|, alors nous obtiendrons un vecteur $\mathbf{e}$ de poids $\omega \ in \{\omega_{easy}^-,\omega_{easy}^+\}$. Non allons montrer comment utiliser les propriétés des codes $(U,U+V)$-généréralisés pour permettre un décodage hors de cet intervalle. 
@@ -344,35 +352,177 @@ c_i\mathbf{e}_U(i) + d_i\mathbf{e}_V(i) &=& \mathbf{e}(i+n/2)
 Choisir la valeur de $\mathbf{e}_U$ en fonction de la valeur de $\mathbf{e}_V$ nous permettras donc d'influer sur le poids de $\mathbf{e}$. On aura alors :
 
 \begin{flushleft}
+\leftskip=2cm
 \verb|InvertAlg|$(\mathbf{s},\mathbf{T}) : $\\
 $\qquad (\mathbf{s}_U, \mathbf{s}_V) = s $\\
 $\qquad \mathbf{e}_V = \verb|DECODE_V|(\mathbf{s}_V)$ \\
 $\qquad \mathbf{e}_U = \verb|DECODE_U|(\mathbf{s}_U, \mathbf{e}_V) $\\
 $\qquad \verb|renvoie | \varphi_{\mathbf{a},\mathbf{b},\mathbf{c},\mathbf{d}}(\mathbf{e_U},\mathbf{e_V})$ \\
-
+\leftskip=0cm
+\vspace{0.1in}
 \end{flushleft}
 
 \end{remarque}
 
+\begin{propo} Soit $\mathbf{e}_V$ une sortie de \verb|DECODE_V|. Soit \verb|DECODE_U| un algorithme prenant en entrée $\mathbf{s}_U$ et $\mathbf{e}_V$ et renvoyant $\mathbf{e}_U$ tel que $\mathbf{e}_U\mathbf{H}_U^T = \mathbf{s}^U$ et tel que pour $k_U$ positions de $\mathbf{e}_U$ 
+\begin{center}
+$\left \{
+\begin{array}{rcl}
+a_i\mathbf{e}_U(i) + b_i\mathbf{e}_V(i) &\neq& 0 \\
+c_i\mathbf{e}_U(i) + d_i\mathbf{e}_V(i) &\neq& 0
+\end{array}
+\right.$
+\end{center}
+Alors $\mathbf{e} = \varphi_{\mathbf{a},\mathbf{b},\mathbf{c},\mathbf{d}}(\mathbf{e_U},\mathbf{e_V})$ a au moins $2k_U$ coordonnées non nulles. De plus les $n-k_U$ autres coordonnées sont uniformément distribuées sur $\F_q$. \\
+On a alors 
+$$ \mathbb{E}(|\mathbf{e}|) = \frac{q-1}{q}n + \frac{2k_U}{q} $$
+et 
+\begin{center}
+$\omega^+_{UV} = $
+$\left \{
+\begin{array}{rcl}
+&\frac{q-1}{q}n + \frac{2k}{q} & \;\; \text{ si } k \leq n/2 \\
+&n & \quad \text{sinon}
+\end{array}
+\right.$
+\end{center}
+\end{propo}
+
+\begin{proof}[Preuve]
+TODO
+\end{proof}
+
+
+\begin{propo} Soit $\mathbf{e}_V$ une sortie de \verb|DECODE_V|. Soit \verb|DECODE_U| un algorithme prenant en entrée $\mathbf{s}_U$ et $\mathbf{e}_V$ et renvoyant $\mathbf{e}_U$ tel que $\mathbf{e}_U\mathbf{H}_U^T = \mathbf{s}^U$ et tel que pour $k_U$ positions de $\mathbf{e}_U$ 
+\begin{center}
+$\left \{
+\begin{array}{rcl}
+a_i\mathbf{e}_U(i) + b_i\mathbf{e}_V(i) &=& 0 \\
+c_i\mathbf{e}_U(i) + d_i\mathbf{e}_V(i) &=& 0
+\end{array}
+\right.$
+\end{center}
+On a alors
+\begin{center}
+$\omega^-_{UV} = $
+$\left \{
+\begin{array}{rcl}
+&\frac{q-1}{q}(n-2k) & \;\; \text{ si } k \leq n/(2q) \\
+&\frac{2(q-1)^2}{(2q-1)q}(n-k) & \quad \text{sinon}
+\end{array}
+\right.$
+\end{center}
+\end{propo}
+
+\begin{proof}[Preuve]
+TODO
+\end{proof}
+
+On récapitule les différents cas dans la figure REF. \\
+INSERER GRAPHIQUE \\
+La connaissance de la trappe apporte donc bien un avantage puisqu'elle permet un décodage pour des erreurs de poids ne permettant pas de décodage générique. 
 
 \begin{remarque} Fonction de hash
 \end{remarque}
 
 \subsection{Implémentation et choix de paramètres}
 TODO \\
+Détail de DECODE U et DECODE V + choix des paramètres et choix d'implémentation + résultats \\
 
 \section{Uniformisation des signatures et syndromes}
 
 \subsection{Une fuite d'information}
-- Malheureusement, fuite d'information en raison des correspondance entre e[i] et e[i+n/2] ! \\
-- Calcul de proba \\
-- Pourquoi c'est problématique \\ 
+Afin d'assurer la sécurité du système, il est nécéssaire que les $\mathbf{e} \in f_{w,\mathbf{H}}^{-1}(\mathbf{s})$ ne révèlent pas d'information sur la structure du code (U,U+V)-généralisé utilisé. \\
+Or, si la sortie $\mathbf{e_V}$ de \verb|DECODE_V| n'est pas uniforme, alors des corrélations entre les coordonnées $\mathbf{e}_i$ et $\mathbf{e}_{i+n/2}$ du vecteur $\mathbf{e}$. \\
+Par exemple, prenons le cas où $q=3$, et où pour tout $i \in \{1,n/2\}$, $a_i = c_i = d_i = 1$ et $b_i = 0$, et où \verb|DECODE_V| est l'algorithme de Prange. \\
+On a alors pour tout $\mathbf{e} = (\mathbf{e_U},\mathbf{e_U}+\mathbf{e_V})$
+$$ |\mathbf{e_V}| = \# \; \{1  \leq i \leq n/2 \;|\; e_i \neq e_{i+n/2}\}$$
+
+\begin{propo}
+Si le vecteur $\mathbf{e_V}$ est obtenu par l'algorithme de Prange, alors il est de poids moyen $\frac{2}{3}(\frac{n}{2}-k_V)$.
+\end{propo}
+
+\begin{proof}[Preuve]
+TODO
+\end{proof}
+
+Alors, pour tout $i \ in \{1,n/2\}$, on a :
+$$ \mathbb{P}(\mathbf{e}_i \neq \mathbf{e}_{i+n/2}) = \frac{1}{n/2}\frac{2}{3}(n/2-k_V)(1+o(1))$$
+PREUVE \\
+En revanche, pour les autres paires $(i,j)$, on a :
+$$ \mathbb{P}(\mathbf{e}_i \neq \mathbf{e}_{j}) = \frac{4wn - 3w^2-w}{n(n-1)}$$
+Ces deux probabilités n'ont donc aucune raison d'être égales. On a donc une fuite d'information. En effet, dans la pratique et afin de cacher la structure, on effectue une permutation sur les coordonnées de $\mathbf{e}$ lors de la signature. Si un attaquant récupère suffisemment de signatures, il pourra donc en analysant la fréquence des $\mathbf{e}_i \neq \mathbf{e}_j$ retrouver cette permutation. Il est donc nécéssaire pour la sécurité du schéma de s'assurer de l'uniformité des sorties de l'algorithme \verb|sign|.
 
 \subsection{La méthode du rejet}
-Idée générale : On attend pour que les sorties aient l'air uniforme (soient suffisemment proches de l'uniforme): \\
-- On choisit ev de façon a ce qu'il soit uniforme dans son ensemble \\
-- On met des conditions de rejet sur eu en fonction de ev pour que eu ait l'air uniforme \\
-- On obtient un e qui a l'air uniforme \\
+Afin de s'assurer un $\mathbf{e}$ uniforme dans son ensemble, nous allons :
+\begin{itemize}
+\item choisir $\mathbf{e}_V$ de façon a ce qu'il soit uniforme dans son ensemble 
+\item mettre des conditions de rejet sur $\mathbf{e}_U$ en fonction du poids de $\mathbf{e}_V$ afin de supprimer le biais sur l'ensemble 
+$$ m_1(x) := \# \; \{1  \leq i \leq n/2 \;;\; |(x_i, x_{i+n/2})| = 1\}$$
+\end{itemize}
+Avant d'expliciter nos algorithmes, il est nécéssaire d'introduire quelques notations et définitions. \\
+
+\begin{nota} On notera :
+\begin{itemize}
+\item $\mathbf{e}^{unif}$ la variable aléatoire tirée uniformément dans l'ensemble $S_{w,n}$
+\item $\mathbf{e}_V^{unif}$ la variable aléatoire tirée uniformément dans $\F_q^{n/2}$
+\item $\mathbf{e}_U^{unif}$ ?????
+\end{itemize}
+\end{nota}
+
+
+\begin{defi} (uniforme en poids et $m_1$-uniforme)
+\begin{itemize}
+\item \verb|DECODE_V| est dit uniforme en poids si ces sorties $\mathbf{e}_V$ sont telles que $\mathbb{P}(\mathbf{e}_V)$ n'est fonction que du poids de $\mathbf{e}_V$ quand $\mathbf{s}^V$ est tiré uniformément dans son ensemble.
+\item \verb|DECODE_U| est dit $m_1$-uniforme si ces sorties $\mathbf{e}_U$ sont telles que $\mathbb{P}(\mathbf{e}_U\; |\;  \mathbf{e}_V)$ n'est fonction que du poids de $\mathbf{e}_V$ et de $m_1(\varphi(\mathbf{e}_U,\mathbf{e}_V))$.
+\end{itemize}
+\end{defi}
+
+\begin{lemme} Soit $\mathbf{e}$ la sortie de \verb|InvertAlg| avec $\mathbf{s}_U$ et $\mathbf{s}_V$ choisis uniformément dans leurs ensembles. Soit \verb|DECODE_V| uniforme en poids et \verb|DECODE_U| $m_1$-uniforme. Si pour tout $y$ et $z$ 
+$$|\mathbf{e}_V| \sim |\mathbf{e}_V^{unif}|\quad \text{et} \quad\mathbb{P}(m_1(\mathbf{e}) = z\; |\; |\mathbf{e}_V| = y) = \mathbb{P}(m_1(\mathbf{e}^{unif}) = z\; |\; |\mathbf{e}_V^{unif}| = y)$$
+Alors
+$$ \mathbf{e} \sim \mathbf{e}_V^{unif}.$$
+\end{lemme}
+
+\begin{proof}[Preuve] TODO
+\end{proof}
+
+Ainsi, pour que $\mathbf{e}$ soit uniformément distribué sur $S_\omega$, il suffit de choisir \verb|DECODE_V| de façon à ce que ses sorties soient uniforment sur $\F_q^{n/2}$ puis d'ajouter une condition de rejet sur les sorties de \verb|DECODE_U| de façon à ce que $m_1(\mathbf{e})$ conditionnée à $|\mathbf{e}_V|$ soit distribué comme $m_1(\mathbf{e}^{unif})$ conditionnée à $|\mathbf{e}_V^{unif}|$. \\
+\begin{propo}
+Soit l'algorithme :
+
+\begin{flushleft}
+\leftskip=2cm
+\verb|DECODE_UV |$(\mathbf{H}_V,\mathbf{H}_V,\varphi,\mathbf{s}) : $\\
+$\qquad \mathbf{e}_V \leftarrow \verb|DECODE_V |(\mathbf{H}_V,\mathbf{s}^V) $\\
+$\qquad \verb|Faire|$ \\
+$\qquad \qquad \mathbf{e}_U \leftarrow \verb|DECODE_U |(\mathbf{H}_U, \mathbf{s}^U, \varphi, \mathbf{e}_V) $\\
+$\qquad \qquad \mathbf{e} \leftarrow \varphi(\mathbf{e}_U,\mathbf{e}_V)$ \\
+$\qquad \verb|Tant que rand|([0,1]) \leq r(|\mathbf{e}_V|),m_1(\mathbf{e}))$\\
+$\qquad \verb|retourner | \mathbf{e}$ \\
+\leftskip=0cm
+\vspace{0.1in}
+\end{flushleft}
+Où :
+\begin{flushleft}
+
+$$r(s,t) := \frac{1}{M(t)}\frac{q^{unif}(s,t)}{q(s,t)} $$
+\vspace{0.1in}
+$$q(s,t) := \mathbb{P}(m_1(\mathbf{e})=s\;|\;|\mathbf{e}_V|=t)$$ 
+\vspace{0.1in}
+$$q^{unif}(s,t) := \mathbb{P}(m_1(\mathbf{e}^{unif})=s\;|\;|\mathbf{e}^{unif}_V|=t)$$
+\vspace{0.1in}
+$$M(t) := \max_{0 \leq s \leq t} \frac{q^{unif}(s,t)}{q(s,t)}$$
+\end{flushleft}
+Alors si \verb|DECODE_V| est uniforme en poids et si \verb|DECODE_U| est $m_1$-uniforme, on a $\mathbf{e}\sim\mathbf{e}^{unif}$.
+\end{propo}
+\begin{proof}[Preuve]
+TODO
+\end{proof}
+\subsection{Choix des algorithmes de décodage}
+description explicite de \verb|DECODE_V| \\
+description explicite de \verb|DECODE_U| \\
+Application de la méthode du rejet selon ces choix et choix des distributions. 
 
 \subsection{Estimation du nombre de rejet}
 TODO \\
@@ -383,7 +533,37 @@ On a donc le point (2) de la definition des fonctions GPV qui est obtenu dans la
 \section{Sécurité du schéma}
 
 \subsection{Sécurité EUF-CMA}
+
 \subsubsection{Définitions}
+
+Soit $\mathcal{A}$ un adversaire ayant accès à $N_{sign}$ signatures de son choix.
+\begin{defi} (Modèle de sécurité EUF-CMA). On définit 3 algorithmes :
+\begin{multicols}{2}
+\begin{flushleft}
+$\verb|Init|$:\\
+	$\quad (pk,sk) \leftarrow \verb|Gen|(1^{\lambda)}$ \\
+	$\quad \mathbf{H}_{pk} \leftarrow pk$ \\
+	$\quad (\varphi, \mathbf{H}_{U},\mathbf{H}_{V}) \leftarrow sk$ \\
+	$\quad \verb|renvoie| \mathbf{H}_{pk}$ \\
+\end{flushleft}
+\begin{flushleft}
+$\verb|Sign|(s)$: \\
+	$\quad \mathbf{e} \leftarrow \mathcal{D}_{\varphi,\mathbf{H}_{U},\mathbf{H}_{V}}(s)$
+	$\quad$ \verb|renvoie | $\mathbf{e}$
+\end{flushleft}
+\begin{flushleft}
+$\verb|Fin|^{pk}(s,e)$: \\
+	$\quad$ \verb|renvoie | $(\mathbf{e}\mathbf{H}_{pk}^T = s) \land (|\mathbf{e}| = \omega)$
+\end{flushleft}
+\end{multicols}
+Le jeu EUF-CMA se déroule comme suit. $\mathcal{A}$ fait appel à \verb|Init|. Il peut ensuite faire $N_{sign}$ requêtes à \verb|sign|. Le jeu est dit réussi si $\mathcal{A}$ est capable de donner $(s,e)$ accepté par \verb|Fin| et tel que $s$ n'est jamais été demandé à \verb|Sign|. \\
+On définit alors le succès EUF-CMA comme :
+$$Succ^{EUF-CMA}_{Wave}(t,N_{sign}) := \max_{\mathcal{A};|A|\leq t}(\mathbb{P}(\mathcal{A}\text{ réussit le jeu EUF-CMA de Wave})).$$
+Le protocole est alors sûr au sens EUF-CMA si ce succès est négligeable.
+\end{defi}
+
+
+
 \subsubsection{Réduction au problème DOOM}
 \subsubsection{Et la fonction de hachage ?}
 
