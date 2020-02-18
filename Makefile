@@ -14,7 +14,6 @@ clean:
 	@cd implementation && $(MAKE) clean
 	@rm -f wave
 	@cd rapport && $(MAKE) clean
-	@rm -f rapport_wave.pdf
 
 help:
 	@echo "Usage :"
