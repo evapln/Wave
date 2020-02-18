@@ -7,16 +7,19 @@ LDFLAGS = -lm
 
 all: wave
 
-wave:	wave.o matrix.o algebra.o
+wave:	wave.o scheme.o matrix.o algebra.o
 			$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-algebra.o: algebra.c algebra.h
+scheme.o: scheme.c scheme.h
 			$(CC) $(CFLAGS) $(CPPFLAGS) -c $< $(LDFLAGS)
 
 matrix.o: matrix.c matrix.h
 			$(CC) $(CFLAGS) $(CPPFLAGS) -c $< $(LDFLAGS)
 
-wave.o: wave.c wave.h matrix.h
+algebra.o: algebra.c algebra.h
+			$(CC) $(CFLAGS) $(CPPFLAGS) -c $< $(LDFLAGS)
+
+wave.o: wave.c
 	    $(CC) $(CFLAGS) $(CPPFLAGS) -c $< $(LDFLAGS)
 
 clean:
