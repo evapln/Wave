@@ -45,8 +45,8 @@ matrix_t *matrix_init (const int row, const int col, const char val);
 /* Alloue en mémoire et renvoie une copie de matrix */
 matrix_t *matrix_copy(const matrix_t *matrix);
 
-/* Copie matrix2 dans matrix1 sans toucher à aucune mémoire */
-void matrix_copy2 (const matrix_t *matrix1, const matrix_t *matrix2);
+/* Copie src dans dest sans toucher à aucune mémoire */
+void matrix_copy2 (matrix_t *dest, const matrix_t *src);
 
 /* Alloue en mémoire et renvoie une matrice identité de taille size */
 matrix_t *matrix_identity (const int size);
@@ -181,6 +181,8 @@ matrix_t *vector_rand_sub_weight(const int n, const int *info, const int len_i,
 /* Alloue et renvoie le produit élément par élément de vect1 et vect2 */
 matrix_t *vect_scal(const matrix_t *vect1, const matrix_t *vect2);
 
+/* Alloue et renvoie le supp de vect */
+matrix_t *vect_supp(const matrix_t *vect);
 
 
 ////////////////////////////////////////////////////////////////////////////////

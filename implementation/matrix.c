@@ -122,7 +122,7 @@ matrix_t *matrix_copy(const matrix_t *matrix) {
   return copy;
 }
 
-void matrix_copy2 (const matrix_t *matrix1, const matrix_t *matrix2) {
+void matrix_copy2 (matrix_t *matrix1, const matrix_t *matrix2) {
   if (!matrix1 || !matrix2)
     return;
   if (matrix1->nb_row != matrix2->nb_row || matrix1->nb_col != matrix2->nb_col)
@@ -821,6 +821,28 @@ matrix_t *vect_scal(const matrix_t *vect1, const matrix_t *vect2) {
   return mul;
 }
 
+matrix_t *vect_supp(const matrix_t *vect) {
+  if (!vect)
+    return NULL;
+  if (vect->nb_row != 1)
+    return NULL; // ce n'est pas un vecteur
+  int col = vect->nb_col;
+  int col_supp = 0;
+  for (int i = 0; i < col; ++i)
+    if (vect->mat[0][i] % ORDER != 0)
+      ++col_supp;
+  matrix_t *supp = matrix_alloc(1,col_supp);
+  if (!supp)
+    return NULL;
+  int j = 0;
+  for (int i = 0; i < col; ++i) {
+    if (vect->mat[0][i] % ORDER != 0) {
+      supp->mat[0][j] = vect->mat[0][i];
+      ++j;
+    }
+  }
+  return supp;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////// calculs et tests sur les lignes d'une matrice ///////////////
