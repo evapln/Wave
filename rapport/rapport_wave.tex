@@ -308,6 +308,53 @@ $$\begin{array}{ccccc}
  & & (\mathbf{x} , \mathbf{y}) & \mapsto &  (\mathbf{d}.\mathbf{x} - \mathbf{b}.\mathbf{y}, -\mathbf{c}.\mathbf{x} + \mathbf{a}.\mathbf{y}) \\
 \end{array}$$
 
+Ainsi, pour chaque vecteur $\mathbf{e}$ de $\F_q^n$, on peut associer deux vecteurs $\mathbf{e_U}$ et $\mathbf{e_V}$ de $\F_q^{n/2}$ tels que 
+$$ (\mathbf{e_U},\mathbf{e_V}) = \varphi^{-1}_{\mathbf{a},\mathbf{b},\mathbf{c},\mathbf{d}}(\mathbf{e}).$$
+
+\begin{propo} Inverser $f_{\omega,\mathbf{H}}$ pour un certain $\mathbf{s} \in F_q^{n-k}$ est équivalent à trouver $\mathbf{e} \in \F_q^n$ tel que:
+$$ \mathbf{e}_U\mathbf{H}_U^T = \mathbf{s}^U \qquad \text{et} \qquad \mathbf{e}_V\mathbf{H}_V^T = \mathbf{s}^V $$
+où $\mathbf{s} = (\mathbf{s}^U, \mathbf{s}^V)$ avec $\mathbf{s}^U \in \F_q^{n/2-k_U}$ et $\mathbf{s}^V \in \F_q^{n/2-k_V}$.
+\end{propo}
+
+\begin{proof}[Preuve] TODO
+\end{proof}
+
+Ainsi, on on aura : \\
+\begin{flushleft}
+\verb|InvertAlg|$(\mathbf{s},\mathbf{T}) : $\\
+$\qquad (\mathbf{s}_U, \mathbf{s}_V) = s $\\
+$\qquad \mathbf{e}_U = \verb|DECODE_U|(\mathbf{s}_U) $\\
+$\qquad \mathbf{e}_V = \verb|DECODE_V|(\mathbf{s}_V)$ \\
+$\qquad \verb|renvoie | \varphi_{\mathbf{a},\mathbf{b},\mathbf{c},\mathbf{d}}(\mathbf{e_U},\mathbf{e_V})$ \\
+
+\end{flushleft}
+Si l'on choisit un algorithme générique pour \verb|DECODE_U| et \verb|DECODE_V|, alors nous obtiendrons un vecteur $\mathbf{e}$ de poids $\omega \ in \{\omega_{easy}^-,\omega_{easy}^+\}$. Non allons montrer comment utiliser les propriétés des codes $(U,U+V)$-généréralisés pour permettre un décodage hors de cet intervalle. 
+
+\begin{remarque} Pour tout $\mathbf{e} = \varphi_{\mathbf{a},\mathbf{b},\mathbf{c},\mathbf{d}}(\mathbf{e_U},\mathbf{e_V})$, on a pour tout $i \in \{1,n/2\}$ :
+\begin{center}
+
+$\left \{
+\begin{array}{rcl}
+a_i\mathbf{e}_U(i) + b_i\mathbf{e}_V(i) &=& \mathbf{e}(i) \\
+c_i\mathbf{e}_U(i) + d_i\mathbf{e}_V(i) &=& \mathbf{e}(i+n/2) 
+\end{array}
+\right.$
+\end{center}
+
+Choisir la valeur de $\mathbf{e}_U$ en fonction de la valeur de $\mathbf{e}_V$ nous permettras donc d'influer sur le poids de $\mathbf{e}$. On aura alors :
+
+\begin{flushleft}
+\verb|InvertAlg|$(\mathbf{s},\mathbf{T}) : $\\
+$\qquad (\mathbf{s}_U, \mathbf{s}_V) = s $\\
+$\qquad \mathbf{e}_V = \verb|DECODE_V|(\mathbf{s}_V)$ \\
+$\qquad \mathbf{e}_U = \verb|DECODE_U|(\mathbf{s}_U, \mathbf{e}_V) $\\
+$\qquad \verb|renvoie | \varphi_{\mathbf{a},\mathbf{b},\mathbf{c},\mathbf{d}}(\mathbf{e_U},\mathbf{e_V})$ \\
+
+\end{flushleft}
+
+\end{remarque}
+
+
 \begin{remarque} Fonction de hash
 \end{remarque}
 
