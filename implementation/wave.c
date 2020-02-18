@@ -2,7 +2,7 @@
 #include "wave.h"
 
 const float LAMBDA = 3.08;
-const int SIZE = 26;
+const int SIZE = 10;
 const int OMEGA = 0.9261*SIZE;
 const int d = 0;
 const int K_U = 0.7978*SIZE/2;
@@ -122,6 +122,9 @@ matrix_t* phi (const matrix_t* x,const matrix_t* y) {
   if (!coef_init || !x || !y)
     return NULL;
   matrix_t *ax = vect_scal(A,x);
+  // printf("\tx  : "); matrix_print(x, stdout);
+  // printf("\tAx  : "); matrix_print(ax, stdout);
+  // printf("\tA  : "); matrix_print(A, stdout);
   matrix_t *by = vect_scal(B,y);
   matrix_t *cx = vect_scal(C,x);
   matrix_t *dy = vect_scal(D,y);
@@ -406,7 +409,7 @@ keys_t *key_gen (int mode) {
 ///////////////////////////////// décodage /////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void decode_ev(matrix_t * ev,const matrix_t *G, const matrix_t *synd, keys_t *keys) {
+void decode_ev(matrix_t * ev,const matrix_t *G, const matrix_t *synd, const keys_t *keys) {
   if (!ev || !G || !synd)
     return;
   // printf("\tsyndrome cherché : "); matrix_print(synd,stdout);
@@ -596,6 +599,88 @@ void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *synd,
   // matrix_free(e);
   // matrix_free(x);
   // matrix_free(eu_not);
+}
+
+matrix_t *decode_uv(const keys_t *keys, const matrix_t *synd) {
+  if(!keys || !synd)
+    return NULL;
+  //initialisation
+  matrix_t *su = matrix_alloc(1,SIZE/2 - K_U);
+  matrix_t *sv = matrix_alloc(1,SIZE/2 - K_V);
+  matrix_separate(synd, su, sv);
+  if (!su || !sv)
+    return NULL;
+  // decodage de ev
+  puts("\tdécodage de ev...");
+  matrix_t *ev = matrix_alloc(1,SIZE/2);
+  // printf("dim V %d\n", keys->sk->dim_V);
+  decode_ev(ev, gen_V, sv, keys);
+  if (!ev)
+    return NULL;
+  // printf("\tcol : %d, row : %d\n",matrix_get_col(synd_V), matrix_get_row(synd_V));
+  // matrix_print(synd_V, stdout);
+  matrix_t *verifv = syndrome(ev, keys->sk->parite_V);
+  if (!verifv)
+    return  NULL;
+  printf("\t\tsv :     "); matrix_print(sv, stdout);
+  printf("\t\tverif v: "); matrix_print(verifv, stdout);
+  printf("\t\tev obtenu :   "); matrix_print(ev, stdout);
+  // matrix_t *supp_ev = vect_supp(ev);
+  // printf("suppp de ev : "); matrix_print(supp_ev, stdout);
+  // printf("taille du supp : %d\nKu: %d\n", matrix_get_col(supp_ev), keys->sk->dim_U);
+  // matrix_free(supp_ev);
+
+
+  // decodage de ev
+  puts("\tdécodage de eu...");
+  matrix_t *eu = matrix_alloc(1,SIZE/2);
+  // puts("\tmatrice de parité de U"); matrix_print(keys->sk->parite_U, stdout);
+  // matrix_t *synd_U = syndrome(e, keys->sk->parite_U);
+  decode_eu(eu, keys, su, ev);
+  if (!eu)
+    return NULL;
+  // printf("\tcol : %d, row : %d\n",matrix_get_col(synd_U), matrix_get_row(synd_U));
+  // matrix_print(synd_U, stdout);
+  matrix_t *verifu = syndrome(eu, keys->sk->parite_U);
+  if (!verifu)
+    return NULL;
+  printf("\t\tsu :     "); matrix_print(su, stdout);
+  printf("\t\tverif u: "); matrix_print(verifu, stdout);
+  printf("\t\teu obtenu : "); matrix_print(eu, stdout);
+
+  // printf("ev obtenu : "); matrix_print(ev, stdout);
+  matrix_t *e = phi(eu,ev);
+  printf("e obtenu : "); matrix_print(e, stdout);
+  // matrix_t *sy = syndrome(e, keys->pk);
+  // printf("syndrome voulu :  "); matrix_print(synd, stdout);
+  // printf("syndrome obtenu : "); matrix_print(sy, stdout);
+  // printf("a : "); matrix_print(A, stdout);
+  // printf("b : "); matrix_print(B, stdout);
+  // printf("c : "); matrix_print(C, stdout);
+  // printf("d : "); matrix_print(D, stdout);
+  // matrix_free(e_ob);
+  // matrix_free(sy);
+
+  // matrix_t *gen_U_T = matrix_trans(gen_U);
+  // puts("matrice génératrice de U transposée"); matrix_print(gen_U_T, stdout);
+  // matrix_t *gen_U_T_inv = matrix_inv(gen_U_T);
+  // puts("inverse de la matrice génératrice de U transposée");
+  // matrix_print(gen_U_T_inv, stdout);
+  // matrix_t *ver = matrix_prod(gen_U_T, gen_U_T_inv);
+  // puts("doit être identité"); matrix_print(ver, stdout);
+  //
+  // matrix_free(gen_U_T);
+  // matrix_free(gen_U_T_inv);
+  // matrix_free(ver);
+  matrix_free(ev);
+  matrix_free(eu);
+  matrix_free(verifv);
+  matrix_free(verifu);
+  // matrix_free(e);
+  // matrix_free(synd);
+  matrix_free(su);
+  matrix_free(sv);
+  return e;
 }
 
 int *freeset(const matrix_t *H, const matrix_t *ev, const int k) {
@@ -1047,13 +1132,67 @@ int main(void) {
   ///////////////////////////////// GENERATION DE CLES
   puts("génération des clés de chiffrement avec les paramètres :");
   printf("lambda = %f, n = %d, w = %d, Ku = %d, Kv = %d\n",LAMBDA, SIZE, OMEGA, K_U, K_V);
-  keys_t *keys = key_gen(1);
+  keys_t *keys = key_gen(0);
   if (keys == NULL) {
     puts ("Key_gen revoit NULL\n");
     return EXIT_FAILURE;
   }
   puts("\tgénération des clés terminée !!");
 
+  /////////////////////////////////// test decode_uv
+  puts("on test decode_uv :");
+  matrix_t *e_test = vector_rand_weight(SIZE, OMEGA);
+  if (!e_test)
+    return EXIT_FAILURE;
+  matrix_t *synd_test = syndrome(e_test, keys->pk);
+  if (!synd_test)
+    return EXIT_FAILURE;
+  matrix_t *S_inv = matrix_inv(keys->sk->S);
+  matrix_t *S_inv_T = matrix_trans(S_inv);
+  matrix_t *entree = matrix_prod(synd_test, S_inv_T);
+  printf("\tS : \n"); matrix_print(keys->sk->S, stdout);
+  printf("\tS-1 : \n"); matrix_print(S_inv, stdout);
+  printf("\tS-1t : \n"); matrix_print(S_inv_T, stdout);
+  printf("\tentre : \n"); matrix_print(entree, stdout);
+
+  matrix_t *e = decode_uv(keys, entree);
+  if (!e) {
+    puts("pas de sortie");
+    return EXIT_FAILURE;
+  }
+  matrix_t *synd = syndrome(e, keys->pk);
+  if (!synd)
+    return EXIT_FAILURE;
+  printf("\te de base : "); matrix_print(e_test, stdout);
+  printf("\te obtenu  : "); matrix_print(e, stdout);
+  printf("\tsyndrome de base : "); matrix_print(synd_test, stdout);
+  printf("\tsyndrome obtenu  : "); matrix_print(synd, stdout);
+
+  matrix_free(e_test);
+  matrix_free(e);
+  matrix_free(synd_test);
+  matrix_free(synd);
+  matrix_free(S_inv);
+  matrix_free(S_inv_T);
+  matrix_free(entree);
+
+  matrix_t *x = vector_rand(SIZE/2);
+  matrix_t *y = vector_rand(SIZE/2);
+  matrix_t *ph = phi(x,y);
+  if(!ph)
+    puts("ouch");
+
+  printf("a : "); matrix_print(A, stdout);
+  printf("b : "); matrix_print(B, stdout);
+  printf("c : "); matrix_print(C, stdout);
+  printf("d : "); matrix_print(D, stdout);
+  printf("\tx : "); matrix_print(x, stdout);
+  printf("\ty : "); matrix_print(y, stdout);
+  printf("\tphi(x,y) : "); matrix_print(ph, stdout);
+
+  matrix_free(x);
+  matrix_free(y);
+  matrix_free(ph);
 
   // ////////////////////////////// test decode ev seul
   // matrix_t *ev = matrix_alloc(1,SIZE/2);
@@ -1069,96 +1208,96 @@ int main(void) {
   // matrix_free(verif);
 
   ///////////////////////////////////////test decode_ev
-
-  matrix_t *ev = matrix_alloc(1,SIZE/2);
-  matrix_t *eu = matrix_alloc(1,SIZE/2);
-  matrix_t *e = vector_rand_weight(SIZE, OMEGA);
-  printf("\te : "); matrix_print(e, stdout);
-  matrix_t *synd = syndrome(e, keys->pk);
-  printf("\tsyndrome : "); matrix_print(synd, stdout);
-  matrix_t *synd_U = matrix_alloc(1,SIZE/2 - K_U);
-  matrix_t *synd_V = matrix_alloc(1,SIZE/2 - K_V);
-  matrix_separate(synd, synd_U, synd_V);
-  if (!ev || !e || !synd || !synd_U || !synd_V) {
-    puts("error 1");
-    return EXIT_FAILURE;
-  }
-  puts("test de decode_ev...");
-  // printf("dim V %d\n", keys->sk->dim_V);
-  decode_ev(ev, gen_V, synd_V, keys);
-  if (!ev) {
-    puts("error 2");
-    return EXIT_FAILURE;
-  }
-  printf("\tcol : %d, row : %d\n",matrix_get_col(synd_V), matrix_get_row(synd_V));
-  // matrix_print(synd_V, stdout);
-  matrix_t *verif = syndrome(ev, keys->sk->parite_V);
-  if (!verif) {
-    puts("\terror 3");
-    return EXIT_FAILURE;
-  }
-  printf("\tsv :    ");
-  matrix_print(synd_V, stdout);
-  printf("\tverif : ");
-  matrix_print(verif, stdout);
-  // printf("ev obtenu :   "); matrix_print(ev, stdout);
-  // matrix_t *supp_ev = vect_supp(ev);
-  // printf("suppp de ev : "); matrix_print(supp_ev, stdout);
-  // printf("taille du supp : %d\nKu: %d\n", matrix_get_col(supp_ev), keys->sk->dim_U);
-  // matrix_free(supp_ev);
-  /////////////////////////////////////////test decode_ev
-  puts("test de decove_eu...");
-  puts("\tmatrice de parité de U"); matrix_print(keys->sk->parite_U, stdout);
-  // matrix_t *synd_U = syndrome(e, keys->sk->parite_U);
-  decode_eu(eu, keys, synd_U, ev);
-  if (!eu) {
-    puts("\terror 2");
-    return EXIT_FAILURE;
-  }
-  // printf("\tcol : %d, row : %d\n",matrix_get_col(synd_U), matrix_get_row(synd_U));
-  // matrix_print(synd_U, stdout);
-  matrix_t *verif2 = syndrome(eu, keys->sk->parite_U);
-  if (!verif2) {
-    puts("\terror 3");
-    return EXIT_FAILURE;
-  }
-  printf("eu sortant : "); matrix_print(eu, stdout);
-  printf("\tsu :    "); matrix_print(synd_U, stdout);
-  printf("\tverif : "); matrix_print(verif2, stdout);
-
-  printf("ev obtenu : "); matrix_print(ev, stdout);
-  matrix_t *e_ob = phi(eu,ev);
-  printf("e obtenu : "); matrix_print(e_ob, stdout);
-  matrix_t *sy = syndrome(e_ob, keys->pk);
-  printf("syndrome voulu :  "); matrix_print(synd, stdout);
-  printf("syndrome obtenu : "); matrix_print(sy, stdout);
-  // printf("a : "); matrix_print(A, stdout);
-  // printf("b : "); matrix_print(B, stdout);
-  // printf("c : "); matrix_print(C, stdout);
-  // printf("d : "); matrix_print(D, stdout);
-  matrix_free(e_ob);
-  matrix_free(sy);
-
-  // matrix_t *gen_U_T = matrix_trans(gen_U);
-  // puts("matrice génératrice de U transposée"); matrix_print(gen_U_T, stdout);
-  // matrix_t *gen_U_T_inv = matrix_inv(gen_U_T);
-  // puts("inverse de la matrice génératrice de U transposée");
-  // matrix_print(gen_U_T_inv, stdout);
-  // matrix_t *ver = matrix_prod(gen_U_T, gen_U_T_inv);
-  // puts("doit être identité"); matrix_print(ver, stdout);
   //
-  // matrix_free(gen_U_T);
-  // matrix_free(gen_U_T_inv);
-  // matrix_free(ver);
-  matrix_free(ev);
-  matrix_free(eu);
-  matrix_free(verif);
-  matrix_free(verif2);
-  matrix_free(e);
-  matrix_free(synd);
-  matrix_free(synd_V);
-  matrix_free(synd_U);
-  key_free(keys);
+  // matrix_t *ev = matrix_alloc(1,SIZE/2);
+  // matrix_t *eu = matrix_alloc(1,SIZE/2);
+  // matrix_t *e = vector_rand_weight(SIZE, OMEGA);
+  // printf("\te : "); matrix_print(e, stdout);
+  // matrix_t *synd = syndrome(e, keys->pk);
+  // printf("\tsyndrome : "); matrix_print(synd, stdout);
+  // matrix_t *synd_U = matrix_alloc(1,SIZE/2 - K_U);
+  // matrix_t *synd_V = matrix_alloc(1,SIZE/2 - K_V);
+  // matrix_separate(synd, synd_U, synd_V);
+  // if (!ev || !e || !synd || !synd_U || !synd_V) {
+  //   puts("error 1");
+  //   return EXIT_FAILURE;
+  // }
+  // puts("test de decode_ev...");
+  // // printf("dim V %d\n", keys->sk->dim_V);
+  // decode_ev(ev, gen_V, synd_V, keys);
+  // if (!ev) {
+  //   puts("error 2");
+  //   return EXIT_FAILURE;
+  // }
+  // printf("\tcol : %d, row : %d\n",matrix_get_col(synd_V), matrix_get_row(synd_V));
+  // // matrix_print(synd_V, stdout);
+  // matrix_t *verif = syndrome(ev, keys->sk->parite_V);
+  // if (!verif) {
+  //   puts("\terror 3");
+  //   return EXIT_FAILURE;
+  // }
+  // printf("\tsv :    ");
+  // matrix_print(synd_V, stdout);
+  // printf("\tverif : ");
+  // matrix_print(verif, stdout);
+  // // printf("ev obtenu :   "); matrix_print(ev, stdout);
+  // // matrix_t *supp_ev = vect_supp(ev);
+  // // printf("suppp de ev : "); matrix_print(supp_ev, stdout);
+  // // printf("taille du supp : %d\nKu: %d\n", matrix_get_col(supp_ev), keys->sk->dim_U);
+  // // matrix_free(supp_ev);
+  // /////////////////////////////////////////test decode_ev
+  // puts("test de decove_eu...");
+  // puts("\tmatrice de parité de U"); matrix_print(keys->sk->parite_U, stdout);
+  // // matrix_t *synd_U = syndrome(e, keys->sk->parite_U);
+  // decode_eu(eu, keys, synd_U, ev);
+  // if (!eu) {
+  //   puts("\terror 2");
+  //   return EXIT_FAILURE;
+  // }
+  // // printf("\tcol : %d, row : %d\n",matrix_get_col(synd_U), matrix_get_row(synd_U));
+  // // matrix_print(synd_U, stdout);
+  // matrix_t *verif2 = syndrome(eu, keys->sk->parite_U);
+  // if (!verif2) {
+  //   puts("\terror 3");
+  //   return EXIT_FAILURE;
+  // }
+  // printf("eu sortant : "); matrix_print(eu, stdout);
+  // printf("\tsu :    "); matrix_print(synd_U, stdout);
+  // printf("\tverif : "); matrix_print(verif2, stdout);
+  //
+  // printf("ev obtenu : "); matrix_print(ev, stdout);
+  // matrix_t *e_ob = phi(eu,ev);
+  // printf("e obtenu : "); matrix_print(e_ob, stdout);
+  // matrix_t *sy = syndrome(e_ob, keys->pk);
+  // printf("syndrome voulu :  "); matrix_print(synd, stdout);
+  // printf("syndrome obtenu : "); matrix_print(sy, stdout);
+  // // printf("a : "); matrix_print(A, stdout);
+  // // printf("b : "); matrix_print(B, stdout);
+  // // printf("c : "); matrix_print(C, stdout);
+  // // printf("d : "); matrix_print(D, stdout);
+  // matrix_free(e_ob);
+  // matrix_free(sy);
+  //
+  // // matrix_t *gen_U_T = matrix_trans(gen_U);
+  // // puts("matrice génératrice de U transposée"); matrix_print(gen_U_T, stdout);
+  // // matrix_t *gen_U_T_inv = matrix_inv(gen_U_T);
+  // // puts("inverse de la matrice génératrice de U transposée");
+  // // matrix_print(gen_U_T_inv, stdout);
+  // // matrix_t *ver = matrix_prod(gen_U_T, gen_U_T_inv);
+  // // puts("doit être identité"); matrix_print(ver, stdout);
+  // //
+  // // matrix_free(gen_U_T);
+  // // matrix_free(gen_U_T_inv);
+  // // matrix_free(ver);
+  // matrix_free(ev);
+  // matrix_free(eu);
+  // matrix_free(verif);
+  // matrix_free(verif2);
+  // matrix_free(e);
+  // matrix_free(synd);
+  // matrix_free(synd_V);
+  // matrix_free(synd_U);
+  // key_free(keys);
 
 
   ///////////////////////////////////////////// test matrix_rank
@@ -1304,5 +1443,6 @@ int main(void) {
   matrix_free(H);
   matrix_free(gen_U);
   matrix_free(gen_V);
+  key_free(keys);
   return EXIT_SUCCESS;
 }

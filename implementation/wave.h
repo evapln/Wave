@@ -55,7 +55,7 @@ keys_t *key_gen(int mode);
   G est la matrice génératrice du code V
   synd vecteur ligne est le syndrome cherché
   ev vecteur ligne est la sortie */
-void decode_ev(matrix_t * ev, const matrix_t *G, const matrix_t *synd, keys_t *keys);
+void decode_ev(matrix_t * ev, const matrix_t *G, const matrix_t *synd, const  keys_t *keys);
 
 /* decodage par ensemble d'information :
   G est la matrice [-A|Id] avec A partie droite de H_U systematisée
@@ -65,10 +65,15 @@ void decode_ev(matrix_t * ev, const matrix_t *G, const matrix_t *synd, keys_t *k
 void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *synd,
                const matrix_t *ev);
 
+ /* decodage par ensemble d'information :
+   synd vecteur ligne est le syndrome cherché
+   alloue en mémoire et renvoie e vecteur ligne tq son syndrome vaille synd */
+matrix_t *decode_uv(const keys_t *keys, const matrix_t *synd);
+
 /* alloue en mémoire en renvoie le vecteur x tel que Ax=y */
 // matrix_t *resol_syst(const matrix_t *A, const matrix_t *y);
 
-int *freeset(const matrix_t *H, const matrix_t *ev, const int k);
+// int *freeset(const matrix_t *H, const matrix_t *ev, const int k);
 
 
 ////////////////////////////////////////////////////////////////////////////////
