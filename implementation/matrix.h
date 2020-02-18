@@ -130,15 +130,16 @@ int matrix_rank(const matrix_t *A);
 ////////////////////////////////////////////////////////////////////////////////
 
 /* vérifie A==Id */
-bool is_identity(const matrix_t *A);
+bool matrix_is_identity(const matrix_t *A);
 
 /* Vérifie si la matrice est correctement systématisée */
 bool matrix_is_syst(const matrix_t *matrix);
 
 /* Vérifie si la matrice est triangulaire */
-bool is_trigonalise (const matrix_t *A);
+bool matrix_is_trigonalise(const matrix_t *A);
 
-
+/* Vérifie si les deux matrices sont égales */
+bool matrix_is_equal(const matrix_t *A, const matrix_t *B);
 
 ////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////// utilisation de tableaux //////////////////////////
@@ -184,6 +185,9 @@ matrix_t *vect_scal(const matrix_t *vect1, const matrix_t *vect2);
 /* Alloue et renvoie le supp de vect */
 matrix_t *vect_supp(const matrix_t *vect);
 
+// matrix_t *int_to_vect(const long long m);
+//
+// long long vect_to_int(const matrix_t *vect);
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////// calculs et tests sur les lignes d'une matrice ///////////////

@@ -22,3 +22,5 @@ char opp_Fq(void);
 
 /* Renvoi un nombre aléatoire modulo q */
 char rand_Fq(void);
+
+int mod_Fq(char a);

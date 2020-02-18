@@ -271,7 +271,7 @@ matrix_t *matrix_inv(const matrix_t *A){
     matrix_free(id);
     return NULL;
   }
-  if (!is_identity(id)) {
+  if (!matrix_is_identity(id)) {
     matrix_free(inv);
     matrix_free(conc);
     matrix_free(id);
@@ -572,7 +572,7 @@ char matrix_det(const matrix_t *A) {
   if (!A)
     return 0;
   int size = A->nb_col;
-  if (is_trigonalise(A)){
+  if (matrix_is_trigonalise(A)){
     // puts("ok");
     char det = 1;
     for (int i = 0; i < size; i++){
@@ -623,7 +623,7 @@ int matrix_rank(const matrix_t *A) {
 //////////////////////////// test de la forme des matrices /////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-bool is_identity(const matrix_t *A){
+bool matrix_is_identity(const matrix_t *A){
   if (!A)
     return false;
   int row = A->nb_row;
@@ -661,7 +661,7 @@ bool matrix_is_syst (const matrix_t *matrix) {
   return true;
 }
 
-bool is_trigonalise (const matrix_t *A) {
+bool matrix_is_trigonalise (const matrix_t *A) {
   int size = A->nb_row;
   for (int i = 0; i < size; i++){
     for (int j = 0; j < i; j++){
@@ -672,6 +672,19 @@ bool is_trigonalise (const matrix_t *A) {
   return true;
 }
 
+bool matrix_is_equal(const matrix_t *A, const matrix_t *B) {
+  if (!A || !B)
+    return false;
+  int row = A->nb_row;
+  int col = A->nb_col;
+  if (row != A->nb_row || col != B->nb_col)
+    return false;
+  for (int i = 0; i < row; ++i)
+    for (int j = 0; j < col; ++j)
+      if (A->mat[i][j] != B->mat[i][j])
+        return false;
+  return true;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////// utilisation de tableaux //////////////////////////
@@ -781,13 +794,26 @@ matrix_t *vector_rand(const int n) {
 }
 
 matrix_t *vector_rand_weight(const int n, const int w) {
-  matrix_t *vect = NULL;
-  int w_vect = 0;
-  while (!vect || w_vect != w) {
-    matrix_free(vect);
-    vect = vector_rand(n);
-    w_vect = weight(vect);
+  // tableau contenant tous les indices possible du vecteur
+  int ind[n];
+  for (int i = 0; i < n; ++i)
+    ind[i] = i;
+  shuffle(ind, n);
+  // tableau contenant tous les indices des coordonnées nulles du vecteur
+  int ind_weight[n-w];
+  for (int i = 0; i < n-w; ++i)
+    ind_weight[i] = ind[i];
+  // initialisation de vect
+  matrix_t *vect = matrix_alloc(1,n);
+  char r;
+  for (int i = 0; i < n; ++i) {
+    r = 0;
+    if (!is_in_array(ind_weight, n-w, i))
+      while (r == 0)
+        r = rand_Fq();
+    vect->mat[0][i] = r;
   }
+  // retour
   return vect;
 }
 
@@ -843,6 +869,43 @@ matrix_t *vect_supp(const matrix_t *vect) {
   }
   return supp;
 }
+
+// matrix_t *int_to_vect(const long long m) {
+//   if (m == 0)
+//     return matrix_init(1,1,0);
+//   float l = log(m)/log(ORDER);
+//   long long n = m;
+//   int size = floor(l+1), power = pow(ORDER, size);
+//   printf("size = %d\nl = %f\n", size, l);
+//   matrix_t *vect = matrix_init(1,size,0);
+//   if (!vect)
+//     return NULL;
+//   for (int i = 0; i < size; ++i) {
+//     power /= ORDER;
+//     while (n >= power) {
+//       n -= power;
+//       vect->mat[0][i] = vect->mat[0][i] + 1;
+//       // if (vect->mat[0][i] > 2)
+//       // puts("error !!!!");
+//     }
+//   }
+//   return vect;
+// }
+//
+// long long vect_to_int(const matrix_t *vect) {
+//   if (!vect || vect->nb_row != 1)
+//     return -1;
+//   int col = vect->nb_col, mul = 1;
+//   long long m = 0;
+//   matrix_print(vect,stdout); printf("%dx%d\n", vect->nb_row, vect->nb_col);
+//   for (int i = 0; i <col; ++i) {
+//     int v = vect->mat[0][col-1-i];
+//     m += v * mul;
+//     printf("%d : v = %d, m = %lld, mul = %d\n", i, v, m, mul);
+//     mul *= ORDER;
+//   }
+//   return m;
+// }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////// calculs et tests sur les lignes d'une matrice ///////////////

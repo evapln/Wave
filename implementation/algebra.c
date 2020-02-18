@@ -40,3 +40,9 @@ char rand_Fq(void) {
   char rd = rand() % ORDER;
   return rd;
 }
+
+int mod_Fq(char a) {
+  if (a  == -1)
+    return 2;
+  return a % ORDER;
+}

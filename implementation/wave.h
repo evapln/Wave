@@ -4,6 +4,8 @@ typedef struct sk_t sk_t;
 
 typedef struct keys_t keys_t;
 
+typedef struct sign_t sign_t;
+
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////////////// gestion de la mémoire /////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -20,6 +22,11 @@ keys_t *key_alloc(int dim_U, int dim_V, int dim);
 /* Libère l'espace alloué pour les clés */
 void key_free(keys_t *keys);
 
+/* Alloue en mémoire l'espace de la signature */
+sign_t *sign_alloc(void);
+
+/* Libère l'espace alloué pour la signature */
+void sign_free(sign_t *signature);
 
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////// fonctions secondaires //////////////////////////////
@@ -55,20 +62,23 @@ keys_t *key_gen(int mode);
   G est la matrice génératrice du code V
   synd vecteur ligne est le syndrome cherché
   ev vecteur ligne est la sortie */
-void decode_ev(matrix_t * ev, const matrix_t *G, const matrix_t *synd, const  keys_t *keys);
+void decode_ev(matrix_t * ev, const matrix_t *G, const matrix_t *synd);
 
 /* decodage par ensemble d'information :
   G est la matrice [-A|Id] avec A partie droite de H_U systematisée
   synd vecteur ligne est le syndrome cherché
   ev vecteur ligne estla sortie de decode_ev
   eu vecteur ligne est la sortie */
-void decode_eu(matrix_t * eu, const keys_t *keys, const matrix_t *synd,
+void decode_eu(matrix_t * eu, const sk_t *sk, const matrix_t *synd,
                const matrix_t *ev);
 
  /* decodage par ensemble d'information :
    synd vecteur ligne est le syndrome cherché
    alloue en mémoire et renvoie e vecteur ligne tq son syndrome vaille synd */
-matrix_t *decode_uv(const keys_t *keys, const matrix_t *synd);
+matrix_t *decode_uv(const sk_t *sk, const matrix_t *synd);
+
+/* inverse la fonction syndrome */
+matrix_t *invert_alg(const sk_t *sk, const matrix_t *synd);
 
 /* alloue en mémoire en renvoie le vecteur x tel que Ax=y */
 // matrix_t *resol_syst(const matrix_t *A, const matrix_t *y);
@@ -94,13 +104,12 @@ matrix_t *iteration_prange(const matrix_t *parite, const matrix_t *syndrome);
 
 
 
-
-
-// TO DO ///////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+////////////////////////// signature et vérification ///////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-matrix_t *sign(sk_t *sk, int m);
-bool verify(matrix_t *pk, int m, matrix_t *signature);
-int inversion_of_f(matrix_t *parite_U, matrix_t *parite_V, matrix_t *inv);
-matrix_t *invert_alg(sk_t *sk, matrix_t *S);
+matrix_t *hash(const matrix_t *m, const matrix_t *r);
+
+sign_t *sign(const sk_t *sk, const matrix_t *m);
+
+bool verify(const matrix_t *pk, const matrix_t *m, const sign_t *signature);
