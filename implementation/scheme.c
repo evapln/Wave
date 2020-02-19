@@ -90,7 +90,7 @@ void sk_free(sk_t *sk) {
   free(sk);
 }
 
-keys_t *key_alloc(int dim_U, int dim_V, int dim){
+keys_t *keys_alloc(int dim_U, int dim_V, int dim){
   keys_t *keys = malloc(sizeof(keys_t));
   if (!keys)
     return NULL;
@@ -108,7 +108,7 @@ keys_t *key_alloc(int dim_U, int dim_V, int dim){
   return keys;
 }
 
-void key_free(keys_t *keys) {
+void keys_free(keys_t *keys) {
   if (keys) {
     matrix_free(keys->pk);
     sk_free(keys->sk);
@@ -141,6 +141,24 @@ void sign_free(sign_t *signature) {
   }
   free(signature);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////// affichage ////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+/* Ecrit keys->sk dans secret et keys->pk dans public */
+void keys_print(const keys_t *keys, FILE *secret, FILE *public) {
+  if (keys && keys->pk && keys->sk && keys->sk->parite_U && keys->sk->parite_V && keys->sk->S && keys->sk->P) {
+    fputs("parité U :\n", secret); matrix_print(keys->sk->parite_U, secret);
+    fputs("parité V :\n", secret); matrix_print(keys->sk->parite_V, secret);
+    fputs("S :\n", secret); matrix_print(keys->sk->S, secret);
+    fputs("P :\n", secret); matrix_print(keys->sk->P, secret);
+    fprintf(secret, "dim U : %d\n", keys->sk->dim_U);
+    fprintf(secret, "dim V : %d\n\n", keys->sk->dim_V);
+    fputs("Pk :\n", public); matrix_print(keys->pk, public);
+  }
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////// fonctions secondaires //////////////////////////////
@@ -341,7 +359,7 @@ keys_t *key_gen (int mode) {
   }
 
   // alloue la structure keys_t et remplie avec les matrices de parités
-  keys_t *keys = key_alloc(dim_U,dim_V, DIM);
+  keys_t *keys = keys_alloc(dim_U,dim_V, DIM);
   if (!keys) {
     matrix_free(H_U);
     matrix_free(H_V);
@@ -352,14 +370,14 @@ keys_t *key_gen (int mode) {
   matrix_free(H_U);
   matrix_free(H_V);
   if (!keys->sk->parite_U ||! keys->sk->parite_V) {
-    key_free(keys);
+    keys_free(keys);
     return NULL;
   }
 
   // création de H
   H = parite(keys->sk->parite_U, keys->sk->parite_V);
   if (!H) {
-    key_free(keys);
+    keys_free(keys);
     return NULL;
   }
   // création de S aléaoire inversible
@@ -375,41 +393,40 @@ keys_t *key_gen (int mode) {
   matrix_copy2(keys->sk->S, S);
   matrix_free(S);
   if (!keys->sk->S) {
-    key_free(keys);
+    keys_free(keys);
     return NULL;
   }
   // créationde P matrice de permutation aléatoire
   matrix_t *permut = matrix_perm_random(SIZE);
   if (!permut) {
-    key_free(keys);
+    keys_free(keys);
     return NULL;
   }
   matrix_copy2(keys->sk->P, permut);
   matrix_free(permut);
   if (!keys->sk->P) {
-    key_free(keys);
+    keys_free(keys);
     return NULL;
   }
   keys->sk->dim_U = dim_U;
   keys->sk->dim_V = dim_V;
 
   // création de la clé publique SHP
-  puts("\tet enfin notre clé publique...");
   matrix_t *SH = matrix_prod(keys->sk->S,H);
   if (!SH) {
-    key_free(keys);
+    keys_free(keys);
     return NULL;
   }
   matrix_t *SHP = matrix_prod(SH,keys->sk->P);
   matrix_free(SH);
   if (!SHP) {
-    key_free(keys);
+    keys_free(keys);
     return NULL;
   }
   matrix_copy2(keys->pk, SHP);
   matrix_free(SHP);
   if (!keys->pk) {
-    key_free(keys);
+    keys_free(keys);
     return NULL;
   }
   return keys;

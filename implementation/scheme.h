@@ -17,16 +17,35 @@ sk_t *sk_alloc(int dim_U, int dim_V, int dim);
 void sk_free (sk_t *sk);
 
 /* Alloue en mémoire l'espace des deux clés */
-keys_t *key_alloc(int dim_U, int dim_V, int dim);
+keys_t *keys_alloc(int dim_U, int dim_V, int dim);
 
 /* Libère l'espace alloué pour les clés */
-void key_free(keys_t *keys);
+void keys_free(keys_t *keys);
 
 /* Alloue en mémoire l'espace de la signature */
 sign_t *sign_alloc(void);
 
 /* Libère l'espace alloué pour la signature */
 void sign_free(sign_t *signature);
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////// affichage ////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+/* Ecrit keys->sk dans secret et keys->pk dans public */
+void keys_print(const keys_t *keys, FILE *secret, FILE *public);
+
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////// gestion des paramètres de keys_t et sk_t /////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+// /* Renvoie la clé privée */
+// sk_t *keys_get_sk(keys_t *keys);
+//
+// /* Renvoie la clé publique */
+// matrix_t *keys_get_pk(keys_t *keys);
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////// fonctions secondaires //////////////////////////////

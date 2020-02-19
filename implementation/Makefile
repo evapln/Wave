@@ -19,7 +19,7 @@ matrix.o: matrix.c matrix.h
 algebra.o: algebra.c algebra.h
 			$(CC) $(CFLAGS) $(CPPFLAGS) -c $< $(LDFLAGS)
 
-wave.o: wave.c
+wave.o: wave.c wave.h
 	    $(CC) $(CFLAGS) $(CPPFLAGS) -c $< $(LDFLAGS)
 
 clean:
