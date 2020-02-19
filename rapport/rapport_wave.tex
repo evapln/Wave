@@ -531,9 +531,12 @@ TODO \\
 On a donc le point (2) de la definition des fonctions GPV qui est obtenu dans la section précédente. On va montrer le point (1), à savoir, notre famille de fonctions syndrômes est uniformément distribuée avec les codes (U,U+V)-généralisés \\
 
 \section{Sécurité du schéma}
+Deux problèmes : \\
+- Distinction d'une matrice de parité d'un code (U,U+V)-généralisé permutée d'une matrice aléatoire \\
+- Sécurité EUF-CMA du système si H ressemble à une matrice aléatoire \\
 
 \subsection{Sécurité EUF-CMA}
-
+Nous allons montrer que le schéma est sûr au sens EUF-CMA (Existential Unforgeability under Chosen Message Attacks). Pour cela nous ferons une réduction au problème DOOM.
 \subsubsection{Définitions}
 
 Soit $\mathcal{A}$ un adversaire ayant accès à $N_{sign}$ signatures de son choix.
@@ -544,15 +547,15 @@ $\verb|Init|$:\\
 	$\quad (pk,sk) \leftarrow \verb|Gen|(1^{\lambda)}$ \\
 	$\quad \mathbf{H}_{pk} \leftarrow pk$ \\
 	$\quad (\varphi, \mathbf{H}_{U},\mathbf{H}_{V}) \leftarrow sk$ \\
-	$\quad \verb|renvoie| \mathbf{H}_{pk}$ \\
+	$\quad \verb|renvoie | \mathbf{H}_{pk}$ \\
 \end{flushleft}
 \begin{flushleft}
 $\verb|Sign|(s)$: \\
-	$\quad \mathbf{e} \leftarrow \mathcal{D}_{\varphi,\mathbf{H}_{U},\mathbf{H}_{V}}(s)$
+	$\quad \mathbf{e} \leftarrow \mathcal{D}_{\varphi,\mathbf{H}_{U},\mathbf{H}_{V}}(s)$ ¯\\
 	$\quad$ \verb|renvoie | $\mathbf{e}$
 \end{flushleft}
 \begin{flushleft}
-$\verb|Fin|^{pk}(s,e)$: \\
+$\verb|Fin|(s,e)$: \\
 	$\quad$ \verb|renvoie | $(\mathbf{e}\mathbf{H}_{pk}^T = s) \land (|\mathbf{e}| = \omega)$
 \end{flushleft}
 \end{multicols}
@@ -562,9 +565,43 @@ $$Succ^{EUF-CMA}_{Wave}(t,N_{sign}) := \max_{\mathcal{A};|A|\leq t}(\mathbb{P}(\
 Le protocole est alors sûr au sens EUF-CMA si ce succès est négligeable.
 \end{defi}
 
+Nous souhaitons donc montrer que notre système est sûr au sens EUF-CMA. Pour cela, nous allons dans la section suivante majorer ce succès par rapport au succès d'un problème connu, le problème DOOM.
 
 
 \subsubsection{Réduction au problème DOOM}
+\begin{defi} (Le problème DOOM). Soient des paramètres $(n,q,k,\omega,N)$, où $N$ est un entier. \\
+
+\leftskip=1cm
+\noindent$I$ : $\mathbf{H}$ une matrice uniforme de $\F_q^{(n-k)\times n}$ et $(\mathbf{s}_1,...,\mathbf{s}_N)$ une liste de $N$ syndromes. 
+
+\noindent$Q$ : Décoder l'un des syndromes à la distance $w := \lfloor \omega n \rfloor$. 
+
+\leftskip=0cm
+
+On définit alors le succès de DOOM comme :
+$$Succ^{DOOM(n,q,k,N)}(t) := \max_{\mathcal{A};|A|\leq t}(\mathbb{P}(\mathcal{A}(\mathbf{H},\mathbf{s}_1,...,\mathbf{s}_n)=\mathbf{e}\text{ tel que }$$
+$$ \mathbf{eH}^T = \mathbf{s}_j \text{ pour un certain } j \in \{1,...,N\})).$$
+\end{defi} 
+
+La réduction à ce problème est naturelle pour un schéma de signature puisque JHFEKHZFKHFKZEHFILZEJHFKLZEJFHJ. \\ 
+EXPLICATION INFORMELLE DE LA REDUCTION, POURQUOI ELLE VA MARCHER \\
+
+Pour faire une preuve formelle de cette réduction, nous allons introduire un système de jeux qui nous permettra de réduire la sécurité d'un système à un problème $P$. Soit $\mathcal{A}$ un attaquant et $\mathcal{R}$ un rival. Soient $G_0, G_1, ...,G_N$ un ensemble de jeux et soit $\mathbb{P}(G_i)$ la probabilité pour $\mathcal{A}$ de répondre au défi posé par $\mathcal{R}$ pour le jeu $G_i$. $\mathbb{P}(G_0)$ est alors la probabilité de cassé le système considérer et $\mathbb{P}(G_N)$ la probabilité de répondre au problème $P$. \\
+L'idée est de changer pas à pas les jeux $G_0$ à $G_N$ de façon à ce que :
+$$\forall i \in {0,...,N-1}, |\mathbb{P}(G_i)-\mathbb{P}(G_i+1)| \in negl(\lambda) \Longrightarrow |\mathbb{P}(G_0)-\mathbb{P}(G_N)|  \in negl(\lambda)$$
+où $\lambda$ est un paramètre de sécurité. Autrement dis, les changements sur les jeux ne changent qu'à un facteur négligeable près les probabilités de succès de l'attaquant $\mathcal{A}$. \\
+Il n'est pas possible de changer le comportement de $\mathcal{A}$ puisqu'il est quelconque, en revanche nous pouvons modifier celui de $R$. \\
+EVENTUELLEMENT METTRE LES 3 conditions mais je ne pense pas que ça soit nécessaire. \\
+
+\begin{thm} (Réduction de sécurité). \\
+Soit $N_{sign}$ le nombre de requêtes faites à l'oracle de signature. Soit $\lambda$ le paramètre de sécurité et $\lambda_0=\lambda + 2\log_2(N_{sign})$. On a :
+$$Succ^{EUF-CMA}_{Wave}(t,N_{sign}) \leq 2Succ^{DOOM(n,q,k,N)}(t) + SMT$$
+\end{thm}
+
+\begin{proof}[Preuve]
+
+\end{proof}
+
 \subsubsection{Et la fonction de hachage ?}
 
 \subsection{Indistinguabilité des codes (U,U+V)-généralisés}
