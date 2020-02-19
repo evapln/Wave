@@ -21,6 +21,8 @@
 \renewcommand{\a}{\alpha}
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}} 
 \newcommand{\F}{\mathbb{F}} 
+\newcommand{\e}{\mathbf{e}} 
+\newcommand{\s}{\mathbf{s}} 
 \newcommand{\K}{\mathbb{K}} 
 
 \title{Projet - Wave}
@@ -465,8 +467,8 @@ Avant d'expliciter nos algorithmes, il est nécéssaire d'introduire quelques no
 \begin{nota} On notera :
 \begin{itemize}
 \item $\mathbf{e}^{unif}$ la variable aléatoire tirée uniformément dans l'ensemble $S_{w,n}$
-\item $\mathbf{e}_V^{unif}$ la variable aléatoire tirée uniformément dans $\F_q^{n/2}$
-\item $\mathbf{e}_U^{unif}$ ?????
+\item $\mathbf{e}_V^{unif}$ la variable aléatoire tirée uniformément dans les mots de $\F_q^{n/2}$ 
+\item $\mathbf{e}_U^{unif}$ la variable aléatoire tirée uniformément dans les mots de $\F_q^{n/2}$ conditionné au vecteur $\e_V^{unif}$
 \end{itemize}
 \end{nota}
 
@@ -551,7 +553,7 @@ $\verb|Init|$:\\
 \end{flushleft}
 \begin{flushleft}
 $\verb|Sign|(s)$: \\
-	$\quad \mathbf{e} \leftarrow \mathcal{D}_{\varphi,\mathbf{H}_{U},\mathbf{H}_{V}}(s)$ ¯\\
+	$\quad \mathbf{e} \leftarrow \mathcal{D}_{\varphi,\mathbf{H}_{U},\mathbf{H}_{V}}(s)$ \\
 	$\quad$ \verb|renvoie | $\mathbf{e}$
 \end{flushleft}
 \begin{flushleft}
@@ -599,7 +601,14 @@ $$Succ^{EUF-CMA}_{Wave}(t,N_{sign}) \leq 2Succ^{DOOM(n,q,k,N)}(t) + SMT$$
 \end{thm}
 
 \begin{proof}[Preuve]
-
+\begin{itemize} On rappelle que correspond à notre jeu pour la sécurité EUF-CMA de Wave.
+\item $G_1$ : Changer le jeu si lors d'un appelle à la fonction sign, deux $r$ identiques sont choisis pour un même message $m$. S0 + P(F) négligeable
+\item $G_2$ : On crée une liste suffisemment grande de Lm, des sel, tous différent. Dans la fonction hash, si r est dans la liste, alors on choisit un e unifirme dans Sw, on renvoit son syndrome. e est stocké et au même couple (r, m) le même syndrome sera renvoyé. Si r n'est pas la dans liste, on renvoit un des syndromes de doom \\
+Dans la fonction sign, on prend toujours le r suivant dans Lm. (ne pose pas de pb grace au passage à $G_1$ Ainsi dans sign, on ne signera jamais les syndromes de DOOM. On s'assure donc que le fait d'avoir un oracle à sign dans UEF-CMA ne change pas la sécu face à DOOM.
+\item $G_3$ : Ici, on enlève l'utilisation de la trappe uniquement pour les syndromes non-DOOM, càd dans la fonction sign. On n'appelle plus la fonction de décodage D. A la place, on écupère le e stocké
+\item $G_4$ : On remplace Hpk par H0. Pas de pb car plus de trappe
+\item $G_5$ : On verifie que r n'est pas dans Lm, ainsi on est bien sûr que A a signé un message de DOOM ET qu'il connait nécessairement la trappe. 
+\end{itemize}
 \end{proof}
 
 \subsubsection{Et la fonction de hachage ?}
