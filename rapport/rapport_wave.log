@@ -1,0 +1,1107 @@
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2020.2.20)  20 FEB 2020 16:47
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**rapport_wave.tex
+(./rapport_wave.tex
+LaTeX2e <2019-10-01> patch level 3
+(/usr/share/texlive/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2019/10/25 v1.4k Standard LaTeX document class
+(/usr/share/texlive/texmf-dist/tex/latex/base/size12.clo
+File: size12.clo 2019/10/25 v1.4k Standard LaTeX file (size option)
+)
+\c@part=\count80
+\c@section=\count81
+\c@subsection=\count82
+\c@subsubsection=\count83
+\c@paragraph=\count84
+\c@subparagraph=\count85
+\c@figure=\count86
+\c@table=\count87
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+)
+(/usr/share/texlive/texmf-dist/tex/generic/babel/babel.sty
+Package: babel 2019/11/14 3.36 The Babel package
+
+(/usr/share/texlive/texmf-dist/tex/generic/babel/switch.def
+File: switch.def 2019/11/14 3.36 Babel switching mechanism
+)
+Package babel Info: You haven't specified a language. I'll use 'nil'
+(babel)             as the main language. Reported on input line 584.
+
+(/usr/share/texlive/texmf-dist/tex/generic/babel/nil.ldf
+Language: nil 2019/11/14 3.36 Nil language
+
+(/usr/share/texlive/texmf-dist/tex/generic/babel/babel.def
+File: babel.def 2019/11/14 3.36 Babel common definitions
+\babel@savecnt=\count88
+\U@D=\dimen103
+
+(/usr/share/texlive/texmf-dist/tex/generic/babel/txtbabel.def)
+\bbl@dirlevel=\count89
+)
+\l@nil=\language9
+))
+(/usr/share/texlive/texmf-dist/tex/latex/base/inputenc.sty
+Package: inputenc 2018/08/11 v1.3c Input encoding file
+\inpenc@prehook=\toks14
+\inpenc@posthook=\toks15
+
+(/usr/share/texlive/texmf-dist/tex/latex/ucs/utf8x.def
+File: utf8x.def 2004/10/17 UCS: Input encoding UTF-8
+))
+(/usr/share/texlive/texmf-dist/tex/latex/ucs/ucs.sty
+Package: ucs 2013/05/11 v2.2 UCS: Unicode input support
+
+(/usr/share/texlive/texmf-dist/tex/latex/ucs/data/uni-global.def
+File: uni-global.def 2013/05/13 UCS: Unicode global data
+)
+\uc@secondtry=\count90
+\uc@combtoks=\toks16
+\uc@combtoksb=\toks17
+\uc@temptokena=\toks18
+)
+(/usr/share/texlive/texmf-dist/tex/latex/base/fontenc.sty
+Package: fontenc 2018/08/11 v2.0j Standard LaTeX package
+
+(/usr/share/texlive/texmf-dist/tex/latex/base/t1enc.def
+File: t1enc.def 2018/08/11 v2.0j Standard LaTeX file
+LaTeX Font Info:    Redeclaring font encoding T1 on input line 48.
+))
+(/usr/share/texlive/texmf-dist/tex/latex/todonotes/todonotes.sty
+Package: todonotes 2019/01/24 v1.1.2 Todonotes source and documentation.
+Package: todonotes 2018/11/22
+
+(/usr/share/texlive/texmf-dist/tex/latex/base/ifthen.sty
+Package: ifthen 2014/09/29 v1.1c Standard LaTeX ifthen package (DPC)
+)
+(/usr/share/texlive/texmf-dist/tex/latex/xkeyval/xkeyval.sty
+Package: xkeyval 2014/12/03 v2.7a package option processing (HA)
+
+(/usr/share/texlive/texmf-dist/tex/generic/xkeyval/xkeyval.tex
+(/usr/share/texlive/texmf-dist/tex/generic/xkeyval/xkvutils.tex
+\XKV@toks=\toks19
+\XKV@tempa@toks=\toks20
+
+(/usr/share/texlive/texmf-dist/tex/generic/xkeyval/keyval.tex))
+\XKV@depth=\count91
+File: xkeyval.tex 2014/12/03 v2.7a key=value parser (HA)
+))
+(/usr/share/texlive/texmf-dist/tex/latex/xcolor/xcolor.sty
+Package: xcolor 2016/05/11 v2.12 LaTeX color extensions (UK)
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-cfg/color.cfg
+File: color.cfg 2016/01/02 v1.6 sample color configuration
+)
+Package xcolor Info: Driver file: pdftex.def on input line 225.
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-def/pdftex.def
+File: pdftex.def 2018/01/08 v1.0l Graphics/color driver for pdftex
+)
+Package xcolor Info: Model `cmy' substituted by `cmy0' on input line 1348.
+Package xcolor Info: Model `hsb' substituted by `rgb' on input line 1352.
+Package xcolor Info: Model `RGB' extended on input line 1364.
+Package xcolor Info: Model `HTML' substituted by `rgb' on input line 1366.
+Package xcolor Info: Model `Hsb' substituted by `hsb' on input line 1367.
+Package xcolor Info: Model `tHsb' substituted by `hsb' on input line 1368.
+Package xcolor Info: Model `HSB' substituted by `hsb' on input line 1369.
+Package xcolor Info: Model `Gray' substituted by `gray' on input line 1370.
+Package xcolor Info: Model `wave' substituted by `hsb' on input line 1371.
+)
+(/usr/share/texlive/texmf-dist/tex/latex/pgf/frontendlayer/tikz.sty
+(/usr/share/texlive/texmf-dist/tex/latex/pgf/basiclayer/pgf.sty
+(/usr/share/texlive/texmf-dist/tex/latex/pgf/utilities/pgfrcs.sty
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/utilities/pgfutil-common.tex
+\pgfutil@everybye=\toks21
+\pgfutil@tempdima=\dimen104
+\pgfutil@tempdimb=\dimen105
+
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/utilities/pgfutil-common-lists.t
+ex)) (/usr/share/texlive/texmf-dist/tex/generic/pgf/utilities/pgfutil-latex.def
+\pgfutil@abb=\box27
+(/usr/share/texlive/texmf-dist/tex/latex/ms/everyshi.sty
+Package: everyshi 2001/05/15 v3.00 EveryShipout Package (MS)
+))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/utilities/pgfrcs.code.tex
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/pgf.revision.tex)
+Package: pgfrcs 2019/08/03 v3.1.4b (3.1.4b)
+))
+Package: pgf 2019/08/03 v3.1.4b (3.1.4b)
+
+(/usr/share/texlive/texmf-dist/tex/latex/pgf/basiclayer/pgfcore.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphicx.sty
+Package: graphicx 2017/06/01 v1.1a Enhanced LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphics.sty
+Package: graphics 2019/11/01 v1.3d Standard LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/trig.sty
+Package: trig 2016/01/03 v1.10 sin cos tan (DPC)
+)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-cfg/graphics.cfg
+File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
+)
+Package graphics Info: Driver file: pdftex.def on input line 105.
+)
+\Gin@req@height=\dimen106
+\Gin@req@width=\dimen107
+)
+(/usr/share/texlive/texmf-dist/tex/latex/pgf/systemlayer/pgfsys.sty
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/systemlayer/pgfsys.code.tex
+Package: pgfsys 2019/08/03 v3.1.4b (3.1.4b)
+
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/utilities/pgfkeys.code.tex
+\pgfkeys@pathtoks=\toks22
+\pgfkeys@temptoks=\toks23
+
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/utilities/pgfkeysfiltered.code.t
+ex
+\pgfkeys@tmptoks=\toks24
+))
+\pgf@x=\dimen108
+\pgf@y=\dimen109
+\pgf@xa=\dimen110
+\pgf@ya=\dimen111
+\pgf@xb=\dimen112
+\pgf@yb=\dimen113
+\pgf@xc=\dimen114
+\pgf@yc=\dimen115
+\pgf@xd=\dimen116
+\pgf@yd=\dimen117
+\w@pgf@writea=\write3
+\r@pgf@reada=\read1
+\c@pgf@counta=\count92
+\c@pgf@countb=\count93
+\c@pgf@countc=\count94
+\c@pgf@countd=\count95
+\t@pgf@toka=\toks25
+\t@pgf@tokb=\toks26
+\t@pgf@tokc=\toks27
+\pgf@sys@id@count=\count96
+ (/usr/share/texlive/texmf-dist/tex/generic/pgf/systemlayer/pgf.cfg
+File: pgf.cfg 2019/08/03 v3.1.4b (3.1.4b)
+)
+Driver file for pgf: pgfsys-pdftex.def
+
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-pdftex.def
+File: pgfsys-pdftex.def 2019/08/03 v3.1.4b (3.1.4b)
+
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-common-pdf.de
+f
+File: pgfsys-common-pdf.def 2019/08/03 v3.1.4b (3.1.4b)
+)))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/systemlayer/pgfsyssoftpath.code.
+tex
+File: pgfsyssoftpath.code.tex 2019/08/03 v3.1.4b (3.1.4b)
+\pgfsyssoftpath@smallbuffer@items=\count97
+\pgfsyssoftpath@bigbuffer@items=\count98
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/systemlayer/pgfsysprotocol.code.
+tex
+File: pgfsysprotocol.code.tex 2019/08/03 v3.1.4b (3.1.4b)
+))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcore.code.tex
+Package: pgfcore 2019/08/03 v3.1.4b (3.1.4b)
+
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathcalc.code.tex
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathutil.code.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathparser.code.tex
+\pgfmath@dimen=\dimen118
+\pgfmath@count=\count99
+\pgfmath@box=\box28
+\pgfmath@toks=\toks28
+\pgfmath@stack@operand=\toks29
+\pgfmath@stack@operation=\toks30
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.code.tex
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.basic.code
+.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.trigonomet
+ric.code.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.random.cod
+e.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.comparison
+.code.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.base.code.
+tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.round.code
+.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.misc.code.
+tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.integerari
+thmetics.code.tex)))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfloat.code.tex
+\c@pgfmathroundto@lastzeros=\count100
+))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfint.code.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepoints.code.te
+x
+File: pgfcorepoints.code.tex 2019/08/03 v3.1.4b (3.1.4b)
+\pgf@picminx=\dimen119
+\pgf@picmaxx=\dimen120
+\pgf@picminy=\dimen121
+\pgf@picmaxy=\dimen122
+\pgf@pathminx=\dimen123
+\pgf@pathmaxx=\dimen124
+\pgf@pathminy=\dimen125
+\pgf@pathmaxy=\dimen126
+\pgf@xx=\dimen127
+\pgf@xy=\dimen128
+\pgf@yx=\dimen129
+\pgf@yy=\dimen130
+\pgf@zx=\dimen131
+\pgf@zy=\dimen132
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathconstruct.
+code.tex
+File: pgfcorepathconstruct.code.tex 2019/08/03 v3.1.4b (3.1.4b)
+\pgf@path@lastx=\dimen133
+\pgf@path@lasty=\dimen134
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathusage.code
+.tex
+File: pgfcorepathusage.code.tex 2019/08/03 v3.1.4b (3.1.4b)
+\pgf@shorten@end@additional=\dimen135
+\pgf@shorten@start@additional=\dimen136
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcorescopes.code.te
+x
+File: pgfcorescopes.code.tex 2019/08/03 v3.1.4b (3.1.4b)
+\pgfpic=\box29
+\pgf@hbox=\box30
+\pgf@layerbox@main=\box31
+\pgf@picture@serial@count=\count101
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcoregraphicstate.c
+ode.tex
+File: pgfcoregraphicstate.code.tex 2019/08/03 v3.1.4b (3.1.4b)
+\pgflinewidth=\dimen137
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretransformation
+s.code.tex
+File: pgfcoretransformations.code.tex 2019/08/03 v3.1.4b (3.1.4b)
+\pgf@pt@x=\dimen138
+\pgf@pt@y=\dimen139
+\pgf@pt@temp=\dimen140
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcorequick.code.tex
+File: pgfcorequick.code.tex 2019/08/03 v3.1.4b (3.1.4b)
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreobjects.code.t
+ex
+File: pgfcoreobjects.code.tex 2019/08/03 v3.1.4b (3.1.4b)
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathprocessing
+.code.tex
+File: pgfcorepathprocessing.code.tex 2019/08/03 v3.1.4b (3.1.4b)
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcorearrows.code.te
+x
+File: pgfcorearrows.code.tex 2019/08/03 v3.1.4b (3.1.4b)
+\pgfarrowsep=\dimen141
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreshade.code.tex
+File: pgfcoreshade.code.tex 2019/08/03 v3.1.4b (3.1.4b)
+\pgf@max=\dimen142
+\pgf@sys@shading@range@num=\count102
+\pgf@shadingcount=\count103
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreimage.code.tex
+File: pgfcoreimage.code.tex 2019/08/03 v3.1.4b (3.1.4b)
+
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreexternal.code.
+tex
+File: pgfcoreexternal.code.tex 2019/08/03 v3.1.4b (3.1.4b)
+\pgfexternal@startupbox=\box32
+))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcorelayers.code.te
+x
+File: pgfcorelayers.code.tex 2019/08/03 v3.1.4b (3.1.4b)
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretransparency.c
+ode.tex
+File: pgfcoretransparency.code.tex 2019/08/03 v3.1.4b (3.1.4b)
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepatterns.code.
+tex
+File: pgfcorepatterns.code.tex 2019/08/03 v3.1.4b (3.1.4b)
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcorerdf.code.tex
+File: pgfcorerdf.code.tex 2019/08/03 v3.1.4b (3.1.4b)
+)))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/modules/pgfmoduleshapes.code.tex
+File: pgfmoduleshapes.code.tex 2019/08/03 v3.1.4b (3.1.4b)
+\pgfnodeparttextbox=\box33
+) (/usr/share/texlive/texmf-dist/tex/generic/pgf/modules/pgfmoduleplot.code.tex
+File: pgfmoduleplot.code.tex 2019/08/03 v3.1.4b (3.1.4b)
+)
+(/usr/share/texlive/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-version-0-65
+.sty
+Package: pgfcomp-version-0-65 2019/08/03 v3.1.4b (3.1.4b)
+\pgf@nodesepstart=\dimen143
+\pgf@nodesepend=\dimen144
+)
+(/usr/share/texlive/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-version-1-18
+.sty
+Package: pgfcomp-version-1-18 2019/08/03 v3.1.4b (3.1.4b)
+)) (/usr/share/texlive/texmf-dist/tex/latex/pgf/utilities/pgffor.sty
+(/usr/share/texlive/texmf-dist/tex/latex/pgf/utilities/pgfkeys.sty
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/utilities/pgfkeys.code.tex))
+(/usr/share/texlive/texmf-dist/tex/latex/pgf/math/pgfmath.sty
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/utilities/pgffor.code.tex
+Package: pgffor 2019/08/03 v3.1.4b (3.1.4b)
+
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex)
+\pgffor@iter=\dimen145
+\pgffor@skip=\dimen146
+\pgffor@stack=\toks31
+\pgffor@toks=\toks32
+))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/tikz.code.tex
+Package: tikz 2019/08/03 v3.1.4b (3.1.4b)
+
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/libraries/pgflibraryplothandlers
+.code.tex
+File: pgflibraryplothandlers.code.tex 2019/08/03 v3.1.4b (3.1.4b)
+\pgf@plot@mark@count=\count104
+\pgfplotmarksize=\dimen147
+)
+\tikz@lastx=\dimen148
+\tikz@lasty=\dimen149
+\tikz@lastxsaved=\dimen150
+\tikz@lastysaved=\dimen151
+\tikz@lastmovetox=\dimen152
+\tikz@lastmovetoy=\dimen153
+\tikzleveldistance=\dimen154
+\tikzsiblingdistance=\dimen155
+\tikz@figbox=\box34
+\tikz@figbox@bg=\box35
+\tikz@tempbox=\box36
+\tikz@tempbox@bg=\box37
+\tikztreelevel=\count105
+\tikznumberofchildren=\count106
+\tikznumberofcurrentchild=\count107
+\tikz@fig@count=\count108
+
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/modules/pgfmodulematrix.code.tex
+File: pgfmodulematrix.code.tex 2019/08/03 v3.1.4b (3.1.4b)
+\pgfmatrixcurrentrow=\count109
+\pgfmatrixcurrentcolumn=\count110
+\pgf@matrix@numberofcolumns=\count111
+)
+\tikz@expandcount=\count112
+
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tik
+zlibrarytopaths.code.tex
+File: tikzlibrarytopaths.code.tex 2019/08/03 v3.1.4b (3.1.4b)
+)))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tik
+zlibrarypositioning.code.tex
+File: tikzlibrarypositioning.code.tex 2019/08/03 v3.1.4b (3.1.4b)
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tik
+zlibraryshadows.code.tex
+File: tikzlibraryshadows.code.tex 2019/08/03 v3.1.4b (3.1.4b)
+
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tik
+zlibraryfadings.code.tex
+File: tikzlibraryfadings.code.tex 2019/08/03 v3.1.4b (3.1.4b)
+
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/libraries/pgflibraryfadings.code
+.tex
+File: pgflibraryfadings.code.tex 2019/08/03 v3.1.4b (3.1.4b)
+))) (/usr/share/texlive/texmf-dist/tex/latex/tools/calc.sty
+Package: calc 2017/05/25 v4.3 Infix arithmetic (KKT,FJ)
+\calc@Acount=\count113
+\calc@Bcount=\count114
+\calc@Adimen=\dimen156
+\calc@Bdimen=\dimen157
+\calc@Askip=\skip43
+\calc@Bskip=\skip44
+LaTeX Info: Redefining \setlength on input line 80.
+LaTeX Info: Redefining \addtolength on input line 81.
+\calc@Ccount=\count115
+\calc@Cskip=\skip45
+)
+\c@@todonotes@numberoftodonotes=\count116
+)
+(/usr/share/texlive/texmf-dist/tex/latex/listings/listings.sty
+\lst@mode=\count117
+\lst@gtempboxa=\box38
+\lst@token=\toks33
+\lst@length=\count118
+\lst@currlwidth=\dimen158
+\lst@column=\count119
+\lst@pos=\count120
+\lst@lostspace=\dimen159
+\lst@width=\dimen160
+\lst@newlines=\count121
+\lst@lineno=\count122
+\lst@maxwidth=\dimen161
+
+(/usr/share/texlive/texmf-dist/tex/latex/listings/lstmisc.sty
+File: lstmisc.sty 2019/09/10 1.8c (Carsten Heinz)
+\c@lstnumber=\count123
+\lst@skipnumbers=\count124
+\lst@framebox=\box39
+)
+(/usr/share/texlive/texmf-dist/tex/latex/listings/listings.cfg
+File: listings.cfg 2019/09/10 1.8c listings configuration
+))
+Package: listings 2019/09/10 1.8c (Carsten Heinz)
+
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amssymb.sty
+Package: amssymb 2013/01/14 v3.01 AMS font symbols
+
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amsfonts.sty
+Package: amsfonts 2013/01/14 v3.01 Basic AMSFonts support
+\@emptytoks=\toks34
+\symAMSa=\mathgroup4
+\symAMSb=\mathgroup5
+LaTeX Font Info:    Redeclaring math symbol \hbar on input line 98.
+LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
+(Font)                  U/euf/m/n --> U/euf/b/n on input line 106.
+))
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsmath.sty
+Package: amsmath 2019/11/16 v2.17d AMS math features
+\@mathmargin=\skip46
+
+For additional information on amsmath, use the `?' option.
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amstext.sty
+Package: amstext 2000/06/29 v2.01 AMS text
+
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsgen.sty
+File: amsgen.sty 1999/11/30 v2.0 generic functions
+\@emptytoks=\toks35
+\ex@=\dimen162
+))
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsbsy.sty
+Package: amsbsy 1999/11/29 v1.2d Bold Symbols
+\pmbraise@=\dimen163
+)
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsopn.sty
+Package: amsopn 2016/03/08 v2.02 operator names
+)
+\inf@bad=\count125
+LaTeX Info: Redefining \frac on input line 227.
+\uproot@=\count126
+\leftroot@=\count127
+LaTeX Info: Redefining \overline on input line 389.
+\classnum@=\count128
+\DOTSCASE@=\count129
+LaTeX Info: Redefining \ldots on input line 486.
+LaTeX Info: Redefining \dots on input line 489.
+LaTeX Info: Redefining \cdots on input line 610.
+\Mathstrutbox@=\box40
+\strutbox@=\box41
+\big@size=\dimen164
+LaTeX Font Info:    Redeclaring font encoding OML on input line 733.
+LaTeX Font Info:    Redeclaring font encoding OMS on input line 734.
+\macc@depth=\count130
+\c@MaxMatrixCols=\count131
+\dotsspace@=\muskip10
+\c@parentequation=\count132
+\dspbrk@lvl=\count133
+\tag@help=\toks36
+\row@=\count134
+\column@=\count135
+\maxfields@=\count136
+\andhelp@=\toks37
+\eqnshift@=\dimen165
+\alignsep@=\dimen166
+\tagshift@=\dimen167
+\tagwidth@=\dimen168
+\totwidth@=\dimen169
+\lineht@=\dimen170
+\@envbody=\toks38
+\multlinegap=\skip47
+\multlinetaggap=\skip48
+\mathdisplay@stack=\toks39
+LaTeX Info: Redefining \[ on input line 2858.
+LaTeX Info: Redefining \] on input line 2859.
+)
+(/usr/share/texlive/texmf-dist/tex/latex/amscls/amsthm.sty
+Package: amsthm 2017/10/31 v2.20.4
+\thm@style=\toks40
+\thm@bodyfont=\toks41
+\thm@headfont=\toks42
+\thm@notefont=\toks43
+\thm@headpunct=\toks44
+\thm@preskip=\skip49
+\thm@postskip=\skip50
+\thm@headsep=\skip51
+\dth@everypar=\toks45
+)
+(/usr/share/texlive/texmf-dist/tex/latex/appendix/appendix.sty
+Package: appendix 2009/09/02 v1.2b extra appendix facilities
+\c@@pps=\count137
+\c@@ppsavesec=\count138
+\c@@ppsaveapp=\count139
+)
+(/usr/share/texlive/texmf-dist/tex/latex/tools/multicol.sty
+Package: multicol 2019/03/01 v1.8w multicolumn formatting (FMi)
+\c@tracingmulticols=\count140
+\mult@box=\box42
+\multicol@leftmargin=\dimen171
+\c@unbalance=\count141
+\c@collectmore=\count142
+\doublecol@number=\count143
+\multicoltolerance=\count144
+\multicolpretolerance=\count145
+\full@width=\dimen172
+\page@free=\dimen173
+\premulticols=\dimen174
+\postmulticols=\dimen175
+\multicolsep=\skip52
+\multicolbaselineskip=\skip53
+\partial@page=\box43
+\last@line=\box44
+\maxbalancingoverflow=\dimen176
+\mult@rightbox=\box45
+\mult@grightbox=\box46
+\mult@gfirstbox=\box47
+\mult@firstbox=\box48
+\@tempa=\box49
+\@tempa=\box50
+\@tempa=\box51
+\@tempa=\box52
+\@tempa=\box53
+\@tempa=\box54
+\@tempa=\box55
+\@tempa=\box56
+\@tempa=\box57
+\@tempa=\box58
+\@tempa=\box59
+\@tempa=\box60
+\@tempa=\box61
+\@tempa=\box62
+\@tempa=\box63
+\@tempa=\box64
+\@tempa=\box65
+\c@minrows=\count146
+\c@columnbadness=\count147
+\c@finalcolumnbadness=\count148
+\last@try=\dimen177
+\multicolovershoot=\dimen178
+\multicolundershoot=\dimen179
+\mult@nat@firstbox=\box66
+\colbreak@box=\box67
+\mc@col@check@num=\count149
+)
+(/usr/share/texlive/texmf-dist/tex/latex/stmaryrd/stmaryrd.sty
+Package: stmaryrd 1994/03/03 St Mary's Road symbol package
+\symstmry=\mathgroup6
+LaTeX Font Info:    Overwriting symbol font `stmry' in version `bold'
+(Font)                  U/stmry/m/n --> U/stmry/b/n on input line 89.
+)
+(/usr/share/texlive/texmf-dist/tex/latex/algorithms/algorithm.sty
+Package: algorithm 2009/08/24 v0.1 Document Style `algorithm' - floating enviro
+nment
+
+(/usr/share/texlive/texmf-dist/tex/latex/float/float.sty
+Package: float 2001/11/08 v1.3d Float enhancements (AL)
+\c@float@type=\count150
+\float@exts=\toks46
+\float@box=\box68
+\@float@everytoks=\toks47
+\@floatcapt=\box69
+)
+\@float@every@algorithm=\toks48
+\c@algorithm=\count151
+)
+(/usr/share/texlive/texmf-dist/tex/latex/algorithms/algorithmic.sty
+Package: algorithmic 2009/08/24 v0.1 Document Style `algorithmic'
+\c@ALC@unique=\count152
+\c@ALC@line=\count153
+\c@ALC@rem=\count154
+\c@ALC@depth=\count155
+\ALC@tlm=\skip54
+\algorithmicindent=\skip55
+)
+\c@thm=\count156
+
+No file rapport_wave.aux.
+\openout1 = `rapport_wave.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 45.
+LaTeX Font Info:    ... okay on input line 45.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 45.
+LaTeX Font Info:    ... okay on input line 45.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 45.
+LaTeX Font Info:    ... okay on input line 45.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 45.
+LaTeX Font Info:    ... okay on input line 45.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 45.
+LaTeX Font Info:    ... okay on input line 45.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 45.
+LaTeX Font Info:    ... okay on input line 45.
+(/usr/share/texlive/texmf-dist/tex/latex/ucs/ucsencs.def
+File: ucsencs.def 2011/01/21 Fixes to fontencodings LGR, T3
+)
+(/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count157
+\scratchdimen=\dimen180
+\scratchbox=\box70
+\nofMPsegments=\count158
+\nofMParguments=\count159
+\everyMPshowfont=\toks49
+\MPscratchCnt=\count160
+\MPscratchDim=\dimen181
+\MPnumerator=\count161
+\makeMPintoPDFobject=\count162
+\everyMPtoPDFconversion=\toks50
+) (/usr/share/texlive/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
+Package: epstopdf-base 2019-11-30 v2.9 Base part for package epstopdf
+Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
+85.
+
+(/usr/share/texlive/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
+File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
+e
+))
+ABD: EveryShipout initializing macros
+
+Package todonotes Warning: The length marginparwidth is less than 2cm and will 
+most likely cause issues with the appearance of inserted todonotes. The issue c
+an be solved by adding a line like \setlength {\marginparwidth }{2cm} prior to 
+loading the todonotes package. on input line 45.
+
+\c@lstlisting=\count163
+(/usr/share/texlive/texmf-dist/tex/latex/ucs/data/uni-0.def
+File: uni-0.def 2013/05/13 UCS: Unicode data U+0000..U+00FF
+)
+LaTeX Font Info:    Trying to load font information for U+msa on input line 65.
+
+
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
+File: umsa.fd 2013/01/14 v3.01 AMS symbols A
+)
+LaTeX Font Info:    Trying to load font information for U+msb on input line 65.
+
+
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
+File: umsb.fd 2013/01/14 v3.01 AMS symbols B
+)
+LaTeX Font Info:    Trying to load font information for U+stmry on input line 6
+5.
+
+(/usr/share/texlive/texmf-dist/tex/latex/stmaryrd/Ustmry.fd)
+<include/Universite_Bordeaux.jpg, id=29, 995.72pt x 399.4925pt>
+File: include/Universite_Bordeaux.jpg Graphic file (type jpg)
+<use include/Universite_Bordeaux.jpg>
+Package pdftex.def Info: include/Universite_Bordeaux.jpg  used on input line 80
+.
+(pdftex.def)             Requested size: 199.14047pt x 79.89708pt.
+ [1
+
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map} <./include/Universite_Borde
+aux.jpg>]
+No file rapport_wave.toc.
+\tf@toc=\write4
+\openout4 = `rapport_wave.toc'.
+
+[1]
+Underfull \hbox (badness 10000) in paragraph at lines 91--95
+
+ []
+
+<include/nist_second_tour.png, id=45, 953.5625pt x 307.1475pt>
+File: include/nist_second_tour.png Graphic file (type png)
+<use include/nist_second_tour.png>
+Package pdftex.def Info: include/nist_second_tour.png  used on input line 99.
+(pdftex.def)             Requested size: 381.41824pt x 122.85681pt.
+(/usr/share/texlive/texmf-dist/tex/latex/ucs/data/uni-32.def
+File: uni-32.def 2013/05/13 UCS: Unicode data U+2000..U+20FF
+)
+Overfull \hbox (6.23524pt too wide) in paragraph at lines 103--109
+\T1/cmr/m/n/12 Explication rapide du schéma wave + on cherchera à rendre les so
+rties uniforme
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 103--109
+
+ []
+
+[2 <./include/nist_second_tour.png>]
+Overfull \hbox (12.96695pt too wide) in paragraph at lines 111--113
+\T1/cmr/m/n/12 s'appuie aussi sur la notion de fonctions GPV en moyenne, que no
+us détaillerons. 
+ []
+
+
+Overfull \hbox (1.22739pt too wide) in paragraph at lines 117--118
+[]\T1/cmr/bx/n/12 Définition 1.1. []\T1/cmr/m/it/12 (Code (U,U+V).) Un code $\O
+T1/cmr/m/n/12 (\OML/cmm/m/it/12 U; U \OT1/cmr/m/n/12 + \OML/cmm/m/it/12 V\OT1/c
+mr/m/n/12 )$ \T1/cmr/m/it/12 est un code de longueur
+ []
+
+
+LaTeX Warning: Reference `UV' on page 3 undefined on input line 129.
+
+
+Overfull \hbox (20.85799pt too wide) in paragraph at lines 129--130
+[]\T1/cmr/m/n/12 En revanche, pour le système de signature wave, on utilisera u
+ne généralisation
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 129--130
+
+ []
+
+[3]
+Underfull \hbox (badness 10000) in paragraph at lines 138--139
+
+ []
+
+
+LaTeX Warning: Reference `ac' on page 4 undefined on input line 144.
+
+
+LaTeX Warning: Reference `ad-bc' on page 4 undefined on input line 145.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 148--149
+
+ []
+
+
+Overfull \hbox (21.06004pt too wide) in paragraph at lines 151--155
+\T1/cmr/m/it/12 De plus soient $\OML/cmm/m/it/12 G[] \OMS/cmsy/m/n/12 2 \U/msb/
+m/n/12 F[]$ \T1/cmr/m/it/12 (respectivement $\OML/cmm/m/it/12 G[] \OMS/cmsy/m/n
+/12 2 \U/msb/m/n/12 F[]$\T1/cmr/m/it/12 ) et $\OML/cmm/m/it/12 H[] \OMS/cmsy/m/
+n/12 2 \U/msb/m/n/12 F[]$
+ []
+
+[4]
+Underfull \hbox (badness 10000) in paragraph at lines 242--243
+
+ []
+
+
+LaTeX Warning: Reference `dim_hull' on page 5 undefined on input line 245.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 253--254
+
+ []
+
+[5]
+LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 2
+63.
+ (/usr/share/texlive/texmf-dist/tex/latex/base/t1cmtt.fd
+File: t1cmtt.fd 2014/09/29 v2.5h Standard LaTeX font definitions
+)
+Overfull \hbox (4.82858pt too wide) in paragraph at lines 263--264
+\T1/cmr/m/it/12 une paire d'algorithmes ([][]\T1/cmtt/m/n/12 Trapdoor[]\T1/cmr/
+m/it/12 ,[][]\T1/cmtt/m/n/12 InvertAlg[]\T1/cmr/m/it/12 ) ainsi qu'un triplet d
+e fonctions
+ []
+
+LaTeX Font Info:    Trying to load font information for OMS+cmr on input line 2
+65.
+(/usr/share/texlive/texmf-dist/tex/latex/base/omscmr.fd
+File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
+)
+LaTeX Font Info:    Font shape `OMS/cmr/m/it' in size <12> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 265.
+
+Overfull \hbox (3.17197pt too wide) in paragraph at lines 265--266
+[][][]\T1/cmtt/m/n/12 Trapdoor []\T1/cmr/m/it/12 est un algorithme probabiliste
+ et polynomial en $\OT1/cmr/m/n/12 1[]$ \T1/cmr/m/it/12 et renvoyant
+ []
+
+
+Overfull \hbox (5.0604pt too wide) in paragraph at lines 266--267
+[][][]\T1/cmtt/m/n/12 InvertAlg []\T1/cmr/m/it/12 est un algorithme probabilist
+e et polynomial prenant en entrée
+ []
+
+
+Overfull \hbox (19.04906pt too wide) in paragraph at lines 272--274
+\OML/cmm/m/it/12 ^^Z\OT1/cmr/m/n/12 ([](\OML/cmm/m/it/12 s; T\OT1/cmr/m/n/12 )\
+OML/cmm/m/it/12 ; e\OT1/cmr/m/n/12 ) \OMS/cmsy/m/n/12 2 []\OT1/cmr/m/n/12 (\OML
+/cmm/m/it/12 ^^U\OT1/cmr/m/n/12 )$ \T1/cmr/m/it/12 où $\OML/cmm/m/it/12 e$ \T1/
+cmr/m/it/12 est pris uniformément dans l'ensemble
+ []
+
+[6]
+Underfull \hbox (badness 10000) in paragraph at lines 300--301
+
+ []
+
+
+Overfull \hbox (4.94078pt too wide) in paragraph at lines 308--309
+[]\T1/cmr/m/n/12 On rappelle que la fonction $\OML/cmm/m/it/12 f[]$ \T1/cmr/m/n
+/12 avec $\OT1/cmr/bx/n/12 H \OMS/cmsy/m/n/12 2 \U/msb/m/n/12 F[]$ \T1/cmr/m/n/
+12 s'inverse génériquement
+ []
+
+[7]
+
+LaTeX Warning: Reference `UV-normalise' on page 8 undefined on input line 334.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 352--353
+
+ []
+
+
+Overfull \hbox (13.6874pt too wide) in paragraph at lines 364--365
+\T1/cmr/m/n/12 comment utiliser les propriétés des codes $\OT1/cmr/m/n/12 (\OML
+/cmm/m/it/12 U; U \OT1/cmr/m/n/12 + \OML/cmm/m/it/12 V\OT1/cmr/m/n/12 )$\T1/cmr
+/m/n/12 -généréralisés pour permettre
+ []
+
+[8]
+Overfull \hbox (21.28743pt too wide) in paragraph at lines 392--393
+[]\T1/cmr/bx/n/12 Proposition 1.11. []\T1/cmr/m/it/12 Soit $\OT1/cmr/bx/n/12 e[
+]$ \T1/cmr/m/it/12 une sortie de [][]\T1/cmtt/m/n/12 DECODE_V[]\T1/cmr/m/it/12 
+. Soit [][]\T1/cmtt/m/n/12 DECODE_U []\T1/cmr/m/it/12 un algorithme
+ []
+
+
+Overfull \hbox (21.28743pt too wide) in paragraph at lines 421--422
+[]\T1/cmr/bx/n/12 Proposition 1.12. []\T1/cmr/m/it/12 Soit $\OT1/cmr/bx/n/12 e[
+]$ \T1/cmr/m/it/12 une sortie de [][]\T1/cmtt/m/n/12 DECODE_V[]\T1/cmr/m/it/12 
+. Soit [][]\T1/cmtt/m/n/12 DECODE_U []\T1/cmr/m/it/12 un algorithme
+ []
+
+[9]
+
+LaTeX Warning: Reference `syst petit poid' on page 10 undefined on input line 4
+45.
+
+LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <12> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 447.
+
+LaTeX Warning: Reference `graphique ratio' on page 10 undefined on input line 4
+62.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 462--463
+
+ []
+
+<include/graph_ratio_w.png, id=87, 740.7675pt x 534.99875pt>
+File: include/graph_ratio_w.png Graphic file (type png)
+<use include/graph_ratio_w.png>
+Package pdftex.def Info: include/graph_ratio_w.png  used on input line 467.
+(pdftex.def)             Requested size: 296.30174pt x 213.9957pt.
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 478--479
+
+ []
+
+[10] [11 <./include/graph_ratio_w.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 511--512
+
+ []
+
+[12]
+Overfull \hbox (2.4278pt too wide) in paragraph at lines 525--526
+[][][]\T1/cmtt/m/n/12 DECODE_U []\T1/cmr/m/it/12 est dit $\OML/cmm/m/it/12 m[]$
+\T1/cmr/m/it/12 -uniforme si ces sorties $\OT1/cmr/bx/n/12 e[]$ \T1/cmr/m/it/12
+ sont telles que $\U/msb/m/n/12 P\OT1/cmr/m/n/12 (\OT1/cmr/bx/n/12 e[] \OMS/cms
+y/m/n/12 j \OT1/cmr/bx/n/12 e[]\OT1/cmr/m/n/12 )$
+ []
+
+
+Overfull \hbox (6.46861pt too wide) in paragraph at lines 529--530
+[]\T1/cmr/bx/n/12 Lemme 2.4. []\T1/cmr/m/it/12 Soit $\OT1/cmr/bx/n/12 e$ \T1/cm
+r/m/it/12 la sortie de [][]\T1/cmtt/m/n/12 InvertAlg []\T1/cmr/m/it/12 avec $\O
+T1/cmr/bx/n/12 s[]$ \T1/cmr/m/it/12 et $\OT1/cmr/bx/n/12 s[]$ \T1/cmr/m/it/12 c
+hoisis uniformément
+ []
+
+
+Overfull \hbox (33.51472pt too wide) detected at line 560
+[]
+ []
+
+[13] [14] [15]
+Underfull \hbox (badness 10000) in paragraph at lines 664--670
+
+ []
+
+[16]
+Underfull \hbox (badness 10000) in paragraph at lines 671--672
+
+ []
+
+
+LaTeX Warning: Reference `maj_dist_e_eunif' on page 17 undefined on input line 
+712.
+
+
+LaTeX Warning: Reference `esp' on page 17 undefined on input line 712.
+
+
+LaTeX Warning: Reference `maj_dist_e_eunif' on page 17 undefined on input line 
+712.
+
+
+LaTeX Warning: Reference `esp' on page 17 undefined on input line 712.
+
+[17]
+
+LaTeX Warning: Reference `rejet' on page 18 undefined on input line 717.
+
+
+Overfull \hbox (5.39087pt too wide) in paragraph at lines 717--718
+[]\T1/cmr/m/n/12 La probabilité d'avoir un rejet équivaut à la probabilité d'av
+oir une distance
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 726--728
+
+ []
+
+[18]
+Underfull \hbox (badness 10000) in paragraph at lines 763--765
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 770--771
+
+ []
+
+[19]
+Underfull \hbox (badness 10000) in paragraph at lines 775--776
+ 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 783--784
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 787--788
+
+ []
+
+
+Overfull \hbox (3.05602pt too wide) in paragraph at lines 791--794
+\T1/cmr/m/n/12 Il n'est pas possible de changer le comportement de $\OMS/cmsy/m
+/n/12 A$ \T1/cmr/m/n/12 puisqu'il est quelconque,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 791--794
+
+ []
+
+[20]
+Overfull \hbox (1.42062pt too wide) in paragraph at lines 813--814
+\T1/cmr/m/n/12 (stocké) pris uniformément dans $\OML/cmm/m/it/12 S[]$\T1/cmr/m/
+n/12 . Elle renvoie alors $\OT1/cmr/bx/n/12 s \OT1/cmr/m/n/12 = \OT1/cmr/bx/n/1
+2 e[]H[]$\T1/cmr/m/n/12 . 
+ []
+
+[21]
+Overfull \hbox (0.66898pt too wide) in paragraph at lines 820--823
+[]$\OML/cmm/m/it/12 G[]$ \T1/cmr/m/n/12 : Le jeu $\OML/cmm/m/it/12 G[]$ \T1/cmr
+/m/n/12 permet à l'oracle de signature de se passer de l'algorithme
+ []
+
+
+Overfull \hbox (11.37892pt too wide) in paragraph at lines 820--823
+\T1/cmr/m/n/12 La différence de succès de dépand que de $\OML/cmm/m/it/12 !$ \T
+1/cmr/m/n/12 et des différence de distribution
+ []
+
+
+Overfull \hbox (1.33455pt too wide) in paragraph at lines 825--827
+\T1/cmr/m/n/12 revanche, nous avons créé un distingueur entre la distribution $
+\OT1/cmr/m/n/12 (:= \OMS/cmsy/m/n/12 D[]\OT1/cmr/m/n/12 )$
+ []
+
+
+Overfull \hbox (1.27399pt too wide) in paragraph at lines 825--827
+\OT1/cmr/m/n/12 (:= \OMS/cmsy/m/n/12 D[]\OT1/cmr/m/n/12 )$ \T1/cmr/m/n/12 des m
+atrices prises aléatoirement dans l'ensemble des matrices
+ []
+
+[22]
+Underfull \hbox (badness 10000) in paragraph at lines 839--842
+
+ []
+
+[23]
+No file rapport_wave.bbl.
+
+LaTeX Warning: Reference `maj_dist_e_eunif' on page 24 undefined on input line 
+855.
+
+
+LaTeX Warning: Reference `rho_f' on page 24 undefined on input line 880.
+
+
+LaTeX Warning: Reference `dim_hull_UV' on page 24 undefined on input line 893.
+
+[24] [25] (./rapport_wave.aux)
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+ ) 
+Here is how much of TeX's memory you used:
+ 17134 strings out of 493990
+ 312104 string characters out of 6170905
+ 365699 words of memory out of 5000000
+ 20891 multiletter control sequences out of 15000+600000
+ 29595 words of font info for 74 fonts, out of 8000000 for 9000
+ 81 hyphenation exceptions out of 8191
+ 68i,20n,83p,585b,587s stack positions out of 5000i,500n,10000p,200000b,80000s
+ </home/suzanne/.texlive2019/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1000.6
+00pk> </home/suzanne/.texlive2019/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt120
+0.600pk> </home/suzanne/.texlive2019/texmf-var/fonts/pk/ljfour/jknappen/ec/ecti
+1200.600pk> </home/suzanne/.texlive2019/texmf-var/fonts/pk/ljfour/jknappen/ec/e
+cbx1200.600pk> </home/suzanne/.texlive2019/texmf-var/fonts/pk/ljfour/jknappen/e
+c/ecbx1440.600pk> </home/suzanne/.texlive2019/texmf-var/fonts/pk/ljfour/jknappe
+n/ec/ecrm1095.600pk> </home/suzanne/.texlive2019/texmf-var/fonts/pk/ljfour/jkna
+ppen/ec/ecrm1200.600pk> </home/suzanne/.texlive2019/texmf-var/fonts/pk/ljfour/j
+knappen/ec/ecbx1728.600pk> </home/suzanne/.texlive2019/texmf-var/fonts/pk/ljfou
+r/jknappen/ec/ecti1440.600pk> </home/suzanne/.texlive2019/texmf-var/fonts/pk/lj
+four/jknappen/ec/ecrm1440.600pk> </home/suzanne/.texlive2019/texmf-var/fonts/pk
+/ljfour/jknappen/ec/ecbx2488.600pk> </home/suzanne/.texlive2019/texmf-var/fonts
+/pk/ljfour/jknappen/ec/eccc1440.600pk> </home/suzanne/.texlive2019/texmf-var/fo
+nts/pk/ljfour/jknappen/ec/eccc1728.600pk> </home/suzanne/.texlive2019/texmf-var
+/fonts/pk/ljfour/jknappen/ec/eccc2074.600pk></usr/share/texlive/texmf-dist/font
+s/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type
+1/public/amsfonts/cm/cmbx6.pfb></usr/share/texlive/texmf-dist/fonts/type1/publi
+c/amsfonts/cm/cmbx8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfo
+nts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm
+extra/cmex8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/c
+mmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.
+pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></u
+sr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/shar
+e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texli
+ve/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texm
+f-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/f
+onts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/typ
+e1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/pub
+lic/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/ams
+fonts/symbols/msbm10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/stma
+ryrd/stmary10.pfb>
+Output written on rapport_wave.pdf (26 pages, 531713 bytes).
+PDF statistics:
+ 675 PDF objects out of 1000 (max. 8388607)
+ 177 compressed objects within 2 object streams
+ 0 named destinations out of 1000 (max. 500000)
+ 124 words of extra memory for PDF output out of 10000 (max. 10000000)
+
