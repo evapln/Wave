@@ -12,7 +12,7 @@
 \usepackage{stmaryrd}
 \usepackage{algorithm, algorithmic}
 
-\theoremstyle{definition}
+\theoremstyle{plain}
 \newtheorem{thm}{Théorème}[section]
 \newtheorem{lemme}[thm]{Lemme}
 \newtheorem{remarque}[thm]{Remarque}
@@ -88,37 +88,39 @@ Février, 2020
 \section*{Introduction}
 \addcontentsline{toc}{section}{\protect\numberline{}Introduction}
 
-- passage au post-quantique \\
+- passage au post-quantique --> On cherche des alternatives à RSA et DH.\\
 - appel d'offre NIST \\
-	-> tableau : aucun code correcteur en signatures \\
-- dur de trouver l'ensemble des syndromes facilement décodable \\
-- dur de créer une fonction de hachage qui envoie m dans l'ensemble des syndromes possibles \\
-- problème du décodage NP-complet \\
-- mot y de syndrome s est associé à un unique mot de code c le plus proche de y \\
-quand on chiffre -> ne pose pas de problème \\
-quand on signe -> pose un problème car il est dur de trouver un syndrome de cette sorte \\
-la solution Wave est d'enlever la restriction au mot le plus proche \\
-Explication rapide du schéma wave + on cherchera à rendre les sorties uniforme + preuves de sécurité \\
+- On aimerai bien un système de signature utilisant les codes, puisque le problème du décodage d'un code aléatoire est NP-complet. \\
+- Ca marche pas mal pour le chiffrement, mais encore très compliqué pour les signatures, comme en témoigne le tableau des soumissions au NIST pour le secondd tour. \\
+
+\begin{figure}[h]
+\label{nist 2}
+\begin{center}
+\includegraphics [scale=0.4]{nist_second_tour.png}
+\end{center}
+\caption{\small Comparaison des soumissions au NIST du second tour.}
+\end{figure}
+\noindent Alors pourquoi est-il si compliqué de faire des signatures avec des codes correcteurs ? \\
+- car il est difficile de tomber dans l'ensemble des syndromes facilement décodable, ie. difficile de créer une fonction de hachage qui envoie le message $m$ dans l'ensemble des syndromes possibles. En effet, pour un décodage au sens stricte il faudrait un syndrome $s$ associé à un unique mot $c$ du code le plus proche.\\
+quand on chiffre -> ne pose pas de problème. \\
+quand on signe -> pose un problème car il est dur de trouver un syndrome de cette sorte. \\
+La solution de Wave est d'enlever la restriction au mot le plus proche. On cherche mainteant une famille de codes permettant de trouver pour un mot quelconque un des mots de code à distance w. En particulier, la distance de décodage w est très grande, ce qui assure typiquement de l’existence d’un mot de code à distance w.\\
+Explication rapide du schéma wave + on cherchera à rendre les sorties uniforme + preuves de sécurité. \\
 
 \section{Le schéma de signature Wave}
 Nous allons détailler dans cette section le schéma de signature Wave. C'est un schéma de type hache et signe à base de codes correcteurs. Pour des raisons de clarté nous oublierons dans un premier temps la problématique du hachage. Nous le réintroduirons en fin de rapport afin de proposer une preuve formelle de la sécurité du schéma, où la fonction de hachage est alors nécéssaire. Pour l'instant, nous considererons que l'entrée de l'algorithme de signature est déjà un syndrome du code considéré.\\
 Le schéma de signature Wave s'appuie sur une famille de codes appelés des codes (U,U+V)-généralisés. La strucure de ces codes nous permettrons de proposer un algorithme de décodage $\mathcal{D}$ utilisant une trappe $T$ et donnant un avantage par rapport à un algorithme de décodage générique. Ce système s'appuie aussi sur la notion de fonctions GPV en moyenne, que nous détaillerons.
 
 \subsection{La famille de codes (U,U+V)-généralisés}
-Définition des codes (U,U+V)-généralisés: \\
-- Comment les créer  FAIT \\
-- Choix des paramètres a,b,c,d \`A DETAILLER \\
-- Liens entre les matrices des codes U et V et du code UV FAIT \\
-- Les dimensions et différents paramètres  EN COURS \\
-- Calcul du hull ==> q > 2 TODO \\
-- ...? \\
+Pour définir la famille de code utilisé dans le schéma de signature Wave, on part de deux codes de longueur $n/2$ aléatoires de dimension respectives $k_u$ et $k_v$. On a premièrement la définition suivante :
 
-
-\begin{defi} Soient $U$ et $V$ deux codes de même longueur $n/2$ et de dimension respectives $k_u$ et $k_v$. Un code $(U,U+V)$ est un code de longueur $n$ et de dimension $k=k_u+k_v$ et tel que :
+\begin{defi}\label{UV} (Code (U,U+V).) Un code $(U,U+V)$ est un code de longueur $n$ et de dimension $k=k_u+k_v$ et tel que :
 \begin{center}
 $(U,U+V) = \{(u,u+v)$ tel que $u \in U$ et $v \in V \}$
 \end{center}
 \end{defi}
+
+En revanche, pour le système de signature wave, on utilisera une généralisation de cette définition. En effet, comme nous le verrons plus tard, on peut facilement tirer des informations sur la structure du code dans le cas des codes définis dans la définition \ref{UV}. On utilisera pour le schéma de signature Wave une nouvelles famille de code, les codes (U,U+V)-généralisés :\\
 
 \begin{defi} \label{UV-normalise} (codes $(U,U+V)$-généralisés) Soient $n$ un entier pair et $a$,$b$,$c$,$d$ quatres vecteurs de $\F_q^{n/2}$ tels que pour tout $i \in {1,n/2}$ :
 $$ a_ic_i \neq 0 $$
@@ -127,17 +129,14 @@ Soient U et V deux codes définis comme précédemment. Le code $(U,U+V)$-géné
 \begin{center}
 $\{(a.u + b.v, c.u + d.v)$ tel que $u \in U$ et $v \in V \}$
 \end{center}
-où $x.y$ est le produit coordonnée par coordonnée des $x_i$ et $y_i$.
+où $x.y$ est le produit coordonnée par coordonnée des $x_i$ et $y_i$.\\
 \end{defi}
 
-\begin{remarque}
-Dans la suite, on prend $a$,$b$,$c$,$d$ tels que 
-$$ a_id_i - b_ic_i = 1 \text{ pour tout } i \in {1,n/2}.$$ 
-\end{remarque}
+Dans la suite, nous prendrons $a$,$b$,$c$,$d$ tels que $a_id_i - b_ic_i = 1 \text{ pour tout } i \in {1,n/2}.$ \\
 
 \begin{propo} Soient $U$, $V$, $a$, $b$, $c$ et $d$ définis comme précédemment. Soit $UV$ le code $(U,U+V)$-généralisé associé. Alors
-$$ k = \dim UV = k_u + k_v.$$
-De plus soient $G_U \in \F_q^{k_u \times n/2}$ (respectivement $G_V \in \F_q^{k_v \times n/2}$) et $H_U \in \F_q^{(n/2-k_u) \times n/2}$ (respectivement $H_V \in \F_q^{(n/2-k_v) \times n/2}$) les matrices génératrices et de parité des codes $U$ et $V$. Soient $A$, $B$, $C$, $D$ de $\F_q^{n \times n}$ les matrices diagonales de diagonales respectives les vecteurs $a$, $b$, $c$ et $d$.  \\
+$$ k = \dim\; (UV) = k_u + k_v.$$
+De plus soient $G_U \in \F_q^{k_u \times n/2}$ (respectivement $G_V \in \F_q^{k_v \times n/2}$) et $H_U \in \F_q^{(n/2-k_u) \times n/2}$ (respectivement $H_V \in \F_q^{(n/2-k_v) \times n/2}$) les matrices génératrices et de parité des codes $U$ et $V$. Soient $A$, $B$, $C$, $D$ de $\F_q^{n \times n}$ les matrices diagonales de diagonale respectives les vecteurs $a$, $b$, $c$ et $d$.  \\
 \vspace{0.2in}
 Alors la matrice de $\F_q^{(k_u + k_v) \times n}$: 
 
@@ -223,10 +222,6 @@ $q=2$ --> calcul du hull --> fuite d'info. \\
 On pose donc $q=3$ pour toute la suite du rapport.
 
 \subsection{Le principe de signature}
-Un schéma hash et signe utilisant la fonction syndrome comme fonction à sens unique : \\
-- Définition des fonctions GPVM, un couple (Trapdoor, InvertAlg) où trapdoor est un algo poly proba renvoyant une matrice de parité et la trappe associée, et où InvertAlg est un algo poly proba prenant en entrée la trappe et renvoyant l'inverse de la fonction syndrome. \\
-De plus, ces fonctions sont (1) bien distribuées, (2) sans fuite d'info en moyenne, (3) sens unique sans la trappe \\
-- Le schéma : un algo signe et un algo verify. \\
 
 Notre schéma de signature utilisera donc les codes $(U,U+V)$-généralisés et la fonction syndrôme comme fonction à sens unique, sous l'hypothèse de la difficulté de résoudre le problème du décodage. \\
 
@@ -274,14 +269,6 @@ $\verb|Verify|^{pk}(s,e')$: \\
 
 
 \subsection{Le décodage avec trappe}
-Détail de l'algorithme invertAlg avec utilisation de la trappe: \\
-- Conditions sur le poids de e: \\
---> facile \\
---> facile avec trappe \\
---> difficile \\
-- Inverser le syndrome sur le code UV <==> inverser le syndrome sur U et sur V et prendre son image par Phi. \\
-- Prendre un ev par un algo de décodage quelconque, utiliser les propriétés du code UV pour en déduire un eu, vérifier le poids de e, recommencer. \\
-- Différences gros poids et petits poids \\
 
 En partant de l'hypothèse que la matrice de parité $\mathbf{H}$ du code $(U,U+V)$-généralisé ressemble à une matrice aléatoire, la difficulté de créer une fausse signature sans connaître la trappe $\mathbf{T}$ est exactement celle de résoudre le problème du décodage d'un code aléatoire, que l'on sait difficile. Nous allons expliciter dans cette section l'algorithme d'inversion de la fonction syndrôme, et discuter sa difficulté en fonction du poids $\omega$ de $e$. \\
 
@@ -292,14 +279,14 @@ f_{\omega,\mathbf{H}} & : & \mathcal{S}_{\omega,n} & \to & \F_q^{n-k} \\
 \end{array}$$
 
 On rappelle que la fonction $f_{\omega,\mathbf{H}}$ avec $\mathbf{H} \in \F_q^{(n-k)\times n}$ s'inverse génériquement si $\omega \in \{\omega_{easy}^-,\omega_{easy}^+\}$, où :
-$$ \omega_{easy}^- := \frac{q-1}{q}(n-k) \qquad \text{ et }\qquad  \omega_{easy}^+\} := k + \frac{q-1}{q}(n-k).$$
+$$ \omega_{easy}^- := \frac{q-1}{q}(n-k) \qquad \text{ et }\qquad  \omega_{easy}^+ := k + \frac{q-1}{q}(n-k).$$
 
 \begin{proof}[Preuve] TODO
 \end{proof}
 
 
 On rappelle aussi que la fonction $f_{\omega,\mathbf{H}}$ admet un inverse pour toute entrée $s \in \F_q^{n-k}$ si $\omega \in \{\omega^-,\omega^+\}$, où :
-$$ \omega^- := ??? \qquad \text{ et }\qquad  \omega^+\} := ???.$$
+$$ \omega^- := ??? \qquad \text{ et }\qquad  \omega^+ := ???.$$
 
 \begin{proof}[Preuve] TODO
 \end{proof}
@@ -309,7 +296,6 @@ Nous voulons donc un moyen d'inverser la fonction syndrôme pour $\omega \in \{\
 
 $$\{\omega_{easy}^-,\omega_{easy}^+\} \subsetneq \{\omega_{UV}^-,\omega_{UV}^+\} \subset  \{\omega^-,\omega^+\}$$
 
-INSERER SCHEMA !! \\
 
 Afin d'expliciter le décodage, introduisons la fonction :
 
@@ -463,8 +449,6 @@ La connaissance de la trappe apporte donc bien un avantage puisqu'elle permet un
 
 \subsection{Implémentation et choix de paramètres}
 TODO \\
-Détail de DECODE U et DECODE V + choix des paramètres et choix d'implémentation + résultats \\
-
 \section{Uniformisation des signatures et syndromes}
 
 \subsection{Une fuite d'information}
@@ -524,34 +508,36 @@ $$ \mathbf{e} \sim \mathbf{e}_V^{unif}.$$
 \begin{proof}[Preuve] TODO
 \end{proof}
 
-Ainsi, pour que $\mathbf{e}$ soit uniformément distribué sur $S_\omega$, il suffit de choisir \verb|DECODE_V| de façon à ce que ses sorties soient uniforment sur $\F_q^{n/2}$ puis d'ajouter une condition de rejet sur les sorties de \verb|DECODE_U| de façon à ce que $m_1(\mathbf{e})$ conditionnée à $|\mathbf{e}_V|$ soit distribué comme $m_1(\mathbf{e}^{unif})$ conditionnée à $|\mathbf{e}_V^{unif}|$. \\
+Ainsi, pour que $\mathbf{e}$ soit uniformément distribué sur $S_\omega$, il suffit de choisir \verb|DecodeV| de façon à ce que ses sorties soient uniforment sur $\F_q^{n/2}$ puis d'ajouter une condition de rejet sur les sorties de \verb|DecodeU| de façon à ce que $m_1(\mathbf{e})$ conditionnée à $|\mathbf{e}_V|$ soit distribué comme $m_1(\mathbf{e}^{unif})$ conditionnée à $|\mathbf{e}_V^{unif}|$. \\
+On peut alors introduire l'algorithme suivant :
+\begin{algorithm}
+	\caption{DecodeUV($\varphi, \s, \mathbf{H}_V, \mathbf{H}_U$)}
+	\begin{algorithmic}[1]
+   	 	\REQUIRE $\varphi$, $\s \in \F_q^{n-k}$ un syndrome, $\mathbf{H}_V \in \F_q^{(\frac{n}{2} - k_V) \times \frac{n}{2}}$, $\mathbf{H}_U \in \F_q^{(\frac{n}{2} - k_U) \times \frac{n}{2}}$
+   	 	\ENSURE $\e = \varphi(e_U, e_V) \text{ avec } \e_U\mathbf{H}_U^T = \s^U \text{ et } \e_V\mathbf{H}_V^T = \s^V$
+    	\STATE $\e_V \leftarrow \text {DecodeV}(\s^V,\mathbf{H}_V)$
+    	\REPEAT 
+    	\STATE $\e_U \leftarrow \text {DecodeU}(\varphi, \e_V, \s^U, \mathbf{H}_U)$
+    	\STATE $\e \leftarrow \varphi(\e_U,\e_V)$
+    	\UNTIL {$\text{rand}([0,1]) > \mathbf{r}_U(|\e_V|, m_1(\e)$}
+    	\RETURN $\e$
+    \end{algorithmic}
+\end{algorithm}
+\noindent Avec :
+
+\begin{equation*}
+   \begin{split}
+    r(s,t) &:= \frac{1}{M(t)}\frac{q^{unif}(s,t)}{q(s,t)} \\
+    q(s,t) &:= \mathbb{P}(m_1(\mathbf{e})=s\;|\;|\mathbf{e}_V|=t)\\[.6cm]
+    q^{unif}(s,t) &:= \mathbb{P}(m_1(\mathbf{e}^{unif})=s\;|\;|\mathbf{e}^{unif}_V|=t)\\[.6cm]
+    M(t) &:= \max_{0 \leq s \leq t} \frac{q^{unif}(s,t)}{q(s,t)}\\[.6cm]
+    \end{split}
+\end{equation*}
+On peut alors énoncer la proposition suivante :
+
+
 \begin{propo}
-Soit l'algorithme :
-
-\begin{flushleft}
-\leftskip=2cm
-\verb|DECODE_UV |$(\mathbf{H}_V,\mathbf{H}_V,\varphi,\mathbf{s}) : $\\
-$\qquad \mathbf{e}_V \leftarrow \verb|DECODE_V |(\mathbf{H}_V,\mathbf{s}^V) $\\
-$\qquad \verb|Faire|$ \\
-$\qquad \qquad \mathbf{e}_U \leftarrow \verb|DECODE_U |(\mathbf{H}_U, \mathbf{s}^U, \varphi, \mathbf{e}_V) $\\
-$\qquad \qquad \mathbf{e} \leftarrow \varphi(\mathbf{e}_U,\mathbf{e}_V)$ \\
-$\qquad \verb|Jusqu'à rand|([0,1]) \leq r(|\mathbf{e}_V|),m_1(\mathbf{e}))$\\
-$\qquad \verb|retourner | \mathbf{e}$ \\
-\leftskip=0cm
-\vspace{0.1in}
-\end{flushleft}
-Où :
-
-
-$$r(s,t) := \frac{1}{M(t)}\frac{q^{unif}(s,t)}{q(s,t)} $$
-\vspace{0.1in}
-$$q(s,t) := \mathbb{P}(m_1(\mathbf{e})=s\;|\;|\mathbf{e}_V|=t)$$ 
-\vspace{0.1in}
-$$q^{unif}(s,t) := \mathbb{P}(m_1(\mathbf{e}^{unif})=s\;|\;|\mathbf{e}^{unif}_V|=t)$$
-\vspace{0.1in}
-$$M(t) := \max_{0 \leq s \leq t} \frac{q^{unif}(s,t)}{q(s,t)}$$
-
-Alors si \verb|DECODE_V| est uniforme en poids et si \verb|DECODE_U| est $m_1$-uniforme, on a $\mathbf{e}\sim\mathbf{e}^{unif}$.
+Alors si \verb|DecodeV| est uniforme en poids et si \verb|DecodeU| est $m_1$-uniforme, alors on a $\mathbf{e}\sim\mathbf{e}^{unif}$.
 \end{propo}
 
 \begin{proof}[Preuve]
@@ -577,32 +563,7 @@ description explicite de \verb|DECODE_U| \\
 Application de la méthode du rejet selon ces choix et choix des distributions. 
 
 \subsection{Estimation du nombre de rejet}
-\begin{algorithm}
-	\caption{DecodeUV($\varphi, \s, \mathbf{H}_V, \mathbf{H}_U$)}
-	\begin{algorithmic}[1]
-   	 	\REQUIRE $\varphi$, $\s \in \F_q^{n-k}$ un syndrome, $\mathbf{H}_V \in \F_q^{(\frac{n}{2} - k_V) \times \frac{n}{2}}$, $\mathbf{H}_U \in \F_q^{(\frac{n}{2} - k_U) \times \frac{n}{2}}$
-   	 	\ENSURE $\e = \varphi(e_U, e_V) \text{ avec } \e_U\mathbf{H}_U^T = \s^U \text{ et } \e_V\mathbf{H}_V^T = \s^V$
-    	\STATE $\e_V \leftarrow \text {DecodeV}(\s^V,\mathbf{H}_V)$
-    	\REPEAT 
-    	\STATE $\e_U \leftarrow \text {DecodeU}(\varphi, \e_V, \s^U, \mathbf{H}_U)$
-    	\STATE $\e \leftarrow \varphi(\e_U,\e_V)$
-    	\UNTIL {$\text{rand}([0,1]) > \mathbf{r}_U(|\e_V|, m_1(\e)$}
-    	\RETURN $\e$
-    \end{algorithmic}
-\end{algorithm}
 
-
-\begin{algorithm}
-	\caption{DecodeV($\s^V$)}
-	\begin{algorithmic}[1]
-    	\STATE $c$ mot aléatoire du code $V$
-    	\STATE $\s \leftarrow$ le syndrome $\s^V$ paddé avec des zéros
-    	\STATE $\e_V \leftarrow \s + c$
-    	\RETURN $\e_V$
-    \end{algorithmic}
-\end{algorithm}
-
-dire $d\in [0,k_U]$
 
 \begin{algorithm}
 	\caption{DecodeU($\varphi, \e_V, \s^U, \mathbf{H}_U$)}
@@ -618,7 +579,20 @@ dire $d\in [0,k_U]$
     \end{algorithmic}
 \end{algorithm}
 
-\begin{defi} (Bon ensemble).\\
+
+\begin{algorithm}
+	\caption{DecodeV($\s^V$)}
+	\begin{algorithmic}[1]
+    	\STATE $c$ mot aléatoire du code $V$
+    	\STATE $\s \leftarrow$ le syndrome $\s^V$ paddé avec des zéros
+    	\STATE $\e_V \leftarrow \s + c$
+    	\RETURN $\e_V$
+    \end{algorithmic}
+\end{algorithm}
+
+Avec $d\in [0,k_U]$, qui permettra de montrer que notre sortie est uniforme.
+
+\begin{defi} (Bon ensemble).
 Soient $d \leq k \leq n$, $\mathbf{H}\in\F_3^{(n-k)\times n}$ et $\varepsilon \subseteq \llbracket1,n\rrbracket$ de taile $k-d$. On dit que $\varepsilon$ est un bon ensemble pour $\mathbf{H}$ si $\mathbf{H}_{\overline{\varepsilon}}$ est de rang plein. Sinon, on dit que $\varepsilon$ est un mauvais ensemble.
 \end{defi}
 
@@ -676,77 +650,83 @@ $$ \mathbb{P}\left(\rho(\e,\e^{unif})>3^{-d/2}\right) \leq \frac{3^{-d/2}}{2} $$
 \end{proof}
 
 
-La probabilité d'avoir un rejet équivaut à la probabilité d'avoir une distance significative entre $\e$ et $\e^{unif}$. D'après le théorème \ref{rejet}, nous voyons donc qu'en augmentant $d$, nous aurons très peu de rejets.
+La probabilité d'avoir un rejet équivaut à la probabilité d'avoir une distance significative entre $\e$ et $\e^{unif}$. D'après le théorème \ref{rejet}, nous voyons donc qu'en faisant varier $d$, nous serons en mesure d'effectuer très peu de rejets.
 
 
 \subsection{Une famille de fonctions uniformément distribuée}
-On a donc le point (2) de la definition des fonctions GPV qui est obtenu dans la section précédente. On va montrer le point (1), à savoir, notre famille de fonctions syndrômes est uniformément distribuée avec les codes (U,U+V)-généralisés \\
+On a donc le point (2) de la definition des fonctions GPV qui est obtenu dans la section précédente. On va montrer le point (1), à savoir, notre famille de fonctions syndrômes est uniformément distribuée avec les codes (U,U+V)-généralisés. \\
+TODO
+
 
 \section{Sécurité du schéma}
-Deux problèmes : \\
-- Distinction d'une matrice de parité d'un code (U,U+V)-généralisé permutée d'une matrice aléatoire \\
-- Sécurité EUF-CMA du système si H ressemble à une matrice aléatoire \\
+Pour montrer la sécurité du schéma, nous allons dans un premier temps montrer que dans l'hypothèse que la matrice de parité du code $(U,U+V)$-généralisé considéré est difficile à distinguer d'une matrice aléatoire de $\F_q^{n-k}$, alors le schéma est sûr au sens EUF-CMA.\\
+Nous montrerons ensuite qu'il est effectivement difficile de distinguer notre matrice de parité permuté d'une matrice aléatoire. \\
 
 \subsection{Sécurité EUF-CMA}
 Nous allons montrer que le schéma est sûr au sens EUF-CMA (Existential Unforgeability under Chosen Message Attacks). Pour cela nous ferons une réduction au problème DOOM.
 \subsubsection{Définitions}
 
-Soit $\mathcal{A}$ un adversaire ayant accès à $N_{sign}$ signatures de son choix.
-\begin{defi} (Modèle de sécurité EUF-CMA). On définit 3 algorithmes :
-\begin{multicols}{2}
-\begin{flushleft}
-$\verb|Init|$:\\
-	$\quad (pk,sk) \leftarrow \verb|Gen|(1^{\lambda)}$ \\
-	$\quad \mathbf{H}_{pk} \leftarrow pk$ \\
-	$\quad (\varphi, \mathbf{H}_{U},\mathbf{H}_{V}) \leftarrow sk$ \\
-	$\quad \verb|renvoie | \mathbf{H}_{pk}$ \\
-\end{flushleft}
-\begin{flushleft}
-$\verb|Sign|(s)$: \\
-	$\quad \mathbf{e} \leftarrow \mathcal{D}_{\varphi,\mathbf{H}_{U},\mathbf{H}_{V}}(s)$ \\
-	$\quad$ \verb|renvoie | $\mathbf{e}$
-\end{flushleft}
-\begin{flushleft}
-$\verb|Fin|(s,e)$: \\
-	$\quad$ \verb|renvoie | $(\mathbf{e}\mathbf{H}_{pk}^T = s) \land (|\mathbf{e}| = \omega)$
-\end{flushleft}
-\end{multicols}
+Soit $\mathcal{A}$ un adversaire ayant accès à $N_{sign}$ signatures de son choix. Soit les trois algorithmes suivants :
+
+
+\begin{algorithm} [h]
+	\caption{Init($\lambda$)}
+	\begin{algorithmic}[1]
+    	\STATE $(pk,sk) \Longleftarrow$ Gen$(1^\lambda)$ 
+    	\STATE $\mathbf{H}_{pk} \Longleftarrow pk$
+    	\STATE $(\varphi,\mathbf{H}_{U},\mathbf{H}_{V})\Longleftarrow sk$
+    	\RETURN $\mathbf{H}_{pk}$
+    \end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[h]
+	\caption{Sign($s$)}
+	\begin{algorithmic}[1]
+    	\STATE $\e \Leftarrow \mathcal{D}_{\varphi,\mathbf{H}_{U},\mathbf{H}_{V}}(\s)$
+    	\RETURN $\e$
+    \end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[h]
+	\caption{Fin($(s,e)$)}
+	\begin{algorithmic}[1]
+    	\RETURN $(\mathbf{e}\mathbf{H}_{pk}^T = s) \land (|\mathbf{e}| = \omega)$
+    \end{algorithmic}
+\end{algorithm}
+
 Le jeu EUF-CMA se déroule comme suit. $\mathcal{A}$ fait appel à \verb|Init|. Il peut ensuite faire $N_{sign}$ requêtes à \verb|sign|. Le jeu est dit réussi si $\mathcal{A}$ est capable de donner $(s,e)$ accepté par \verb|Fin| et tel que $s$ n'est jamais été demandé à \verb|Sign|. \\
 On définit alors le succès EUF-CMA comme :
 $$Succ^{EUF-CMA}_{Wave}(t,N_{sign}) := \max_{\mathcal{A};|A|\leq t}(\mathbb{P}(\mathcal{A}\text{ réussit le jeu EUF-CMA de Wave})).$$
-Le protocole est alors sûr au sens EUF-CMA si ce succès est négligeable.
-\end{defi}
+Le protocole est alors sûr au sens EUF-CMA si ce succès est négligeable. \\
 
 Nous souhaitons donc montrer que notre système est sûr au sens EUF-CMA. Pour cela, nous allons dans la section suivante majorer ce succès par rapport au succès d'un problème connu, le problème DOOM.
 
 
 \subsubsection{Réduction au problème DOOM}
-\begin{defi} (Le problème DOOM). Soient des paramètres $(n,q,k,\omega,N)$, où $N$ est un entier. \\
+\textbf{Le problème DOOM.} Soient des paramètres $(n,q,k,\omega,N)$, où $N$ est un entier. \\
 
 \leftskip=1cm
-\noindent$I$ : $\mathbf{H}$ une matrice uniforme de $\F_q^{(n-k)\times n}$ et $(\mathbf{s}_1,...,\mathbf{s}_N)$ une liste de $N$ syndromes. 
+\noindent \textbf{I :} $\mathbf{H}$ une matrice uniforme de $\F_q^{(n-k)\times n}$ et $(\mathbf{s}_1,...,\mathbf{s}_N)$ une liste de $N$ syndromes. 
 
-\noindent$Q$ : Décoder l'un des syndromes à la distance $w := \lfloor \omega n \rfloor$. 
+\noindent \textbf{Q :} Décoder l'un des syndromes à la distance $w := \lfloor \omega n \rfloor$. \\
 
 \leftskip=0cm
 
-On définit alors le succès de DOOM comme :
+\noindent On définit alors le succès de DOOM comme :
 $$Succ^{DOOM(n,q,k,N)}(t) := \max_{\mathcal{A};|A|\leq t}(\mathbb{P}(\mathcal{A}(\mathbf{H},\mathbf{s}_1,...,\mathbf{s}_n)=\mathbf{e}\text{ tel que }$$
 $$ \mathbf{eH}^T = \mathbf{s}_j \text{ pour un certain } j \in \{1,...,N\})).$$
-\end{defi} 
 
-La réduction à ce problème est naturelle pour un schéma de signature puisque JHFEKHZFKHFKZEHFILZEJHFKLZEJFHJ. \\ 
-EXPLICATION INFORMELLE DE LA REDUCTION, POURQUOI ELLE VA MARCHER \\
+\noindent La réduction à ce problème est naturelle pour un schéma de signature puisque EXPLICATION INFORMELLE DE LA REDUCTION, POURQUOI ELLE VA MARCHER \\
 
 
 \subsubsection{Preuve formelle de la réduction}
-AJOUTER EUF-CMA AVEC FONCTION DE HACHAGE \\
-Pour faire une preuve formelle de cette réduction, nous allons introduire un système de jeux qui nous permettra de réduire la sécurité d'un système à un problème $P$. Soit $\mathcal{A}$ un attaquant et $\mathcal{R}$ un rival. Soient $G_0, G_1, ...,G_N$ un ensemble de jeux et soit $\mathbb{P}(G_i)$ la probabilité pour $\mathcal{A}$ de répondre au défi posé par $\mathcal{R}$ pour le jeu $G_i$. $\mathbb{P}(G_0)$ est alors la probabilité de cassé le système considérer et $\mathbb{P}(G_N)$ la probabilité de répondre au problème $P$. \\
+Afin de faire une preuve formelle de la sécurité EUF-CMA, nous allons changer le jeu en rajoutant une fonction de hachage. L'attaquant $\mathcal{A}$ peut maintenant faire $N_{hash}$ appelle à la fonction de hachage et ainsi obtenir des couples (m,s). De plus, la fonction de signature prends maintenant en entrée un message quelconque. Elle prend ensuite un aléa $r$ dans $\{0,1\}^{\lambda_0}$. Le tout est alors donné à la fonction de hachage qui renvoit un syndrome valide. \\
+
+Nous allons aussi introduire un système de jeux qui nous permettra de réduire la sécurité d'un système à un problème $P$. Soit $\mathcal{A}$ un attaquant et $\mathcal{R}$ un rival. Soient $G_0, G_1, ...,G_N$ un ensemble de jeux et soit $\mathbb{P}(G_i)$ la probabilité pour $\mathcal{A}$ de répondre au défi posé par $\mathcal{R}$ pour le jeu $G_i$. $\mathbb{P}(G_0)$ est alors la probabilité de cassé le système considérer et $\mathbb{P}(G_N)$ la probabilité de répondre au problème $P$. \\
 L'idée est de changer pas à pas les jeux $G_0$ à $G_N$ de façon à ce que :
 $$\forall i \in {0,...,N-1}, |\mathbb{P}(G_i)-\mathbb{P}(G_i+1)| \in negl(\lambda) \Longrightarrow |\mathbb{P}(G_0)-\mathbb{P}(G_N)|  \in negl(\lambda)$$
 où $\lambda$ est un paramètre de sécurité. Autrement dis, les changements sur les jeux ne changent qu'à un facteur négligeable près les probabilités de succès de l'attaquant $\mathcal{A}$. \\
 Il n'est pas possible de changer le comportement de $\mathcal{A}$ puisqu'il est quelconque, en revanche nous pouvons modifier celui de $R$. \\
-EVENTUELLEMENT METTRE LES 3 conditions mais je ne pense pas que ça soit nécessaire. \\
 
 \begin{thm} (Réduction de sécurité). \\
 Soit $N_{sign}$ le nombre de requêtes faites à l'oracle de signature. Soit $\lambda$ le paramètre de sécurité et $\lambda_0=\lambda + 2\log_2(N_{sign})$. On a :
