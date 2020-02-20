@@ -120,6 +120,12 @@ $(U,U+V) = \{(u,u+v)$ tel que $u \in U$ et $v \in V \}$
 \end{center}
 \end{defi}
 
+
+\begin{defi}($hull$).\\
+Le  $hull$ d'un code $\mathcal{C}$ est défini par $hull(\mathcal{C}) := \mathcal{C} \cap \mathcal{C}^{\bot}$
+\end{defi}
+
+
 En revanche, pour le système de signature wave, on utilisera une généralisation de cette définition. En effet, comme nous le verrons plus tard, on peut facilement tirer des informations sur la structure du code dans le cas des codes définis dans la définition \ref{UV}. On utilisera pour le schéma de signature Wave une nouvelles famille de code, les codes (U,U+V)-généralisés :\\
 
 \begin{defi} \label{UV-normalise} (codes $(U,U+V)$-généralisés) Soient $n$ un entier pair et $a$,$b$,$c$,$d$ quatres vecteurs de $\F_q^{n/2}$ tels que pour tout $i \in {1,n/2}$ :
@@ -131,6 +137,13 @@ $\{(a.u + b.v, c.u + d.v)$ tel que $u \in U$ et $v \in V \}$
 \end{center}
 où $x.y$ est le produit coordonnée par coordonnée des $x_i$ et $y_i$.\\
 \end{defi}
+
+
+Poser les coefficients $a$, $b$, $c$, $d$ de cette façon permet de garantir :
+\begin{itemize}
+\item[-] toutes les coordonnées de $u \in U$ apparaîtront deux fois grâce  à \eqref{ac}, ce qui nous donne la possibilité d'utiliser la structure du code dans notre algorithme de décodage
+\item[-] la dimension du code $(U,U+V)$ sera la somme des dimensions des codes $U$ et $V$ grâce à \eqref{ad-bc}
+\end{itemize}
 
 Dans la suite, nous prendrons $a$,$b$,$c$,$d$ tels que $a_id_i - b_ic_i = 1 \text{ pour tout } i \in {1,n/2}.$ \\
 
@@ -218,8 +231,22 @@ On remarque aussi que $GH^T = 0$ et que $H$ est de rang plein par le même raiso
 \end{proof}
 
 
-$q=2$ --> calcul du hull --> fuite d'info. \\
-On pose donc $q=3$ pour toute la suite du rapport.
+\begin{propo}\label{dim_hull}
+Soit $\mathcal{C}$ un code aléatoire binaire de longueur $n$ et de dimension $k$, alors on s'attend à avoir $dim(hull(\mathcal{C}))\sim\mathcal{O}(1)$. De plus, nous avons $$ \mathbb{P}\big(dim(hull(\mathcal{C})\big) \leq t) \ \geq\ 1 - \mathcal{O}(2^{-t}) $$
+\end{propo}
+
+\begin{propo}\label{dim_hull_UV}
+Soit $UV$ un code $(U,U+V)$ binaire permuté de longueur $n$ tel que $k_U > k_V$, alors nous avons avec probabilité $1-\mathcal{O}(2^{k_U-k_V})$
+$$ dim(hull(\mathcal{C})) = k_U - k_V $$
+\end{propo}
+PREUVE en annexe.\\
+
+Ainsi nous ne pouvons pas utiliser les codes $(U,U+V)$ binaires où $dim U > dim V$ puisque nous pouvons facilement les distinguer de codes aléatoires.
+En effet, il suffit de calculer la dimension de  leur $hull$ puis de le comparer au résultat de la proposition \ref{dim_hull}.
+Pour résoudre ce problème, nous poserons $q=3$ pour toute la suite du rapport.
+
+
+
 
 \subsection{Le principe de signature}
 
@@ -505,8 +532,45 @@ Alors
 $$ \mathbf{e} \sim \mathbf{e}_V^{unif}.$$
 \end{lemme}
 
-\begin{proof}[Preuve] TODO
+\begin{proof}[Preuve]\
+Nous allons montrer qu'avec les hypothèses précédentes nous avons $\forall x \in S_{\omega} \quad \mathbb{P}(\e = x) = \mathbb{P}(\e^{unif} = x)$.\\
+Soit $x \in S_{\omega}$ :
+\begin{equation*}
+\begin{split}
+\mathbb{P}(\e = x) &= \mathbb{P}(\e_U = x_U, \e_V = x_V)\\
+&= \mathbb{P}(\e_U = x_U | \e_V = x_V)\mathbb{P}(\e_V = x_V)\\
+\end{split}
+\end{equation*}
+Notre but étant de faire apparaître les expressions énoncées lors du lemme, nous allons exprimer ces deux probabilités en fonction de $|x_V| = y$ et de $m_1(x) = z$.
+\begin{equation*}
+\begin{split}
+\mathbb{P}(\e_V = x_V) &= \mathbb{P}(\e_V = x_V, |\e_V| = y)\\
+&= \left.\mathbb{P}(\e_V = x_V \right| |\e_V| = y)\ \mathbb{P}(|\e_V| = y)\\
+&= \frac{\mathbb{P}(|\e_V| = y)}{n(y)}\\
+\end{split}
+\end{equation*}
+avec $n(y) := \#\left\{ \left.\e \in \F_3^{n/2} \right| |e| = y\right\}$.
+De la même façon, nous obtenons :
+\begin{equation*}
+\begin{split}
+\mathbb{P}(\e_U = x_U |\ |\e_V| = y) &= \left.\mathbb{P}(\e_U = x_U ,\ m_1(\e) = z\ \right|\ |\e_V| = y)\\
+&= \left.\mathbb{P}(\e_U = x_U\ \right|\ m_1(\e) = z,\ |\e_V| = y)\mathbb{P}(m_1(\e) = z\ |\ |\e_V| = y)\\
+&= \frac{\mathbb{P}(m_1(\e) = z\ |\ |\e_V| = y)}{n(y,z)}\\
+\end{split}
+\end{equation*}
+avec $n(y,z) := \#\left\{ \left.\e \in \F_3^{n/2} \right|\  m1(\e) = z\text{ et } |\e_V| = y \right\}$.\\
+Ainsi nous obtenons
+\begin{equation*}
+\begin{split}
+\mathbb{P}(\e = x) &= \frac{\mathbb{P}(m_1(\e) = z\ |\ |\e_V| = y)}{n(y,z)}\frac{\mathbb{P}(|\e_V| = y)}{n(y)}\\
+ &= \frac{\mathbb{P}(m_1(\e^{unif}) = z\ |\ |\e_V^{unif}| = y)}{n(y,z)}\frac{\mathbb{P}(|\e_V^{unif}| = y)}{n(y)}\\
+ &\quad \text{par les hypohèses}\\
+ &= \mathbb{P}(\e_U^{unif} = x_U | \e_V^{unif} = x_V)\mathbb{P}(\e_V^{unif} = x_V)\\
+ &= \mathbb{P}(\e^{unif} = x)\\
+\end{split}
+\end{equation*}
 \end{proof}
+
 
 Ainsi, pour que $\mathbf{e}$ soit uniformément distribué sur $S_\omega$, il suffit de choisir \verb|DecodeV| de façon à ce que ses sorties soient uniforment sur $\F_q^{n/2}$ puis d'ajouter une condition de rejet sur les sorties de \verb|DecodeU| de façon à ce que $m_1(\mathbf{e})$ conditionnée à $|\mathbf{e}_V|$ soit distribué comme $m_1(\mathbf{e}^{unif})$ conditionnée à $|\mathbf{e}_V^{unif}|$. \\
 On peut alors introduire l'algorithme suivant :
@@ -786,6 +850,7 @@ Utilisation de S et P pour masquer les propriétés de la matrice. \\
 \bibliography{bibliography}
 
 
+
 annexe
 \begin{proof}[Preuve du lemme \ref{maj_dist_e_eunif}]
 Nous allons avoir besoin dans la suite de la proposition suivante :
@@ -822,6 +887,38 @@ $$ \sum\limits_{x_U}\mathbb{P}(\e_U=x_U|k_0 = l,\e_V=x_V) - \mathbb{P}(\e_U^{uni
 \rho\left(J_{x_V,l}^{unif},J_{x_V, l}^{\mathbf{H}_U}\right) = \frac{N_{x_V,l}}{\dbinom{|x_V|}{l}\dbinom{n/2-|x_V}{k_U-d-l}}
 \end{equation}
 Avec $N_{x_V,l}$ le nombre de mauvais sous-ensembles de $\llbracket1,n/A\rrbracket$ de taille $k_U-d$ pour $\mathbf{H}_U$.
+\end{proof}
+
+
+\begin{proof}[Preuve de la proposition \ref{dim_hull_UV}]
+La dimension d'un $hull$ étant invariante par permutation nous allons ici montrer que nous avons $dim(hull(U,U+V)) = k_U - k_V$ avec probabilité $1-\mathcal{O}(2^{k_U-k_V})$.
+Par définition du $hull$, nous avons :
+\begin{equation*}
+\begin{split}
+hull(U,U+V) &= (U,U+V) \cap (U,U+V)^{\bot } \\
+&= (U,U+V) \cap (V^{\bot}+U^{\bot}, V^{\bot}) \\
+\end{split}
+\end{equation*} 
+Ainsi $\forall u\in U$ et $\forall v\in V$ tels que $(u,u+v)\in hull(U,U+V)$, il existe $u_t\in U^{\bot}$ et $v_t\in V^{\bot}$ tels que
+
+\begin{equation*}
+\left\{
+\begin{aligned}
+&u = v_t + u_t\\
+&u + v = v_t\\
+\end{aligned}
+\right.
+\iff
+\left\{
+\begin{aligned}
+&v = u_t\\
+&u + v = v_t\\
+\end{aligned}
+\right.
+\end{equation*}
+Donc $v\in V\cap U^{\bot}$.
+De plus, nous avons $dim(V) + dim(U^{\bot}) = \frac{n}{2} +k_V - k_U < \frac{n}{2}$
+ET ???????
 \end{proof}
 
 \end{document}
