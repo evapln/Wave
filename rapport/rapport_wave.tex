@@ -98,7 +98,7 @@ Février, 2020
 quand on chiffre -> ne pose pas de problème \\
 quand on signe -> pose un problème car il est dur de trouver un syndrome de cette sorte \\
 la solution Wave est d'enlever la restriction au mot le plus proche \\
-Nous allons détailler le schéma de signature Wave et détailler sa sécurité. \\
+Explication rapide du schéma wave + on cherchera à rendre les sorties uniforme + preuves de sécurité \\
 
 \section{Le schéma de signature Wave}
 Nous allons détailler dans cette section le schéma de signature Wave. C'est un schéma de type hache et signe à base de codes correcteurs. Pour des raisons de clarté nous oublierons dans un premier temps la problématique du hachage. Nous le réintroduirons en fin de rapport afin de proposer une preuve formelle de la sécurité du schéma, où la fonction de hachage est alors nécéssaire. Pour l'instant, nous considererons que l'entrée de l'algorithme de signature est déjà un syndrome du code considéré.\\
@@ -535,13 +535,13 @@ $\qquad \mathbf{e}_V \leftarrow \verb|DECODE_V |(\mathbf{H}_V,\mathbf{s}^V) $\\
 $\qquad \verb|Faire|$ \\
 $\qquad \qquad \mathbf{e}_U \leftarrow \verb|DECODE_U |(\mathbf{H}_U, \mathbf{s}^U, \varphi, \mathbf{e}_V) $\\
 $\qquad \qquad \mathbf{e} \leftarrow \varphi(\mathbf{e}_U,\mathbf{e}_V)$ \\
-$\qquad \verb|Tant que rand|([0,1]) \leq r(|\mathbf{e}_V|),m_1(\mathbf{e}))$\\
+$\qquad \verb|Jusqu'à rand|([0,1]) \leq r(|\mathbf{e}_V|),m_1(\mathbf{e}))$\\
 $\qquad \verb|retourner | \mathbf{e}$ \\
 \leftskip=0cm
 \vspace{0.1in}
 \end{flushleft}
 Où :
-\begin{flushleft}
+
 
 $$r(s,t) := \frac{1}{M(t)}\frac{q^{unif}(s,t)}{q(s,t)} $$
 \vspace{0.1in}
@@ -550,12 +550,27 @@ $$q(s,t) := \mathbb{P}(m_1(\mathbf{e})=s\;|\;|\mathbf{e}_V|=t)$$
 $$q^{unif}(s,t) := \mathbb{P}(m_1(\mathbf{e}^{unif})=s\;|\;|\mathbf{e}^{unif}_V|=t)$$
 \vspace{0.1in}
 $$M(t) := \max_{0 \leq s \leq t} \frac{q^{unif}(s,t)}{q(s,t)}$$
-\end{flushleft}
+
 Alors si \verb|DECODE_V| est uniforme en poids et si \verb|DECODE_U| est $m_1$-uniforme, on a $\mathbf{e}\sim\mathbf{e}^{unif}$.
 \end{propo}
+
 \begin{proof}[Preuve]
-TODO
+Soit $\e_U'$ le vecteur obtenu à la sortie de la boucle dans \verb|DECODE_UV|. On remarque que pour tout $i,j$:
+$$0 \leq r(i,j) = \frac{1}{M(i,j)}\frac{q^{unif}(i,j)}{q(i,j)} = \Bigg(\inf_{0 \leq k \leq l}\frac{q(k,l)}{q^{unif}(k,l}\Bigg)\frac{q^{unif}(i,j)}{q(i,j)} \leq 1$$
+Donc les coordonnées de $r$ sont bien des probabilités. Notons pour tout $i,j \in \llbracket 1,n \rrbracket$:
+$$q'(i,j) := \mathbb{P}(m_1(\mathbf{e'}_U)=i\;|\;|\mathbf{e'}_V|=j)$$
+
+On a alors 
+\begin{equation}
+\begin{aligned}
+q'(i,j) &= \frac{r(i,j)q(i,j)}{\sum_{0 \leq k \leq l}r(k,l)q(k,l)} \\
+ &= \frac{q^{unif}(i,j)}{M(i,j)\sum_{0 \leq k \leq l}\frac{1}{M(k,l)}q^{unif}(l)} \\
+ &= q^{unif}(i,j) \\
+\end{aligned}
+\end{equation}
+La première ligne vient de l'indépendance du tirage du réel rand($[0,1]$) du poids de $\e_V$ et de $m_1(\e)$. La dernière ligne vient du fait que la somme sur $i,j$ des $q^{unif}(i,j)$ vaut $1$. De plus la sortie de l'algorithme \verb|DECODE_V| est uniforme, ce qui conclu la preuve.
 \end{proof}
+
 \subsection{Choix des algorithmes de décodage}
 description explicite de \verb|DECODE_V| \\
 description explicite de \verb|DECODE_U| \\
