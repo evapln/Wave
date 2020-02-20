@@ -437,18 +437,22 @@ keys_t *key_gen (int mode) {
 ////////////////////////////////////////////////////////////////////////////////
 
 void decode_ev(matrix_t * ev,const matrix_t *G, const matrix_t *synd) {
+  // vérifications des entreés
   if (!ev || !G || !synd)
     return;
   int col = matrix_get_col(G);
   if (matrix_get_col(ev) != col || matrix_get_row(ev) != 1)
     return;
+  // choix d'un mot prix au hasard dans le code
   random_word(ev, G);
+  // padage du syndrome avec des 0
   matrix_t *s = matrix_alloc(1,col);
   int col_synd = matrix_get_col(synd);
   for (int i = 0; i < col - col_synd; ++i)
     matrix_set_cell(s, 0, i, 0);
   for (int i = col - col_synd; i < col; ++i)
     matrix_set_cell(s, 0, i, matrix_get_cell(synd, 0, i - col + col_synd));
+  // addition du mot aléatoire du code avec le syndrome paddé
   matrix_add_modified(ev, s, 1);
   matrix_free(s);
 }

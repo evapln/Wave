@@ -88,10 +88,10 @@ Février, 2020
 \section*{Introduction}
 \addcontentsline{toc}{section}{\protect\numberline{}Introduction}
 
-- passage au post-quantique --> On cherche des alternatives à RSA et DH.\\
-- appel d'offre NIST \\
+- Passage au post-quantique --> On cherche des alternatives à RSA et DH.\\
+- Appel d'offre NIST \\
 - On aimerai bien un système de signature utilisant les codes, puisque le problème du décodage d'un code aléatoire est NP-complet. \\
-- Ca marche pas mal pour le chiffrement, mais encore très compliqué pour les signatures, comme en témoigne le tableau des soumissions au NIST pour le secondd tour. \\
+- Ça marche pas mal pour le chiffrement, mais encore très compliqué pour les signatures, comme en témoigne le tableau des soumissions au NIST pour le second tour. \\
 
 \begin{figure}[h]
 \label{nist 2}
@@ -101,36 +101,59 @@ Février, 2020
 \caption{\small Comparaison des soumissions au NIST du second tour.}
 \end{figure}
 \noindent Alors pourquoi est-il si compliqué de faire des signatures avec des codes correcteurs ? \\
-- car il est difficile de tomber dans l'ensemble des syndromes facilement décodable, ie. difficile de créer une fonction de hachage qui envoie le message $m$ dans l'ensemble des syndromes possibles. En effet, pour un décodage au sens stricte il faudrait un syndrome $s$ associé à un unique mot $c$ du code le plus proche.\\
+- car il est difficile de tomber dans l'ensemble des syndromes facilement décodables, ie. difficile de créer une fonction de hachage qui envoie le message $m$ dans l'ensemble des syndromes possibles. En effet, pour un décodage au sens stricte il faudrait un syndrome $s$ associé à un unique mot $c$ du code, le plus proche de $m$.\\
 quand on chiffre -> ne pose pas de problème. \\
 quand on signe -> pose un problème car il est dur de trouver un syndrome de cette sorte. \\
-La solution de Wave est d'enlever la restriction au mot le plus proche. On cherche mainteant une famille de codes permettant de trouver pour un mot quelconque un des mots de code à distance w. En particulier, la distance de décodage w est très grande, ce qui assure typiquement de l’existence d’un mot de code à distance w.\\
-Explication rapide du schéma wave + on cherchera à rendre les sorties uniforme + preuves de sécurité. \\
+Les solutions à ce problème ont pour l'instant soit été cassées, soit impraticables.\\
+La solution de Wave est d'enlever la restriction au mot le plus proche. On cherche maintenant une famille de codes permettant de trouver, pour un mot quelconque, un des mots de code à distance $\omega$. En particulier, la distance de décodage $\omega$ est très grande, ce qui assure typiquement de l’existence d’un mot de code à distance $\omega$.\\
+Explication rapide du schéma wave + on cherchera à rendre les sorties uniformes + preuves de sécurité. \\
 
 \section{Le schéma de signature Wave}
-Nous allons détailler dans cette section le schéma de signature Wave. C'est un schéma de type hache et signe à base de codes correcteurs. Pour des raisons de clarté nous oublierons dans un premier temps la problématique du hachage. Nous le réintroduirons en fin de rapport afin de proposer une preuve formelle de la sécurité du schéma, où la fonction de hachage est alors nécéssaire. Pour l'instant, nous considererons que l'entrée de l'algorithme de signature est déjà un syndrome du code considéré.\\
-Le schéma de signature Wave s'appuie sur une famille de codes appelés des codes (U,U+V)-généralisés. La strucure de ces codes nous permettrons de proposer un algorithme de décodage $\mathcal{D}$ utilisant une trappe $T$ et donnant un avantage par rapport à un algorithme de décodage générique. Ce système s'appuie aussi sur la notion de fonctions GPV en moyenne, que nous détaillerons.
+Nous allons détailler dans cette section le schéma de signature Wave. C'est un schéma de type hache et signe à base de codes correcteurs. Pour des raisons de clarté nous oublierons dans un premier temps la problématique du hachage. Nous la réintroduirons en fin de rapport afin de proposer une preuve formelle de la sécurité du schéma, où la fonction de hachage est alors nécessaire. Pour l'instant, nous considérerons que l'entrée de l'algorithme de signature est déjà un syndrome du code considéré.\\
+Le schéma de signature Wave s'appuie sur une famille de codes appelés des codes $(U,U+V)$-généralisés. La structure de ces codes nous permettra de proposer un algorithme de décodage $\mathcal{D}$ utilisant une trappe $T$ et donnant un avantage par rapport à un algorithme de décodage générique. Ce système s'appuie aussi sur la notion de fonctions GPV en moyenne, que nous détaillerons.
 
 \subsection{La famille de codes (U,U+V)-généralisés}
-Pour définir la famille de code utilisé dans le schéma de signature Wave, on part de deux codes de longueur $n/2$ aléatoires de dimension respectives $k_u$ et $k_v$. On a premièrement la définition suivante :
+Pour définir la famille de code utilisée dans le schéma de signature Wave, on part de deux codes de longueur $n/2$ aléatoires de dimensions respectives $k_u$ et $k_v$. On a premièrement la définition suivante :
 
-\begin{defi}\label{UV} (Code (U,U+V).) Un code $(U,U+V)$ est un code de longueur $n$ et de dimension $k=k_u+k_v$ et tel que :
+\begin{defi}\label{UV} (Code (U,U+V).) Un code $(U,U+V)$ est un code de longueur $n$ et de dimension $k=k_U+k_V$ et tel que :
 \begin{center}
 $(U,U+V) = \{(u,u+v)$ tel que $u \in U$ et $v \in V \}$
 \end{center}
 \end{defi}
 
 
-\begin{defi}($hull$).\\
-Le  $hull$ d'un code $\mathcal{C}$ est défini par $hull(\mathcal{C}) := \mathcal{C} \cap \mathcal{C}^{\bot}$
+En revanche, pour le système de signature Wave, nous n'utiliserons pas cette définition. En effet, on peut facilement tirer des informations sur la structure de ces codes.\\
+
+
+\begin{defi}($hull$).
+Le  $hull$ d'un code $\mathcal{C}$ est défini comme $hull(\mathcal{C}) := \mathcal{C} \cap \mathcal{C}^{\bot}$
 \end{defi}
 
+\begin{propo}\label{dim_hull}
+Soit $\mathcal{C}$ un code aléatoire binaire de longueur $n$ et de dimension $k$, alors on s'attend à avoir $dim(hull(\mathcal{C}))\sim\mathcal{O}(1)$. De plus : $$ \mathbb{P}\big(dim(hull(\mathcal{C})\big) \leq t) \ \geq\ 1 - \mathcal{O}(2^{-t}) $$
+\end{propo}
 
-En revanche, pour le système de signature wave, on utilisera une généralisation de cette définition. En effet, comme nous le verrons plus tard, on peut facilement tirer des informations sur la structure du code dans le cas des codes définis dans la définition \ref{UV}. On utilisera pour le schéma de signature Wave une nouvelles famille de code, les codes (U,U+V)-généralisés :\\
+\begin{propo}\label{dim_hull_UV}
+Soit $UV$ un code $(U,U+V)$ binaire permuté de longueur $n$ tel que $k_U > k_V$, alors nous avons avec probabilité $1-\mathcal{O}(2^{k_U-k_V})$
+$$ dim(hull(UV)) = k_U - k_V $$
+\end{propo}
 
-\begin{defi} \label{UV-normalise} (codes $(U,U+V)$-généralisés) Soient $n$ un entier pair et $a$,$b$,$c$,$d$ quatres vecteurs de $\F_q^{n/2}$ tels que pour tout $i \in {1,n/2}$ :
-$$ a_ic_i \neq 0 $$
-$$ a_id_i - b_ic_i \neq 0 $$
+\begin{proof}[Preuve]
+En annexe.
+\end{proof}
+
+Ainsi nous ne pouvons pas utiliser les codes $(U,U+V)$ binaires où $\dim(U) > \dim(V)$ puisque nous pouvons facilement les distinguer de codes aléatoires.
+En effet, il suffit de calculer la dimension de  leur $hull$ puis de le comparer au résultat de la proposition \ref{dim_hull}.
+Pour résoudre ce problème, nous poserons $q=3$ pour toute la suite du rapport.
+Nous utiliserons également une nouvelle famille de codes, les codes $(U,U+V)$-généralisés :\\
+\begin{defi} \label{UV-normalise} (codes $(U,U+V)$-généralisés) Soient $n$ un entier pair et $a$,$b$,$c$,$d$ quatres vecteurs de $\F_q^{n/2}$ tels que pour tout $i \in \llbracket 1,n/2\rrbracket$ :
+\begin{equation}\label{ac}
+a_ic_i \neq 0 
+\end{equation}
+\begin{equation}\label{ad-bc}
+a_id_i - b_ic_i \neq 0 
+\end{equation}
+
 Soient U et V deux codes définis comme précédemment. Le code $(U,U+V)$-généralisé correspond à l'ensemble :
 \begin{center}
 $\{(a.u + b.v, c.u + d.v)$ tel que $u \in U$ et $v \in V \}$
@@ -139,16 +162,16 @@ où $x.y$ est le produit coordonnée par coordonnée des $x_i$ et $y_i$.\\
 \end{defi}
 
 
-Poser les coefficients $a$, $b$, $c$, $d$ de cette façon permet de garantir :
+Les conditions sur les vecteurs $a$, $b$, $c$, $d$ permet de garantir que :
 \begin{itemize}
-\item[-] toutes les coordonnées de $u \in U$ apparaîtront deux fois grâce  à \eqref{ac}, ce qui nous donne la possibilité d'utiliser la structure du code dans notre algorithme de décodage
-\item[-] la dimension du code $(U,U+V)$ sera la somme des dimensions des codes $U$ et $V$ grâce à \eqref{ad-bc}
+\item[-] toutes les coordonnées de $u \in U$ apparaîtront deux fois, ce qui sera nécessaire pour utiliser la structure du code dans notre algorithme de décodage (par l'équation \eqref{ac}).
+\item[-] la dimension du code $(U,U+V)$-généralisé sera la somme des dimensions des codes $U$ et $V$ (par l'équation \eqref{ad-bc}).
 \end{itemize}
 
-Dans la suite, nous prendrons $a$,$b$,$c$,$d$ tels que $a_id_i - b_ic_i = 1 \text{ pour tout } i \in {1,n/2}.$ \\
+Sans perte de généralité, nous posons pour toute la suite les vecteurs $a$,$b$,$c$,$d$ tels que $a_id_i - b_ic_i = 1 \text{ pour tout } i \in \llbracket 1,n/2\rrbracket$. \\
 
 \begin{propo} Soient $U$, $V$, $a$, $b$, $c$ et $d$ définis comme précédemment. Soit $UV$ le code $(U,U+V)$-généralisé associé. Alors
-$$ k = \dim\; (UV) = k_u + k_v.$$
+$$ k = \dim\; (UV) = k_U + k_V.$$
 De plus soient $G_U \in \F_q^{k_u \times n/2}$ (respectivement $G_V \in \F_q^{k_v \times n/2}$) et $H_U \in \F_q^{(n/2-k_u) \times n/2}$ (respectivement $H_V \in \F_q^{(n/2-k_v) \times n/2}$) les matrices génératrices et de parité des codes $U$ et $V$. Soient $A$, $B$, $C$, $D$ de $\F_q^{n \times n}$ les matrices diagonales de diagonale respectives les vecteurs $a$, $b$, $c$ et $d$.  \\
 \vspace{0.2in}
 Alors la matrice de $\F_q^{(k_u + k_v) \times n}$: 
@@ -188,6 +211,7 @@ $$
 Remarquons d'abord que G engendre bien le code $UV$. Remarquons aussi que 
 
 $$
+G = 
 \begin{pmatrix}
 \begin{array}{c|c}
 G_uA & G_uC \\
@@ -219,38 +243,22 @@ G_u & 0 \\
  \hline 
 0 & G_V \\
 \end{array} \\
-\end{pmatrix} $ est de rang $k_u + k_v$. De plus les matrices $A$, $B$, $C$, $D$ étant diagonales, le déterminant de la matrice $\begin{pmatrix}
+\end{pmatrix} $ est de rang $k_U + k_V$. De plus les matrices $A$, $B$, $C$, $D$ étant diagonales, le déterminant de la matrice $\begin{pmatrix}
 \begin{array}{c|c}
 A & C \\
  \hline 
 B & D \\
 \end{array} \\
 \end{pmatrix}$
-est le produit des $(a_id_i - b_ic_i)$ pour $i \in {1, n/2}$, et donc non-nul par définition des vecteurs $a,b,c,d$. On a donc bien $k = k_u + k_v$. \\
+est le produit des $(a_id_i - b_ic_i)$ pour $i \in {1, n/2}$, et donc non-nul par définition des vecteurs $a,b,c,d$. On a donc bien $k = k_U + k_V$. \\
 On remarque aussi que $GH^T = 0$ et que $H$ est de rang plein par le même raisonnement que précédemment, ce qui conclut la preuve.
 \end{proof}
-
-
-\begin{propo}\label{dim_hull}
-Soit $\mathcal{C}$ un code aléatoire binaire de longueur $n$ et de dimension $k$, alors on s'attend à avoir $dim(hull(\mathcal{C}))\sim\mathcal{O}(1)$. De plus, nous avons $$ \mathbb{P}\big(dim(hull(\mathcal{C})\big) \leq t) \ \geq\ 1 - \mathcal{O}(2^{-t}) $$
-\end{propo}
-
-\begin{propo}\label{dim_hull_UV}
-Soit $UV$ un code $(U,U+V)$ binaire permuté de longueur $n$ tel que $k_U > k_V$, alors nous avons avec probabilité $1-\mathcal{O}(2^{k_U-k_V})$
-$$ dim(hull(\mathcal{C})) = k_U - k_V $$
-\end{propo}
-PREUVE en annexe.\\
-
-Ainsi nous ne pouvons pas utiliser les codes $(U,U+V)$ binaires où $dim U > dim V$ puisque nous pouvons facilement les distinguer de codes aléatoires.
-En effet, il suffit de calculer la dimension de  leur $hull$ puis de le comparer au résultat de la proposition \ref{dim_hull}.
-Pour résoudre ce problème, nous poserons $q=3$ pour toute la suite du rapport.
-
 
 
 
 \subsection{Le principe de signature}
 
-Notre schéma de signature utilisera donc les codes $(U,U+V)$-généralisés et la fonction syndrôme comme fonction à sens unique, sous l'hypothèse de la difficulté de résoudre le problème du décodage. \\
+Notre schéma de signature utilisera donc les codes $(U,U+V)$-généralisés et la fonction syndrome comme fonction à sens unique, sous l'hypothèse de la difficulté de résoudre le problème du décodage. \\
 
 Nous allons définir la notion de fonctions GPV en moyenne (GPVM). Pour cela, introduisons d'abord la notion de distance statistique.
 
@@ -293,52 +301,53 @@ $\verb|Verify|^{pk}(s,e')$: \\
 \end{flushleft}
 \end{multicols}
 
-
+EXPLIQUER POURQUOI LE SYSTÈME FONCTIONNE.
 
 \subsection{Le décodage avec trappe}
 
-En partant de l'hypothèse que la matrice de parité $\mathbf{H}$ du code $(U,U+V)$-généralisé ressemble à une matrice aléatoire, la difficulté de créer une fausse signature sans connaître la trappe $\mathbf{T}$ est exactement celle de résoudre le problème du décodage d'un code aléatoire, que l'on sait difficile. Nous allons expliciter dans cette section l'algorithme d'inversion de la fonction syndrôme, et discuter sa difficulté en fonction du poids $\omega$ de $e$. \\
+En partant de l'hypothèse que la matrice de parité $\mathbf{H}$ du code $(U,U+V)$-généralisé ressemble à une matrice aléatoire, la difficulté de créer une fausse signature sans connaître la trappe $\mathbf{T}$ est exactement celle de résoudre le problème du décodage d'un code aléatoire, que l'on sait difficile. Nous allons expliciter dans cette section l'algorithme d'inversion de la fonction syndrome connaissant la trappe, et discuter de sa difficulté en fonction du poids $\omega$ de $\e$. \\
 
-Notons $\mathcal{S}_{\omega,n}$ l'ensemble des mots de poids $\omega$ et de longueur $n$. On notera $\mathcal{S}_{\omega}$ s'il n'y a pas d'ambiguité sur la longueur. On rappelle que l'agorithme \verb|InvertAlg| cherche à inverser la fonction syndrôme : 
+\noindent Notons $\mathcal{S}_{\omega,n}$ l'ensemble des mots de poids $\omega$ et de longueur $n$. On notera dans la suite $\mathcal{S}_{\omega}$ s'il n'y a pas d’ambiguïté sur la longueur. On rappelle que l'algorithme \verb|InvertAlg| cherche à inverser la fonction syndrome : 
 $$\begin{array}{ccccc}
 f_{\omega,\mathbf{H}} & : & \mathcal{S}_{\omega,n} & \to & \F_q^{n-k} \\
  & & \mathbf{e} & \mapsto & \mathbf{eH^T} \\
 \end{array}$$
 
-On rappelle que la fonction $f_{\omega,\mathbf{H}}$ avec $\mathbf{H} \in \F_q^{(n-k)\times n}$ s'inverse génériquement si $\omega \in \{\omega_{easy}^-,\omega_{easy}^+\}$, où :
+\noindent On rappelle que la fonction $f_{\omega,\mathbf{H}}$ avec $\mathbf{H} \in \F_q^{(n-k)\times n}$ s'inverse génériquement si $\omega \in \{\omega_{easy}^-,\omega_{easy}^+\}$, où :
 $$ \omega_{easy}^- := \frac{q-1}{q}(n-k) \qquad \text{ et }\qquad  \omega_{easy}^+ := k + \frac{q-1}{q}(n-k).$$
 
 \begin{proof}[Preuve] TODO
 \end{proof}
 
 
-On rappelle aussi que la fonction $f_{\omega,\mathbf{H}}$ admet un inverse pour toute entrée $s \in \F_q^{n-k}$ si $\omega \in \{\omega^-,\omega^+\}$, où :
-$$ \omega^- := ??? \qquad \text{ et }\qquad  \omega^+ := ???.$$
+\noindent On rappelle aussi que la fonction $f_{\omega,\mathbf{H}}$ admet un inverse pour toute entrée $s \in \F_q^{n-k}$ si $\omega \in \{\omega^-,\omega^+\}$, où :
+$$\omega^- := \min\left\{\omega\in \llbracket0,n\rrbracket , \dbinom{\omega}{n}(q-1)^{\omega} \geq q^{n-k}\right\} $$
+$$\omega^+ := \max\left\{\omega\in \llbracket0,n\rrbracket , \dbinom{\omega}{n}(q-1)^{\omega} \geq q^{n-k}\right\}$$
 
 \begin{proof}[Preuve] TODO
 \end{proof}
 
 
-Nous voulons donc un moyen d'inverser la fonction syndrôme pour $\omega \in \{\omega_{UV}^-,\omega_{UV}^+\}$ avec $\omega_{UV}^-$ et $\omega_{UV}^+$ tels que :
+\noindent Nous voulons donc un moyen d'inverser la fonction syndrome pour $\omega \in \llbracket\omega_{UV}^-,\omega_{UV}^+\rrbracket$ avec $\omega_{UV}^-$ et $\omega_{UV}^+$ tels que :
 
-$$\{\omega_{easy}^-,\omega_{easy}^+\} \subsetneq \{\omega_{UV}^-,\omega_{UV}^+\} \subset  \{\omega^-,\omega^+\}$$
+$$\llbracket\omega_{easy}^-,\omega_{easy}^+\rrbracket \subsetneq \llbracket\omega_{UV}^-,\omega_{UV}^+\rrbracket \subset  \llbracket\omega^-,\omega^+\rrbracket$$
 
 
-Afin d'expliciter le décodage, introduisons la fonction :
+\noindent Afin d'expliciter le décodage, introduisons la fonction :
 
 $$\begin{array}{ccccc}
 \varphi_{\mathbf{a},\mathbf{b},\mathbf{c},\mathbf{d}} & : & \F_q^{n/2} \times  \F_q^{n/2} & \to & \F_q^{n/2} \times  \F_q^{n/2} \\
  & & (\mathbf{x} , \mathbf{y}) & \mapsto &  (\mathbf{a}.\mathbf{x} + \mathbf{b}.\mathbf{y}, \mathbf{c}.\mathbf{x} + \mathbf{d}.\mathbf{y}) \\
 \end{array}$$
 
-Si cette fonction respecte les conditions sur les vecteurs $\mathbf{a},\mathbf{b},\mathbf{c},\mathbf{d}$ définies dans la définition \ref{UV-normalise}, on dit qu'elle est UV-normalisée. Dans ce cas on peut vérifier qu'elle est bijective d'inverse :
+\noindent Si cette fonction respecte les conditions sur les vecteurs $\mathbf{a},\mathbf{b},\mathbf{c},\mathbf{d}$ définies dans la définition \ref{UV-normalise}, on dit qu'elle est UV-normalisée. Dans ce cas on peut vérifier qu'elle est bijective d'inverse :
 
 $$\begin{array}{ccccc}
 \varphi^{-1}_{\mathbf{a},\mathbf{b},\mathbf{c},\mathbf{d}} & : & \F_q^{n/2} \times  \F_q^{n/2} & \to & \F_q^{n/2} \times  \F_q^{n/2} \\
  & & (\mathbf{x} , \mathbf{y}) & \mapsto &  (\mathbf{d}.\mathbf{x} - \mathbf{b}.\mathbf{y}, -\mathbf{c}.\mathbf{x} + \mathbf{a}.\mathbf{y}) \\
 \end{array}$$
 
-Ainsi, pour chaque vecteur $\mathbf{e}$ de $\F_q^n$, on peut associer deux vecteurs $\mathbf{e_U}$ et $\mathbf{e_V}$ de $\F_q^{n/2}$ tels que 
+\noindent Ainsi, pour chaque vecteur $\mathbf{e}$ de $\F_q^n$, on peut associer deux vecteurs $\mathbf{e_U}$ et $\mathbf{e_V}$ de $\F_q^{n/2}$ tels que 
 $$ (\mathbf{e_U},\mathbf{e_V}) = \varphi^{-1}_{\mathbf{a},\mathbf{b},\mathbf{c},\mathbf{d}}(\mathbf{e}).$$
 
 \begin{propo} Inverser $f_{\omega,\mathbf{H}}$ pour un certain $\mathbf{s} \in F_q^{n-k}$ est équivalent à trouver $\mathbf{e} \in \F_q^n$ tel que:
@@ -456,22 +465,23 @@ Il n'existe de solution au système (\ref{syst petit poid}) que si $\e_V(i)=0$ c
 	\item Les autres coordonnées sont uniformément distribuées.
 	\end{itemize}
 \end{itemize} 
-A PROUVER !!!!!!
+PREUVE À DÉTAILLER
 \end{proof}
 
 On récapitule les différents cas dans la figure \ref{graphique ratio}. \\
 
 \begin{figure}[h]
-\label{graphique ratio}
 \begin{center}
 \includegraphics [scale=0.4]{include/graph_ratio_w.png}
 \end{center}
 \caption{\small Comparaison des distances $w/n$ avec et sans trappe en fonction du rendement.}
+\label{graphique ratio}
 \end{figure}
 
 La connaissance de la trappe apporte donc bien un avantage puisqu'elle permet un décodage pour des erreurs de poids ne permettant pas de décodage générique. 
 
-\begin{remarque} Fonction de hash
+\begin{remarque} Fonction de hachage
+À FAIRE
 \end{remarque}
 
 \subsection{Implémentation et choix de paramètres}
@@ -586,7 +596,9 @@ On peut alors introduire l'algorithme suivant :
     	\UNTIL {$\text{rand}([0,1]) > \mathbf{r}_U(|\e_V|, m_1(\e)$}
     	\RETURN $\e$
     \end{algorithmic}
-\end{algorithm}
+\end{algorithm}\
+
+
 \noindent Avec :
 
 \begin{equation*}
@@ -601,7 +613,7 @@ On peut alors énoncer la proposition suivante :
 
 
 \begin{propo}
-Alors si \verb|DecodeV| est uniforme en poids et si \verb|DecodeU| est $m_1$-uniforme, alors on a $\mathbf{e}\sim\mathbf{e}^{unif}$.
+Si \verb|DecodeV| est uniforme en poids et si \verb|DecodeU| est $m_1$-uniforme, alors on a $\mathbf{e}\sim\mathbf{e}^{unif}$.
 \end{propo}
 
 \begin{proof}[Preuve]
@@ -638,6 +650,7 @@ Application de la méthode du rejet selon ces choix et choix des distributions.
 		\STATE $\mathcal{I} \leftarrow$ ensemble d'information de $\langle\mathbf{H}\rangle^\perp$
 		\STATE $\mathcal{J} \subset \mathcal{I}$ de taille $k-d$ tel que $|\e_V|_\mathcal{J} = k_0$
 		\STATE $x_U \hookleftarrow \{x\in\F_3^{n/2} | \forall j\in\J,  x_j \notin \{-\frac{b_i}{a_i}\e_{V_i}, -\frac{d_i}{c_i}\e_{V_i}\}\}$
+		\STATE $\e_U \leftarrow \textsc{Prange }(\mathbf{H}_U, \s^U, \mathcal{I}, x_U)$
 		\UNTIL {$|\varphi(\e_U,\e_V)| \neq \omega$}
 		\RETURN $\e_U$
     \end{algorithmic}
@@ -654,6 +667,7 @@ Application de la méthode du rejet selon ces choix et choix des distributions.
     \end{algorithmic}
 \end{algorithm}
 
+EXPLIQUER POURQUOI ON AJOUTE LE $d$.\\
 Avec $d\in [0,k_U]$, qui permettra de montrer que notre sortie est uniforme.
 
 \begin{defi} (Bon ensemble).
@@ -668,9 +682,9 @@ Il n'y a donc aucune raison que la sortie soit une solution du problème de déc
 Nous pouvons facilement voir que \verb|VarDecodeU| est $m_1$-uniforme.\\
 La sortie de l'algorithme \verb|DecodeUV| utilisant \verb|VarDecodeU| est alors uniforme, on la note $\e^{unif}$.\\
 
-\begin{defi} $(J_{x_V,l}^{unif},J_{x_V, l}^{\mathbf{H}_U})$.\\
+\begin{defi}\
 \begin{itemize}
-\item $J_{x_V,l}^{unif}$ et un ensemble choisi uniformément tel que $J_{x_V,l}^{unif}\subseteq \llbracket 1,n/2 \rrbracket$, $J_{x_V,l}^{unif}$ est de cardinal $k_U-d$ et $\#J_{x_V,l}^{unif}\cap Supp(x_V) = k_0$. 
+\item $J_{x_V,l}^{unif}$ et un ensemble choisi uniformément tel que $J_{x_V,l}^{unif}\subseteq \llbracket 1,n/2 \rrbracket$, il est de cardinal $k_U-d$ et $\#J_{x_V,l}^{unif}\cap Supp(x_V) = k_0$. 
 \item $J_{x_V, l}^{\mathbf{H}_U}$ est défini de la même façon avec une contrainte supplémentaire : il fait parti des bons ensembles pour $\mathbf{H}_U$.
 \end{itemize}
 \end{defi}
@@ -718,13 +732,13 @@ La probabilité d'avoir un rejet équivaut à la probabilité d'avoir une distan
 
 
 \subsection{Une famille de fonctions uniformément distribuée}
-On a donc le point (2) de la definition des fonctions GPV qui est obtenu dans la section précédente. On va montrer le point (1), à savoir, notre famille de fonctions syndrômes est uniformément distribuée avec les codes (U,U+V)-généralisés. \\
+On a donc le point (2) de la définition des fonctions GPV qui est obtenu dans la section précédente. On va montrer le point (1), à savoir, notre famille de fonctions syndromes est uniformément distribuée avec les codes (U,U+V)-généralisés. \\
 TODO
 
 
 \section{Sécurité du schéma}
-Pour montrer la sécurité du schéma, nous allons dans un premier temps montrer que dans l'hypothèse que la matrice de parité du code $(U,U+V)$-généralisé considéré est difficile à distinguer d'une matrice aléatoire de $\F_q^{n-k}$, alors le schéma est sûr au sens EUF-CMA.\\
-Nous montrerons ensuite qu'il est effectivement difficile de distinguer notre matrice de parité permuté d'une matrice aléatoire. \\
+Pour montrer la sécurité du schéma, nous allons dans un premier temps montrer que sous l'hypothèse que la matrice de parité du code considéré est difficile à distinguer d'une matrice aléatoire, le schéma est sûr au sens EUF-CMA.\\
+Nous montrerons ensuite qu'il est effectivement difficile de distinguer notre matrice de parité permutée d'une matrice aléatoire. \\
 
 \subsection{Sécurité EUF-CMA}
 Nous allons montrer que le schéma est sûr au sens EUF-CMA (Existential Unforgeability under Chosen Message Attacks). Pour cela nous ferons une réduction au problème DOOM.
@@ -851,7 +865,8 @@ Utilisation de S et P pour masquer les propriétés de la matrice. \\
 
 
 
-annexe
+ANNEXES\\
+
 \begin{proof}[Preuve du lemme \ref{maj_dist_e_eunif}]
 Nous allons avoir besoin dans la suite de la proposition suivante :
 \begin{propo}\label{rho_f}
@@ -918,7 +933,7 @@ Ainsi $\forall u\in U$ et $\forall v\in V$ tels que $(u,u+v)\in hull(U,U+V)$, il
 \end{equation*}
 Donc $v\in V\cap U^{\bot}$.
 De plus, nous avons $dim(V) + dim(U^{\bot}) = \frac{n}{2} +k_V - k_U < \frac{n}{2}$
-ET ???????
+SUITE À ÉCRIRE
 \end{proof}
 
 \end{document}
