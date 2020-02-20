@@ -9,6 +9,8 @@
 \usepackage{amsthm}
 \usepackage{appendix}
 \usepackage{multicol}
+\usepackage{stmaryrd}
+\usepackage{algorithm, algorithmic}
 
 \theoremstyle{definition}
 \newtheorem{thm}{Théorème}[section]
@@ -25,6 +27,16 @@
 \newcommand{\e}{\mathbf{e}}  
 \newcommand{\s}{\mathbf{s}} 
 \newcommand{\K}{\mathbb{K}} 
+\newcommand{\J}{\mathcal{J}} 
+\newcommand{\D}{\mathcal{D}} 
+
+% traduction des mots pour les algos
+\floatname{algorithm}{Algorithme}
+\renewcommand{\algorithmicrequire}{\textbf{Entrées:}}
+\renewcommand{\algorithmicensure}{\textbf{Sortie:}}
+\renewcommand{\algorithmicrepeat}{\textbf{Faire}}
+\renewcommand{\algorithmicuntil}{\textbf{Tant que}}
+\renewcommand{\algorithmicreturn}{\textbf{Retourne}}
 
 \title{Projet - Wave}
 \author{Lansade Suzanne}
@@ -550,7 +562,107 @@ description explicite de \verb|DECODE_U| \\
 Application de la méthode du rejet selon ces choix et choix des distributions. 
 
 \subsection{Estimation du nombre de rejet}
-TODO \\
+\begin{algorithm}
+	\caption{DecodeUV($\varphi, \s, \mathbf{H}_V, \mathbf{H}_U$)}
+	\begin{algorithmic}[1]
+   	 	\REQUIRE $\varphi$, $\s \in \F_q^{n-k}$ un syndrome, $\mathbf{H}_V \in \F_q^{(\frac{n}{2} - k_V) \times \frac{n}{2}}$, $\mathbf{H}_U \in \F_q^{(\frac{n}{2} - k_U) \times \frac{n}{2}}$
+   	 	\ENSURE $\e = \varphi(e_U, e_V) \text{ avec } \e_U\mathbf{H}_U^T = \s^U \text{ et } \e_V\mathbf{H}_V^T = \s^V$
+    	\STATE $\e_V \leftarrow \text {DecodeV}(\s^V,\mathbf{H}_V)$
+    	\REPEAT 
+    	\STATE $\e_U \leftarrow \text {DecodeU}(\varphi, \e_V, \s^U, \mathbf{H}_U)$
+    	\STATE $\e \leftarrow \varphi(\e_U,\e_V)$
+    	\UNTIL {$\text{rand}([0,1]) > \mathbf{r}_U(|\e_V|, m_1(\e)$}
+    	\RETURN $\e$
+    \end{algorithmic}
+\end{algorithm}
+
+
+\begin{algorithm}
+	\caption{DecodeV($\s^V$)}
+	\begin{algorithmic}[1]
+    	\STATE $c$ mot aléatoire du code $V$
+    	\STATE $\s \leftarrow$ le syndrome $\s^V$ paddé avec des zéros
+    	\STATE $\e_V \leftarrow \s + c$
+    	\RETURN $\e_V$
+    \end{algorithmic}
+\end{algorithm}
+
+dire $d\in [0,k_U]$
+
+\begin{algorithm}
+	\caption{DecodeU($\varphi, \e_V, \s^U, \mathbf{H}_U$)}
+	\begin{algorithmic}[1]
+		\STATE $t \leftarrow |\e_V|$
+		\STATE $k_0 \hookleftarrow \mathcal{D}_U^t$
+		\REPEAT
+		\STATE $\mathcal{I} \leftarrow$ ensemble d'information de $\langle\mathbf{H}\rangle^\perp$
+		\STATE $\mathcal{J} \subset \mathcal{I}$ de taille $k-d$ tel que $|\e_V|_\mathcal{J} = k_0$
+		\STATE $x_U \hookleftarrow \{x\in\F_3^{n/2} | \forall j\in\J,  x_j \notin \{-\frac{b_i}{a_i}\e_{V_i}, -\frac{d_i}{c_i}\e_{V_i}\}\}$
+		\UNTIL {$|\varphi(\e_U,\e_V)| \neq \omega$}
+		\RETURN $\e_U$
+    \end{algorithmic}
+\end{algorithm}
+
+\begin{defi} (Bon ensemble).\\
+Soient $d \leq k \leq n$, $\mathbf{H}\in\F_3^{(n-k)\times n}$ et $\varepsilon \subseteq \llbracket1,n\rrbracket$ de taile $k-d$. On dit que $\varepsilon$ est un bon ensemble pour $\mathbf{H}$ si $\mathbf{H}_{\overline{\varepsilon}}$ est de rang plein. Sinon, on dit que $\varepsilon$ est un mauvais ensemble.
+\end{defi}
+
+
+Nous voulons compter le nombre de rejets moyen, pour cela nous allons comparer $\e$ la sortie de \verb|DecodeUV| avec $\e^{unif}$ une erreur aléatoire uniforme de poids $\omega$.\\
+Nous savons dores et déjà que la sortie de \verb|DecodeV| est uniforme, nous allons donc étudier la sorite de \verb|DecodeU|.
+Nous introduisons pour cela \verb|VarDecodeU| qui fonctionne de la même façon que \verb|DecodeU| quand $\J$ est un bon ensemble pour $\mathbf{H}$ et qui renvoie une erreur aléatoire selon la distribution $\D_U^t$ sur $\J$ dans le cas contraire.
+Il n'y a donc aucune raison que la sortie soit une solution du problème de décodage lorsque $\J$ n'est pas un bon ensemble pour $\mathbf{H}$.
+Nous pouvons facilement voir que \verb|VarDecodeU| est $m_1$-uniforme.\\
+La sortie de l'algorithme \verb|DecodeUV| utilisant \verb|VarDecodeU| est alors uniforme, on la note $\e^{unif}$.\\
+
+\begin{defi} $(J_{x_V,l}^{unif},J_{x_V, l}^{\mathbf{H}_U})$.\\
+\begin{itemize}
+\item $J_{x_V,l}^{unif}$ et un ensemble choisi uniformément tel que $J_{x_V,l}^{unif}\subseteq \llbracket 1,n/2 \rrbracket$, $J_{x_V,l}^{unif}$ est de cardinal $k_U-d$ et $\#J_{x_V,l}^{unif}\cap Supp(x_V) = k_0$. 
+\item $J_{x_V, l}^{\mathbf{H}_U}$ est défini de la même façon avec une contrainte supplémentaire : il fait parti des bons ensembles pour $\mathbf{H}_U$.
+\end{itemize}
+\end{defi}
+
+Pour pouvoir compter le nombre de rejets, nous allons avoir besoin des lemmes suivants dont les preuves sont en annexes.
+
+\begin{lemme}\label{maj_dist_e_eunif}
+$$ \rho\left(\e ,\e^{unif}\right) \leq \sum\limits_{x_V,l} \rho\left(J_{x_v,l}^{\mathbf{H}_U},J_{x_v,l}^{unif}\right)\mathbb{P}\left(k_0 = l, \e_V = x_V\right) $$ 
+\end{lemme}
+
+
+\begin{lemme}
+\begin{equation}\label{esp}
+\mathbb{E}\left(\rho\left(J_{x_V,l}^{unif},J_{x_V, l}^{\mathbf{H}_U}\right)\right) \leq \frac{3^{-d}}{2}
+\end{equation}
+
+\end{lemme}
+
+\begin{lemme}\label{markov}(Inégalité de Markov).\\
+Soit $Z$ une variable aléatoire supposée presque sûremeny positive ou nulle, alors $$\forall a>0\quad \mathbb{P}(Z > a) \leq \frac{\mathbb{E}(Z)}{a}$$
+\end{lemme}
+
+Nous pouvons maintenant énoncer le théorème suivant :
+
+\begin{thm}\label{rejet}
+Soit $\e$ la sortie de \verb|DecodeUV| et $\e^{unif}$ la variable aléatoire uniformément distribuée parmi les mots de poids $\omega$. On a :
+$$ \mathbb{P}\left(\rho(\e,\e^{unif})>3^{-d/2}\right) \leq \frac{3^{-d/2}}{2} $$
+\end{thm}
+
+\begin{proof}[Preuve]
+\begin{equation*}
+\begin{split}
+\mathbb{P}&\big(\rho(\e,\e^{unif})>3^{-d/2}\big) \\
+&\leq 3^{d/2}\mathbb{E}(\rho\left(\e,\e^{unif})\right) \quad \text{par l'inegalité de Markov}\\
+&\leq 3^{d/2}\mathbb{E}\left(\sum\limits_{x_V,l} \rho\left(J_{x_v,l}^{\mathbf{H}_U},J_{x_v,l}^{unif}\right)\mathbb{P}\left(k_0 = l , \e_V = x_V\right)\right) \text{ d'après le lemme \ref{maj_dist_e_eunif}}\\
+&\leq 3^{d/2}\left(\sum\limits_{x_V,l} \frac{3^{-d}}{2}\mathbb{P}\left(k_0 = l ,\e_V = x_V\right)\right) \quad \text{par \eqref{esp}}\\
+&= 3^{d/2} \frac{3^{-d}}{2}\left(\sum\limits_{x_V,l}\mathbb{P}\left(k_0 = l ,\e_V = x_V\right)\right) \\
+&= \frac{3^{-d/2}}{2}\\
+\end{split}
+\end{equation*}
+\end{proof}
+
+
+La probabilité d'avoir un rejet équivaut à la probabilité d'avoir une distance significative entre $\e$ et $\e^{unif}$. D'après le théorème \ref{rejet}, nous voyons donc qu'en augmentant $d$, nous aurons très peu de rejets.
+
 
 \subsection{Une famille de fonctions uniformément distribuée}
 On a donc le point (2) de la definition des fonctions GPV qui est obtenu dans la section précédente. On va montrer le point (1), à savoir, notre famille de fonctions syndrômes est uniformément distribuée avec les codes (U,U+V)-généralisés \\
@@ -676,5 +788,44 @@ Utilisation de S et P pour masquer les propriétés de la matrice. \\
 
 \bibliographystyle{plain}
 \bibliography{bibliography}
+
+
+annexe
+\begin{proof}[Preuve du lemme \ref{maj_dist_e_eunif}]
+Nous allons avoir besoin dans la suite de la proposition suivante :
+\begin{propo}\label{rho_f}
+Soient $X$ et $Y$ deux variables aléatoires dans le même espace $A$ et $Z$ une variable aléatoire dans l'espace $B$ indépendante de $X$ et $Y$. Alors, pour toute fonction $f$, nous avons : $$ \rho(f(X,Z),f(Y,Z)) \leq \rho(X,Y)$$
+\end{propo}
+
+{\scriptsize
+\begin{equation*}
+\begin{split}
+\rho(\e,\e^{unif}) &= \rho\Big((\e_U,\e_V),(\e_U^{unif},\e_V^{unif})\Big)\\
+&\leq \sum\limits_{x_U,x_V} \left|\mathbb{P}\Big((\e_U,\e_V)=(x_U,x_V)\Big) - \mathbb{P}\Big((\e_U^{unif},\e_V^{unif})=(x_U,x_V)\Big)\right|\\
+&= \sum\limits_{x_U,x_V} \left|\mathbb{P}(\e_V = x_V)\mathbb{P}(\e_U=x_U|\e_V=x_V) - \mathbb{P}(\e_V^{unif} = x_V)\mathbb{P}(\e_U^{unif}=x_U | \e_V^{unif}=x_V)\right|\\
+&= \sum\limits_{x_U,x_V} \mathbb{P}(\e_V = x_V)\left|\mathbb{P}(\e_U=x_U|\e_V=x_V) - \mathbb{P}(\e_U^{unif}=x_U | \e_V^{unif}=x_V)\right|\\
+\end{split}
+\end{equation*}}
+
+Étudions le terme  $\mathbb{P}(\e_U=x_U|\e_V=x_V) - \mathbb{P}(\e_U^{unif}=x_U | \e_V^{unif}=x_V)$:
+{\scriptsize
+$$ \mathbb{P}(\e_U=x_U|\e_V=x_V) - \mathbb{P}(\e_U^{unif}=x_U | \e_V^{unif}=x_V) =  $$
+$$ \sum\limits_l \left[ \mathbb{P}(\e_U=x_U|k_0 = l,\e_V=x_V) - \mathbb{P}(\e_U^{unif}=x_U |k_0 = l, \e_V^{unif}=x_V) \right] \mathbb{P}\left(k_0 = l | \e_V =x_V\right)$$
+}
+
+Les ensembles $\J$ étant inclus dans un ensemble d'information, l'aléa interne de \verb|DecodeU| et de \verb|VarDecodeU| ne dépendent pas du choix de $J_{x_V,l}^{unif}$ et $J_{x_V, l}^{\mathbf{H}_U}$. \\
+Nous pouvons voir que $\mathbb{P}(\e_U=x_U|k_0 = l,\e_V=x_V)$ ne dépend que de $x_U$ et $J_{x_V, l}^{\mathbf{H}_U}$ et   $\mathbb{P}(\e_U^{unif}=x_U |k_0 = l, \e_V^{unif}=x_V)$ ne dépend que de $x_U$ et $J_{x_V, l}^{unif}$. 
+De plus, $J_{x_V,l}^{unif}$ et $J_{x_V, l}^{\mathbf{H}_U}$ vivent dans le même espace.
+Ainsi d'après la proposition \ref{rho_f}, nous avons 
+{\scriptsize
+$$ \sum\limits_{x_U}\mathbb{P}(\e_U=x_U|k_0 = l,\e_V=x_V) - \mathbb{P}(\e_U^{unif}=x_U |k_0 = l, \e_V^{unif}=x_V)\quad \leq\quad \rho(J_{x_V, l}^{\mathbf{H}_U},J_{x_V, l}^{unif})$$
+}
+
+
+\begin{equation}
+\rho\left(J_{x_V,l}^{unif},J_{x_V, l}^{\mathbf{H}_U}\right) = \frac{N_{x_V,l}}{\dbinom{|x_V|}{l}\dbinom{n/2-|x_V}{k_U-d-l}}
+\end{equation}
+Avec $N_{x_V,l}$ le nombre de mauvais sous-ensembles de $\llbracket1,n/A\rrbracket$ de taille $k_U-d$ pour $\mathbf{H}_U$.
+\end{proof}
 
 \end{document}
