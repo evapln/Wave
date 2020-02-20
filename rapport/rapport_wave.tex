@@ -21,7 +21,8 @@
 \renewcommand{\a}{\alpha}
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}} 
 \newcommand{\F}{\mathbb{F}} 
-\newcommand{\e}{\mathbf{e}} 
+\newcommand{\A}{\mathcal{A}} 
+\newcommand{\e}{\mathbf{e}}  
 \newcommand{\s}{\mathbf{s}} 
 \newcommand{\K}{\mathbb{K}} 
 
@@ -588,6 +589,8 @@ $$ \mathbf{eH}^T = \mathbf{s}_j \text{ pour un certain } j \in \{1,...,N\})).$$
 La réduction à ce problème est naturelle pour un schéma de signature puisque JHFEKHZFKHFKZEHFILZEJHFKLZEJFHJ. \\ 
 EXPLICATION INFORMELLE DE LA REDUCTION, POURQUOI ELLE VA MARCHER \\
 
+
+\subsubsection{Preuve formelle de la réduction}
 Pour faire une preuve formelle de cette réduction, nous allons introduire un système de jeux qui nous permettra de réduire la sécurité d'un système à un problème $P$. Soit $\mathcal{A}$ un attaquant et $\mathcal{R}$ un rival. Soient $G_0, G_1, ...,G_N$ un ensemble de jeux et soit $\mathbb{P}(G_i)$ la probabilité pour $\mathcal{A}$ de répondre au défi posé par $\mathcal{R}$ pour le jeu $G_i$. $\mathbb{P}(G_0)$ est alors la probabilité de cassé le système considérer et $\mathbb{P}(G_N)$ la probabilité de répondre au problème $P$. \\
 L'idée est de changer pas à pas les jeux $G_0$ à $G_N$ de façon à ce que :
 $$\forall i \in {0,...,N-1}, |\mathbb{P}(G_i)-\mathbb{P}(G_i+1)| \in negl(\lambda) \Longrightarrow |\mathbb{P}(G_0)-\mathbb{P}(G_N)|  \in negl(\lambda)$$
@@ -597,21 +600,46 @@ EVENTUELLEMENT METTRE LES 3 conditions mais je ne pense pas que ça soit nécess
 
 \begin{thm} (Réduction de sécurité). \\
 Soit $N_{sign}$ le nombre de requêtes faites à l'oracle de signature. Soit $\lambda$ le paramètre de sécurité et $\lambda_0=\lambda + 2\log_2(N_{sign})$. On a :
-$$Succ^{EUF-CMA}_{Wave}(t,N_{sign}) \leq 2Succ^{DOOM(n,q,k,N)}(t) + SMT$$
+$$Succ^{EUF-CMA}_{Wave}(t,N_{sign}) \leq 2Succ^{DOOM(n,q,k,N)}(t) +\rho(\mathcal{D}_{rand},\mathcal{D}_{pub})(t) + $$
+$$ f(\mathcal{U}_{\omega},\mathcal{D}_{\omega}^{\mathbf{H}_{pk}}) + g(\epsilon) + c + \frac{N_{hash}}{2}\sqrt{\epsilon} + \frac{1}{2^{\lambda}}$$
 \end{thm}
 
-\begin{proof}[Preuve]
-\begin{itemize} On rappelle que correspond à notre jeu pour la sécurité EUF-CMA de Wave.
-\item $G_1$ : Changer le jeu si lors d'un appelle à la fonction sign, deux $r$ identiques sont choisis pour un même message $m$. S0 + P(F) négligeable
-\item $G_2$ : On crée une liste suffisemment grande de Lm, des sel, tous différent. Dans la fonction hash, si r est dans la liste, alors on choisit un e unifirme dans Sw, on renvoit son syndrome. e est stocké et au même couple (r, m) le même syndrome sera renvoyé. Si r n'est pas la dans liste, on renvoit un des syndromes de doom \\
-Dans la fonction sign, on prend toujours le r suivant dans Lm. (ne pose pas de pb grace au passage à $G_1$ Ainsi dans sign, on ne signera jamais les syndromes de DOOM. On s'assure donc que le fait d'avoir un oracle à sign dans UEF-CMA ne change pas la sécu face à DOOM.
-\item $G_3$ : Ici, on enlève l'utilisation de la trappe uniquement pour les syndromes non-DOOM, càd dans la fonction sign. On n'appelle plus la fonction de décodage D. A la place, on écupère le e stocké
-\item $G_4$ : On remplace Hpk par H0. Pas de pb car plus de trappe
-\item $G_5$ : On verifie que r n'est pas dans Lm, ainsi on est bien sûr que A a signé un message de DOOM ET qu'il connait nécessairement la trappe. 
+\begin{proof}[Preuve] On rappelle que $G_0$ correspond à notre jeu pour la sécurité EUF-CMA de Wave.
+\begin{itemize} 
+\item $G_1$ : Le jeu $G_1$ est identique au jeu $G_0$ sauf si l'évènement 
+\begin{center}
+$F := \{\text{Un même aléa r a été tiré lors de deux requêtes}$
+$\text{\qquad d'un même message à l'oracle de signature}\}.$
+\end{center}
+On a alors 
+$$ \mathbb{P}(G_0) \leq  \mathbb{P}(G_1) +  \mathbb{P}(F) $$
+Or pour $\lambda_0=\lambda + 2\log_2(N_{sign})$, la probabilité que l'évènement $F$ se produise est majorée par $\frac{1}{2^{\lambda}}$. C'est donc négligeable et le changement est autorisé.
+\item $G_2$ : Le passage au jeu $G_2$ permet d'empêcher $\A$ de faire appel à l'oracle de signature sur les syndrome du problème DOOM. L'idée est de créer une liste suffisemment grande $L_m$ d'aléas tous différents. On modifie alors la fonction \verb|hash| de cette façon :
+	\begin{enumerate}
+	\item Si \verb|hash| est appelée par la fonction \verb|sign|, alors les aléas seront pris successivement dans $L_m$ et associés à un vecteur erreur $\e_{m,r}$ (stocké) pris uniformément dans $S_{\omega}$. Elle renvoie alors $\s=\e_{m,r}\mathbf{H}^T$.
+	\item En revanche si \verb|hash| est appelée hors de la fonction \verb|sign| par $\A$, alors elle son comportement dépendra de l'aléa. Si $r$ est dans $L_m$ elle se comporte comme si elle avait été appelée par \verb|sign| et renvoie $\e_{m,r}\mathbf{H}^T$. Sinon elle renvoie successivement les syndromes du problème DOOM.
+	\end{enumerate}
+On prend donc dans la fonction \verb|sign| toujours le $r$ suivant de $L_m$. On a alors changé le jeu en supprimant le cas où deux mêmes $r$ sont tirés lors de la signature. Cela ne pose pas de problème grace au passage à $G_1$. Le passage au jeu $G_2$ permettra ainsi de s'assurer par la suite que $\A$ n'a pas fait d'appel à \verb|sign| sur les syndromes du problème DOOM.
+On a alors 
+$$ \mathbb{P}(G_1) \leq  \mathbb{P}(G_2) +  \frac{N_{hash}}{2}\sqrt{\epsilon} $$
+où $\epsilon$ est une fonction en $n$ qui décroît exponentiellement. C'est donc bien négligeable.
+\item $G_3$ : Le jeu $G_3$ permet à l'oracle de signature de se passer de l'algorithme de décodage, et donc de la trappe $T$. Il sera nécessaire pour remplacer la matrice du code (U,U+V)-généralisé par la matrice aléatoire de l'instance du problème DOOM. Pour passer au jeu $G_3$, on modifie la sortie de \verb|sign|. Au lieu de renvoyer le couple $(\e,r)$ où $\e = D_{\varphi,H_U,H_V}$, on renvoit le couple $(\e_{m,r},r)$ préalablement stocké.\\
+ La différence de succès de dépand que de $\omega$ et des différence de distribution entre $\mathcal{U}_{\omega}$ et $\mathcal{D}_{\omega}^{\mathbf{H}_{pk}}$, où $\mathcal{U}_{\omega}$ et la distribution uniforme sur $S_{\omega}$ et où $\mathcal{U}_{\omega}$ et $\mathcal{D}_{\omega}^{\mathbf{H}_{pk}}$ est la distribution des couples $(e,r)$ où $r$ est un aléa uniforme dans $\{0,1\}^{\lambda_0}$ et $e$ est la sortie de l'algorothme de décodage avec trappe sur une entrée $s$ prise uniformément dans $\F_q^{n-k}$.
+On a alors 
+$$ \mathbb{P}(G_2) \leq  \mathbb{P}(G_3) + f(\mathcal{U}_{\omega},\mathcal{D}_{\omega}^{\mathbf{H}_{pk}}) + g(\epsilon) + c$$
+où $f$ et $g$ sont linéaires et $c$ un certaine constante.
+\item $G_4$ : On peut maintenant remplacer $\mathbf{H}_{pk}$ par $\mathbf{H}_0$. Ce changement ne pose pas de problème puisque \verb|sign| n'utilise plus la trappe. En revanche, nous avons créé un distingueur entre la distribution $(:=\mathcal{D}_{rand})$ des matrices prises aléatoirement dans $\F_q{(n-k)\times n}$ et la distribuction $(:=\mathcal{D}_{pub})$ des matrices prises aléatoirement dans l'ensemble des matrices de parité d'un code $(U,U+V)$-généralisé où $U$ (resp. $V$) est un $[n/2,k_U]$-code (resp. $[n/2,k_V]$-code). 
+On a alors 
+$$ \mathbb{P}(G_3) \leq  \mathbb{P}(G_4) + \rho(\mathcal{D}_{rand},\mathcal{D}_{pub})(t)$$
+\item $G_5$ : On change ici la procédure de fin. On rajoute à la vérification la condition $r \notin L_m$. Ainsi on est bien sûr que $\A$ réussi le jeu s'il répond au problème DOOM. Alors la probabilité que $\A$ réussisse $G_5$ est exactement la probabilité que $\A$ réussisse $G_4$ et $r\notin L_m$.
+On a alors 
+$$ \mathbb{P}(G_4) \leq  2\mathbb{P}(G_5) + \rho(\mathcal{D}_{rand},\mathcal{D}_{pub})(t)$$
+où $\mathbb{P}(G_5)$ est exactement la probabilité pour $\A$ de renvoyer $\e_j \in S_{\omega}$ et tel que $\e_j\mathbf{H}_0^T = \s_j$ pour un certain indice $j$ du problème DOOM. On a donc 
+$$ \mathbb{P}(G_5) \leq Succ^{n,k,N_{hash}, \omega}_{DOOM}(t)$$
 \end{itemize}
+En rassemblant toutes les inégalités on termine la preuve. (On trouvera le détail des preuves de probabilité en annexe de ce rapport.)
 \end{proof}
 
-\subsubsection{Et la fonction de hachage ?}
 
 \subsection{Indistinguabilité des codes (U,U+V)-généralisés}
 Distinguer une matrice de parité d'un code (U,U+V)-généralisé d'une matrice de parité aléatoire. \\
