@@ -89,11 +89,8 @@ la solution Wave est d'enlever la restriction au mot le plus proche \\
 Nous allons détailler le schéma de signature Wave et détailler sa sécurité. \\
 
 \section{Le schéma de signature Wave}
-Pour répondre aux problèmes : \\
-
-- Des codes UV-généralisés \\
-- Des fonctions GPV en moyenne \\
-- Un schéma de signature de type hash et signe utilisant ces codes \\
+Nous allons détailler dans cette section le schéma de signature Wave. C'est un schéma de type hache et signe à base de codes correcteurs. Pour des raisons de clarté nous oublierons dans un premier temps la problématique du hachage. Nous le réintroduirons en fin de rapport afin de proposer une preuve formelle de la sécurité du schéma, où la fonction de hachage est alors nécéssaire. \\
+Le schéma de signature Wave s'appuie sur une famille de codes appelés des codes (U,U+V)-généralisés. La strucure de ces codes nous permettrons de proposer un algorithme de décodage $\mathcal{D}$ utilisant une trappe $T$ et donnant un avantage par rapport à un algorithme de décodage générique. Ce système s'appuie aussi sur la notion de fonctions GPV en moyenne, que nous détaillerons.
 
 \subsection{La famille de codes (U,U+V)-généralisés}
 Définition des codes (U,U+V)-généralisés: \\
@@ -379,7 +376,7 @@ c_i\mathbf{e}_U(i) + d_i\mathbf{e}_V(i) &\neq& 0
 Alors $\mathbf{e} = \varphi_{\mathbf{a},\mathbf{b},\mathbf{c},\mathbf{d}}(\mathbf{e_U},\mathbf{e_V})$ a au moins $2k_U$ coordonnées non nulles. De plus les $n-k_U$ autres coordonnées sont uniformément distribuées sur $\F_q$. \\
 On a alors 
 $$ \mathbb{E}(|\mathbf{e}|) = \frac{q-1}{q}n + \frac{2k_U}{q} $$
-et 
+et on peut alors espérer obtenir en temps polynomial des erreurs de poids:
 \begin{center}
 $\omega^+_{UV} = $
 $\left \{
@@ -397,32 +394,56 @@ TODO
 
 
 \begin{propo} Soit $\mathbf{e}_V$ une sortie de \verb|DECODE_V|. Soit \verb|DECODE_U| un algorithme prenant en entrée $\mathbf{s}_U$ et $\mathbf{e}_V$ et renvoyant $\mathbf{e}_U$ tel que $\mathbf{e}_U\mathbf{H}_U^T = \mathbf{s}^U$ et tel que pour $k_U$ positions de $\mathbf{e}_U$ 
-\begin{center}
-$\left \{
+\begin{equation}\label{syst petit poid}
+\left \{
 \begin{array}{rcl}
 a_i\mathbf{e}_U(i) + b_i\mathbf{e}_V(i) &=& 0 \\
 c_i\mathbf{e}_U(i) + d_i\mathbf{e}_V(i) &=& 0
 \end{array}
-\right.$
-\end{center}
-On a alors
+\right.
+\end{equation}
+On peut alors espérer obtenir en temps polynomial des erreurs de poids:
 \begin{center}
-$\omega^-_{UV} = $
-$\left \{
+\begin{equation} 
+\omega^-_{UV} = 
+\left \{
 \begin{array}{rcl}
 &\frac{q-1}{q}(n-2k) & \;\; \text{ si } k \leq n/(2q) \\
 &\frac{2(q-1)^2}{(2q-1)q}(n-k) & \quad \text{sinon}
 \end{array}
-\right.$
+\right.
+\end{equation}
 \end{center}
 \end{propo}
 
 \begin{proof}[Preuve]
-TODO
+Il n'existe de solution au système (\ref{syst petit poid}) que si $\e_V(i)=0$ car pour tout $i$ on a $a_id_i -b_ic_i \neq 0$. De ce fait, à l'inverse du cas où nous souhaitions des erreurs de gros poids, l'ensemble d'indices où l'on peut gagner deux fois est réduit à $n/2 - |\e_V|$. De ce fait le poids minimal que nous pouvons espérer pour $\e_V$ est $|\e_V|_{min} := \frac{q-1}{q}(n/2-k_V)$. Ainsi :
+\begin{itemize}
+\item Si $k_U \leq n/2 - |\e_V|_{min}$, nous pouvons obtenir des erreurs $e$ telles que :
+	\begin{itemize}
+	\item $2k_U$ coordonnées sont nulles.
+	\item Les autres coordonnées sont uniformément distribuées.
+	\end{itemize}
+\item Sinon, nous pouvons obtenir des erreurs $e$ telles que :
+	\begin{itemize}
+	\item $2(n/2 - |\e_V|_{min})$ sont nulles.
+	\item $k_U - (n/2 - |\e_V|_{min})$ autres coordonnées sont nulles tandis que $k_U - (n/2 - |\e_V|_{min})$ sont non nulles.
+	\item Les autres coordonnées sont uniformément distribuées.
+	\end{itemize}
+\end{itemize} 
+A PROUVER !!!!!!
 \end{proof}
 
-On récapitule les différents cas dans la figure REF. \\
-INSERER GRAPHIQUE \\
+On récapitule les différents cas dans la figure \ref{graphique ratio}. \\
+
+\begin{figure}[h]
+\label{graphique ratio}
+\begin{center}
+\includegraphics [scale=0.4]{graph_ratio_w.png}
+\end{center}
+\caption{\small Comparaison des distances $w/n$ avec et sans trappe en fonction du rendement.}
+\end{figure}
+
 La connaissance de la trappe apporte donc bien un avantage puisqu'elle permet un décodage pour des erreurs de poids ne permettant pas de décodage générique. 
 
 \begin{remarque} Fonction de hash
@@ -450,10 +471,11 @@ TODO
 \end{proof}
 
 Alors, pour tout $i \ in \{1,n/2\}$, on a :
-$$ \mathbb{P}(\mathbf{e}_i \neq \mathbf{e}_{i+n/2}) = \frac{1}{n/2}\frac{2}{3}(n/2-k_V)(1+o(1))$$
+$$ \mathbb{P}(\mathbf{e}_i \neq \mathbf{e}_{i+n/2}) = \frac{2}{3(n/2)}(n/2-k_V)(1+o(1))$$
 PREUVE \\
 En revanche, pour les autres paires $(i,j)$, on a :
 $$ \mathbb{P}(\mathbf{e}_i \neq \mathbf{e}_{j}) = \frac{4wn - 3w^2-w}{n(n-1)}$$
+PREUVE \\
 Ces deux probabilités n'ont donc aucune raison d'être égales. On a donc une fuite d'information. En effet, dans la pratique et afin de cacher la structure, on effectue une permutation sur les coordonnées de $\mathbf{e}$ lors de la signature. Si un attaquant récupère suffisemment de signatures, il pourra donc en analysant la fréquence des $\mathbf{e}_i \neq \mathbf{e}_j$ retrouver cette permutation. Il est donc nécéssaire pour la sécurité du schéma de s'assurer de l'uniformité des sorties de l'algorithme \verb|sign|.
 
 \subsection{La méthode du rejet}
