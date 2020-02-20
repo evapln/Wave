@@ -101,7 +101,7 @@ la solution Wave est d'enlever la restriction au mot le plus proche \\
 Nous allons détailler le schéma de signature Wave et détailler sa sécurité. \\
 
 \section{Le schéma de signature Wave}
-Nous allons détailler dans cette section le schéma de signature Wave. C'est un schéma de type hache et signe à base de codes correcteurs. Pour des raisons de clarté nous oublierons dans un premier temps la problématique du hachage. Nous le réintroduirons en fin de rapport afin de proposer une preuve formelle de la sécurité du schéma, où la fonction de hachage est alors nécéssaire. \\
+Nous allons détailler dans cette section le schéma de signature Wave. C'est un schéma de type hache et signe à base de codes correcteurs. Pour des raisons de clarté nous oublierons dans un premier temps la problématique du hachage. Nous le réintroduirons en fin de rapport afin de proposer une preuve formelle de la sécurité du schéma, où la fonction de hachage est alors nécéssaire. Pour l'instant, nous considererons que l'entrée de l'algorithme de signature est déjà un syndrome du code considéré.\\
 Le schéma de signature Wave s'appuie sur une famille de codes appelés des codes (U,U+V)-généralisés. La strucure de ces codes nous permettrons de proposer un algorithme de décodage $\mathcal{D}$ utilisant une trappe $T$ et donnant un avantage par rapport à un algorithme de décodage générique. Ce système s'appuie aussi sur la notion de fonctions GPV en moyenne, que nous détaillerons.
 
 \subsection{La famille de codes (U,U+V)-généralisés}
@@ -725,6 +725,7 @@ EXPLICATION INFORMELLE DE LA REDUCTION, POURQUOI ELLE VA MARCHER \\
 
 
 \subsubsection{Preuve formelle de la réduction}
+AJOUTER EUF-CMA AVEC FONCTION DE HACHAGE \\
 Pour faire une preuve formelle de cette réduction, nous allons introduire un système de jeux qui nous permettra de réduire la sécurité d'un système à un problème $P$. Soit $\mathcal{A}$ un attaquant et $\mathcal{R}$ un rival. Soient $G_0, G_1, ...,G_N$ un ensemble de jeux et soit $\mathbb{P}(G_i)$ la probabilité pour $\mathcal{A}$ de répondre au défi posé par $\mathcal{R}$ pour le jeu $G_i$. $\mathbb{P}(G_0)$ est alors la probabilité de cassé le système considérer et $\mathbb{P}(G_N)$ la probabilité de répondre au problème $P$. \\
 L'idée est de changer pas à pas les jeux $G_0$ à $G_N$ de façon à ce que :
 $$\forall i \in {0,...,N-1}, |\mathbb{P}(G_i)-\mathbb{P}(G_i+1)| \in negl(\lambda) \Longrightarrow |\mathbb{P}(G_0)-\mathbb{P}(G_N)|  \in negl(\lambda)$$
