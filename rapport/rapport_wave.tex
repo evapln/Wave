@@ -761,14 +761,14 @@ La sortie de l'algorithme \verb|DecodeUV| utilisant \verb|VarDecodeU| est alors 
 \noindent Pour pouvoir compter le nombre de rejets, nous allons avoir besoin des lemmes suivants dont les preuves sont en annexes.
 
 \begin{lemme}\label{maj_dist_e_eunif}
+Nous pouvons majorer la distance statistique entre la sortie de l'algorithme utilisant \verb|DecodeU| et celle de l'algorithme utilisant \verb|VarDecodeU| de la façon suivante :
 $$ \rho\left(\e ,\e^{unif}\right) \leq \sum\limits_{x_V,l} \rho\left(J_{x_v,l}^{\mathbf{H}_U},J_{x_v,l}^{unif}\right)\mathbb{P}\left(k_0 = l, \e_V = x_V\right) $$ 
 \end{lemme}
 
 
-\begin{lemme}
-\begin{equation}\label{esp}
-\mathbb{E}\left(\rho\left(J_{x_V,l}^{unif},J_{x_V, l}^{\mathbf{H}_U}\right)\right) \leq \frac{3^{-d}}{2}
-\end{equation}
+\begin{lemme}\label{esp}
+L'espérance de la différence statistique entre l'ensemble $J_{x_V,l}^{unif}$ choisi uniformément et l'ensemble $J_{x_V, l}^{\mathbf{H}_U}$ choisi parmi les bons ensembles pour $\mathbf{H}$ peut être majorée comme suit :
+$$ \mathbb{E}\left(\rho\left(J_{x_V,l}^{unif},J_{x_V, l}^{\mathbf{H}_U}\right)\right) \leq \frac{3^{-d}}{2} $$
 
 \end{lemme}
 
@@ -797,7 +797,7 @@ $$ \mathbb{P}\left(\rho(\e,\e^{unif})>3^{-d/2}\right) \leq \frac{3^{-d/2}}{2} $$
 \end{proof}
 
 
-\noindent La probabilité d'avoir un rejet équivaut à la probabilité d'avoir une distance significative entre $\e$ et $\e^{unif}$. D'après le théorème \ref{rejet}, nous voyons donc qu'en faisant varier $d$, nous serons en mesure d'effectuer très peu de rejets.
+\noindent La probabilité d'avoir un rejet équivaut à la probabilité d'avoir une distance significative entre $\e$ et $\e^{unif}$. D'après le théorème \ref{rejet}, nous voyons donc qu'en faisant augmenter $d$, nous serons en mesure d'effectuer très peu de rejets.
 
 
 \subsection{Une famille de fonctions uniformément distribuée}
@@ -934,12 +934,16 @@ Utilisation de S et P pour masquer les propriétés de la matrice. \\
 
 \section*{ANNEXES}
 \addcontentsline{toc}{section}{\protect\numberline{}ANNEXES}
+
 \begin{proof}[Preuve du lemme \ref{maj_dist_e_eunif}]
-Nous allons avoir besoin dans la suite de la proposition suivante :
+Rappelons que nous voulons montrer l’inégalité :
+$$ \rho\left(\e ,\e^{unif}\right) \leq \sum\limits_{x_V,l} \rho\left(J_{x_v,l}^{\mathbf{H}_U},J_{x_v,l}^{unif}\right)\mathbb{P}\left(k_0 = l, \e_V = x_V\right) $$ 
+Nous allons avoir besoin dans la suite de la proposition suivante que nous ne démontrerons pas dans ce rapport :
 \begin{propo}\label{rho_f}
 Soient $X$ et $Y$ deux variables aléatoires dans le même espace $A$ et $Z$ une variable aléatoire dans l'espace $B$ indépendante de $X$ et $Y$. Alors, pour toute fonction $f$, nous avons : $$ \rho(f(X,Z),f(Y,Z)) \leq \rho(X,Y)$$
 \end{propo}
 
+\noindent En écrivant $\e = (\e_U,\ \e_V)$ et $\e^{unif} = (\e_U^{unif},\ \e_V^{unif})$, nous pouvons majorer leur distance statistique
 {\scriptsize
 \begin{equation*}
 \begin{split}
@@ -950,19 +954,22 @@ Soient $X$ et $Y$ deux variables aléatoires dans le même espace $A$ et $Z$ une
 \end{split}
 \end{equation*}}
 
-Étudions le terme  $\mathbb{P}(\e_U=x_U|\e_V=x_V) - \mathbb{P}(\e_U^{unif}=x_U | \e_V^{unif}=x_V)$:
+\noindent Rappelons que $k_0$ est le poids de $\e_V$ sur $J$, en ajoutant une condition sur la valeur de $k_0$ aux probabilités, nous obtenons donc la somme suivante :
 {\scriptsize
 $$ \mathbb{P}(\e_U=x_U|\e_V=x_V) - \mathbb{P}(\e_U^{unif}=x_U | \e_V^{unif}=x_V) =  $$
 $$ \sum\limits_l \left[ \mathbb{P}(\e_U=x_U|k_0 = l,\e_V=x_V) - \mathbb{P}(\e_U^{unif}=x_U |k_0 = l, \e_V^{unif}=x_V) \right] \mathbb{P}\left(k_0 = l | \e_V =x_V\right)$$
 }
 
-\noindent Les ensembles $\J$ étant inclus dans un ensemble d'information, l'aléa interne de \verb|DecodeU| et de \verb|VarDecodeU| ne dépendent pas du choix de $J_{x_V,l}^{unif}$ et $J_{x_V, l}^{\mathbf{H}_U}$. \\
+\noindent Nous obtenons donc, comme majoration de la distance statistique, une somme sur les indices $x_U$, $x_V$ et $l$. Nous allons maintenant étudier la somme sur les indices $x_U$.
+\noindent De plus, les ensembles $\J$ étant inclus dans un ensemble d'information, l'aléa interne de \verb|DecodeU| et de \verb|VarDecodeU| ne dépendent pas du choix de $J_{x_V,l}^{unif}$ et $J_{x_V, l}^{\mathbf{H}_U}$. 
 Nous pouvons voir que $\mathbb{P}(\e_U=x_U|k_0 = l,\e_V=x_V)$ ne dépend que de $x_U$ et $J_{x_V, l}^{\mathbf{H}_U}$ et   $\mathbb{P}(\e_U^{unif}=x_U |k_0 = l, \e_V^{unif}=x_V)$ ne dépend que de $x_U$ et $J_{x_V, l}^{unif}$. 
 De plus, $J_{x_V,l}^{unif}$ et $J_{x_V, l}^{\mathbf{H}_U}$ vivent dans le même espace.
 Ainsi d'après la proposition \ref{rho_f}, nous avons 
 {\scriptsize
 $$ \sum\limits_{x_U}\mathbb{P}(\e_U=x_U|k_0 = l,\e_V=x_V) - \mathbb{P}(\e_U^{unif}=x_U |k_0 = l, \e_V^{unif}=x_V)\quad \leq\quad \rho(J_{x_V, l}^{\mathbf{H}_U},J_{x_V, l}^{unif})$$
 }
+
+
 
 
 \begin{equation}
