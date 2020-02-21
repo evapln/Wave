@@ -38,6 +38,8 @@
 \renewcommand{\algorithmicuntil}{\textbf{Tant que}}
 \renewcommand{\algorithmicreturn}{\textbf{Retourne}}
 
+\renewcommand{\contentsname}{Sommaire}
+
 \title{Projet - Wave}
 \author{Lansade Suzanne}
 \author{Palandjian Eva}
@@ -439,9 +441,9 @@ $\qquad \verb|renvoie | \varphi_{\mathbf{a},\mathbf{b},\mathbf{c},\mathbf{d}}(\m
 \vspace{0.1in}
 
 \end{flushleft}
-Si l'on choisit un algorithme générique pour \verb|DECODE_U| et \verb|DECODE_V|, alors nous obtiendrons un vecteur $\mathbf{e}$ de poids $\omega \ in \{\omega_{easy}^-,\omega_{easy}^+\}$. Non allons montrer comment utiliser les propriétés des codes $(U,U+V)$-généréralisés pour permettre un décodage hors de cet intervalle. 
+Si l'on choisit un algorithme générique pour \verb|DECODE_U| et \verb|DECODE_V|, alors nous obtiendrons un vecteur $\mathbf{e}$ de poids $\omega \in \{\omega_{easy}^-,\omega_{easy}^+\}$. Nous allons montrer comment utiliser les propriétés des codes $(U,U+V)$-généréralisés pour permettre un décodage hors de cet intervalle. 
 
-\begin{remarque} Pour tout $\mathbf{e} = \varphi_{\mathbf{a},\mathbf{b},\mathbf{c},\mathbf{d}}(\mathbf{e_U},\mathbf{e_V})$, on a pour tout $i \in \{1,n/2\}$ :
+\begin{remarque} Pour tout $\mathbf{e} = \varphi_{\mathbf{a},\mathbf{b},\mathbf{c},\mathbf{d}}(\mathbf{e_U},\mathbf{e_V})$, on a pour tout $i \in \llbracket 1,n/2\rrbracket$ :
 \begin{center}
 
 $\left \{
@@ -452,7 +454,7 @@ c_i\mathbf{e}_U(i) + d_i\mathbf{e}_V(i) &=& \mathbf{e}(i+n/2)
 \right.$
 \end{center}
 
-\noindent Choisir la valeur de $\mathbf{e}_U$ en fonction de la valeur de $\mathbf{e}_V$ nous permettras donc d'influer sur le poids de $\mathbf{e}$. On aura alors :
+\noindent Choisir la valeur de $\mathbf{e}_U$ en fonction de la valeur de $\mathbf{e}_V$ nous permettra donc d'influer sur le poids de $\mathbf{e}$. On aura alors :
 
 \begin{flushleft}
 \leftskip=2cm
@@ -484,7 +486,7 @@ et on peut alors espérer obtenir en temps polynomial des erreurs de poids:
 $\omega^+_{UV} = $
 $\left \{
 \begin{array}{rcl}
-&\frac{q-1}{q}n + \frac{2k}{q} & \;\; \text{ si } k \leq n/2 \\
+&\frac{q-1}{q}n + \frac{2k}{q} & \;\; \text{ si } k \leq \frac{n}{2} \\
 &n & \quad \text{sinon}
 \end{array}
 \right.$
@@ -511,7 +513,7 @@ On peut alors espérer obtenir en temps polynomial des erreurs de poids:
 \omega^-_{UV} = 
 \left \{
 \begin{array}{rcl}
-&\frac{q-1}{q}(n-2k) & \;\; \text{ si } k \leq n/(2q) \\
+&\frac{q-1}{q}(n-2k) & \;\; \text{ si } k \leq \frac{n}{2q} \\
 &\frac{2(q-1)^2}{(2q-1)q}(n-k) & \quad \text{sinon}
 \end{array}
 \right.
@@ -534,7 +536,66 @@ Il n'existe de solution au système (\ref{syst petit poid}) que si $\e_V(i)=0$ c
 	\item Les autres coordonnées sont uniformément distribuées.
 	\end{itemize}
 \end{itemize} 
-PREUVE À DÉTAILLER
+
+
+\noindent Nous allons maintenant détailler le calcul de $\omega_{UV}^-$. Supposons que notre code a une dimension $k = k_U + k_V$ et rappelons que nous cherchons à obtenir une erreur de la forme $\e = (\e_U,\e_U + \e_V)$ avec $k_U$ coordonnées nulles.\\
+\noindent On commence par décoder $\e_V$ avec un algorithme générique. 
+Nous pouvons donc découper ce dernier en fonction de son poids $|\e_V|$ de la façon suivante : $ \e_V = (0, \e_V'')$ avec $0 \in \F_q^{n/2-|\e_V|}$ et $\e_V''(i) = 0 \;\forall i$.
+On écrit alors $\e_U$ à l'aide du même découpage : $\e_U = (\e_U', \e_U'')$ avec $\e_U' \in \F_q^{n/2-|\e_V|}$ et $\e_U'' \in \F_q^{|\e_V|}$.\\
+
+\noindent Nous allons dans cette démonstration, montrer la deuxième partie de l'égalité. Supposons que $k_U \geq n/2 - |\e_V|$, ce qui signifie que nous voulons choisir plus de coordonnées nulles qu'en dispose $\e_U'$. 
+Nous allons donc, lors de notre algorithme, fixer toutes les coordonnées de $\e_U'$ à zéro, et il nous restera à annuler $k_U - (n/2 -|\e_V|)$ coordonnées de $\e_U''$.
+Nous obtenons alors 
+\begin{equation*}
+\begin{split}
+&|\e_U| = \frac{q-1}{q}(n/2-k_U) \\
+&|\e_U + \e_V| = k_U - n/2 + |\e_V| + \frac{q-1}{q}(n/2 -k_U)
+\end{split}
+\end{equation*}
+
+En effet, comme nous annulons $k_U - n/2 + |\e_V|$ coordonnées de $\e_U''$ et que $\e_V''(i) = 1 \; \forall i$, ces mêmes coordonnées sont non nulles pour $\e_U'' + \e_V''$. Il reste alors $n/2 -k_U$ coordonnées qui seront non nulles si $\e_U''(i) \neq -\e_V''(i)$. \\
+Nous avons alors une erreur $\e$ de poids :
+$$ |\e| =  |\e_U| + |\e_U + \e_V| = 2\frac{q-1}{q}(n/2-k_U) + k_U - n/2 - |\e_V|$$
+
+\noindent Ici, nous supposons que notre algorithme de décodage nous renvoie $\e_V$ de poids minimum, nous avons donc $$|\e_V| = |\e_V|_{min} = \frac{q-1}{q}(n/2-k_V) = \frac{q-1}{q}(n/2-k+k_U)$$
+
+\noindent Ainsi nous obtenons une erreur dont le poids est :
+\begin{equation*}
+\begin{split}
+|\e| &= 2\frac{q-1}{q}(n/2-k_U) + k_U - n/2 - \frac{q-1}{q}(n/2-k+k_U)\\
+ &= n\left(  \frac{3}{1}\frac{q-1}{q}-\frac{1}{2}\right) + k_U \left(1 - \frac{q-1}{q} \right) - k \frac{q-1}{1}\\
+  &= n\frac{2q-3}{2q} + k_U\frac{1}{q}+ k \frac{1-q}{1}\\
+\end{split}
+\end{equation*}
+
+Pour minimiser le poids de $\e$ nous devons donc prendre $k_U$ le plus petit possible. Comme nous avons supposé avoir $k_U \geq n/2 - |\e_V|$, nous prenons donc 
+\begin{equation*}
+\begin{split}
+k_U &= \frac{n}{2} - |\e_V|\\
+&= \frac{n}{2} - \frac{q-1}{q}(n/2-k+k_U)\\
+&= \frac{n}{2q} + k\frac{q-1}{q} -k_U\frac{q-1}{q}\\
+\end{split}
+\end{equation*}
+Ce qui nous donne alors $k_U = \frac{n}{2(2q-1)} + k\frac{q-1}{q}$.\\
+
+Par définition, nous avons $k_U \leq k$, nous pouvons se servir de cette conditions pour minorer $k$ :
+$$\frac{n}{2(2q-1)} + k\frac{q-1}{q} \leq k$$
+$$\frac{n}{2(2q-1)} \leq k\frac{q-1}{2q-1}$$
+$$\frac{n}{2} \leq k$$
+
+Nous nous trouvons donc bien dans le deuxième cas : lorsque $k \geq n/2$. Finalement, nous pouvons calculer le poidsde $\e$ minimum :
+\begin{equation*}
+\begin{split}
+|\e| &= n\frac{2q-3}{2q} + \left(\frac{n}{2(2q-1)} + k\frac{q-1}{q}\right)\frac{1}{q}+ k \frac{1-q}{1}\\
+&= n\left(\frac{2q-3}{2q} + \frac{1}{2(2q-1)q}\right) + k\left(\frac{q-1}{(2q-1)q}+ \frac{1-q}{1}\right)\\
+&= n\;\frac{4q^2-8q+4}{2q(2q-1)} + k\;\frac{-2q^2+4q-2}{(2q-1)q}\\
+&= n\;\frac{2(q-1)^2}{q(2q-1)} + k\;\frac{-2(q-1)^2}{(2q-1)q}\\
+&= \frac{2(q-1)^2}{q(2q-1)}(n-k)\\
+\end{split}
+\end{equation*}
+
+\noindent Nous avons donc bien le résultat souhaité lorsque $ k \geq \frac{n}{2q}$. La démonstration du cas où $k \leq \frac{n}{2q}$ étant équivalente, nous ne la ferons pas ici.\\
+
 \end{proof}
 
 \noindent On récapitule les différents cas dans la figure \ref{graphique ratio}. \\
@@ -662,7 +723,7 @@ On peut alors introduire l'algorithme suivant :
     	\REPEAT 
     	\STATE $\e_U \leftarrow \text {DecodeU}(\varphi, \e_V, \s^U, \mathbf{H}_U)$
     	\STATE $\e \leftarrow \varphi(\e_U,\e_V)$
-    	\UNTIL {$\text{rand}([0,1]) > \mathbf{r}_U(|\e_V|, m_1(\e)$}
+    	\UNTIL {$\text{rand}([0,1]) > \mathbf{r}_U(|\e_V|, m_1(\e))$}
     	\RETURN $\e$
     \end{algorithmic}
 \end{algorithm}\
@@ -716,7 +777,7 @@ Application de la méthode du rejet selon ces choix et choix des distributions.
 		\STATE $t \leftarrow |\e_V|$
 		\STATE $k_0 \hookleftarrow \mathcal{D}_U^t$
 		\REPEAT
-		\STATE $\mathcal{I} \leftarrow$ ensemble d'information de $\langle\mathbf{H}\rangle^\perp$
+		\STATE $\mathcal{I} \leftarrow$ ensemble d'information de $\langle\mathbf{H}_U\rangle^\perp$
 		\STATE $\mathcal{J} \subset \mathcal{I}$ de taille $k-d$ tel que $|\e_V|_\mathcal{J} = k_0$
 		\STATE $x_U \hookleftarrow \{x\in\F_3^{n/2} | \forall j\in\J,  x_j \notin \{-\frac{b_i}{a_i}\e_{V_i}, -\frac{d_i}{c_i}\e_{V_i}\}\}$
 		\STATE $\e_U \leftarrow \textsc{Prange }(\mathbf{H}_U, \s^U, \mathcal{I}, x_U)$
@@ -758,22 +819,23 @@ La sortie de l'algorithme \verb|DecodeUV| utilisant \verb|VarDecodeU| est alors 
 \end{itemize}
 \end{defi}
 
+\noindent Pour plus de simplicité, nous les noterons par la suite $J^{unif}$ et $J^{\mathbf{H}_U}$.\\
+
 \noindent Pour pouvoir compter le nombre de rejets, nous allons avoir besoin des lemmes suivants dont les preuves sont en annexes.
 
 \begin{lemme}\label{maj_dist_e_eunif}
 Nous pouvons majorer la distance statistique entre la sortie de l'algorithme utilisant \verb|DecodeU| et celle de l'algorithme utilisant \verb|VarDecodeU| de la façon suivante :
-$$ \rho\left(\e ,\e^{unif}\right) \leq \sum\limits_{x_V,l} \rho\left(J_{x_v,l}^{\mathbf{H}_U},J_{x_v,l}^{unif}\right)\mathbb{P}\left(k_0 = l, \e_V = x_V\right) $$ 
+$$ \rho\left(\e ,\e^{unif}\right) \leq \sum\limits_{x_V,l} \rho\left(J^{\mathbf{H}_U},J^{unif}\right)\mathbb{P}\left(k_0 = l, \e_V = x_V\right) $$ 
 \end{lemme}
 
 
 \begin{lemme}\label{esp}
-L'espérance de la différence statistique entre l'ensemble $J_{x_V,l}^{unif}$ choisi uniformément et l'ensemble $J_{x_V, l}^{\mathbf{H}_U}$ choisi parmi les bons ensembles pour $\mathbf{H}$ peut être majorée comme suit :
-$$ \mathbb{E}\left(\rho\left(J_{x_V,l}^{unif},J_{x_V, l}^{\mathbf{H}_U}\right)\right) \leq \frac{3^{-d}}{2} $$
-
+L'espérance de la différence statistique entre l'ensemble $J^{unif}$ choisi uniformément et l'ensemble $J^{\mathbf{H}_U}$ choisi parmi les bons ensembles pour $\mathbf{H}$ peut être majorée comme suit :
+$$ \mathbb{E}\left(\rho\left(J^{unif},J^{\mathbf{H}_U}\right)\right) \leq \frac{3^{-d}}{2} $$
 \end{lemme}
 
 \begin{lemme}\label{markov}(Inégalité de Markov).\\
-Soit $Z$ une variable aléatoire supposée presque sûremeny positive ou nulle, alors $$\forall a>0\quad \mathbb{P}(Z > a) \leq \frac{\mathbb{E}(Z)}{a}$$
+Soit $Z$ une variable aléatoire supposée presque sûrement positive ou nulle, alors $$\forall a>0\quad \mathbb{P}(Z > a) \leq \frac{\mathbb{E}(Z)}{a}$$
 \end{lemme}
 
 \noindent Nous pouvons maintenant énoncer le théorème suivant :
@@ -787,8 +849,8 @@ $$ \mathbb{P}\left(\rho(\e,\e^{unif})>3^{-d/2}\right) \leq \frac{3^{-d/2}}{2} $$
 \begin{equation*}
 \begin{split}
 \mathbb{P}&\big(\rho(\e,\e^{unif})>3^{-d/2}\big) \\
-&\leq 3^{d/2}\mathbb{E}(\rho\left(\e,\e^{unif})\right) \quad \text{par l'inegalité de Markov}\\
-&\leq 3^{d/2}\mathbb{E}\left(\sum\limits_{x_V,l} \rho\left(J_{x_v,l}^{\mathbf{H}_U},J_{x_v,l}^{unif}\right)\mathbb{P}\left(k_0 = l , \e_V = x_V\right)\right) \text{ d'après le lemme \ref{maj_dist_e_eunif}}\\
+&\leq 3^{d/2}\mathbb{E}(\rho\left(\e,\e^{unif})\right) \quad \text{par l'inégalité de Markov}\\
+&\leq 3^{d/2}\mathbb{E}\left(\sum\limits_{x_V,l} \rho\left(J^{\mathbf{H}_U},J^{unif}\right)\mathbb{P}\left(k_0 = l , \e_V = x_V\right)\right) \text{ d'après le lemme \ref{maj_dist_e_eunif}}\\
 &\leq 3^{d/2}\left(\sum\limits_{x_V,l} \frac{3^{-d}}{2}\mathbb{P}\left(k_0 = l ,\e_V = x_V\right)\right) \quad \text{par \eqref{esp}}\\
 &= 3^{d/2} \frac{3^{-d}}{2}\left(\sum\limits_{x_V,l}\mathbb{P}\left(k_0 = l ,\e_V = x_V\right)\right) \\
 &= \frac{3^{-d/2}}{2}\\
@@ -931,17 +993,20 @@ Utilisation de S et P pour masquer les propriétés de la matrice. \\
 \newpage
 
 
+\begin{appendix}
+\section*{Quelques démonstrations supplémentaires}
+\addcontentsline{toc}{section}{\protect\numberline{}Quelques démonstrations supplémentaires}
 
-\section*{ANNEXES}
-\addcontentsline{toc}{section}{\protect\numberline{}ANNEXES}
+\subsection*{Démonstration du lemme \ref{maj_dist_e_eunif}}
 
-\begin{proof}[Preuve du lemme \ref{maj_dist_e_eunif}]
-Rappelons que nous voulons montrer l’inégalité :
-$$ \rho\left(\e ,\e^{unif}\right) \leq \sum\limits_{x_V,l} \rho\left(J_{x_v,l}^{\mathbf{H}_U},J_{x_v,l}^{unif}\right)\mathbb{P}\left(k_0 = l, \e_V = x_V\right) $$ 
 Nous allons avoir besoin dans la suite de la proposition suivante que nous ne démontrerons pas dans ce rapport :
 \begin{propo}\label{rho_f}
 Soient $X$ et $Y$ deux variables aléatoires dans le même espace $A$ et $Z$ une variable aléatoire dans l'espace $B$ indépendante de $X$ et $Y$. Alors, pour toute fonction $f$, nous avons : $$ \rho(f(X,Z),f(Y,Z)) \leq \rho(X,Y)$$
 \end{propo}
+
+\begin{proof}[Preuve du lemme \ref{maj_dist_e_eunif}]
+Rappelons que nous voulons montrer l’inégalité :
+$$ \rho\left(\e ,\e^{unif}\right) \leq \sum\limits_{x_V,l} \rho\left(J^{\mathbf{H}_U},J^{unif}\right)\mathbb{P}\left(k_0 = l, \e_V = x_V\right) $$ 
 
 \noindent En écrivant $\e = (\e_U,\ \e_V)$ et $\e^{unif} = (\e_U^{unif},\ \e_V^{unif})$, nous pouvons majorer leur distance statistique
 {\scriptsize
@@ -954,31 +1019,79 @@ Soient $X$ et $Y$ deux variables aléatoires dans le même espace $A$ et $Z$ une
 \end{split}
 \end{equation*}}
 
+\noindent Le passage de la troisième ligne à la quatrième se fait car $\mathbb{P}(\e_V = x_V) = \mathbb{P}(\e_V^{unif} = x_V) $.
+
 \noindent Rappelons que $k_0$ est le poids de $\e_V$ sur $J$, en ajoutant une condition sur la valeur de $k_0$ aux probabilités, nous obtenons donc la somme suivante :
 {\scriptsize
 $$ \mathbb{P}(\e_U=x_U|\e_V=x_V) - \mathbb{P}(\e_U^{unif}=x_U | \e_V^{unif}=x_V) =  $$
 $$ \sum\limits_l \left[ \mathbb{P}(\e_U=x_U|k_0 = l,\e_V=x_V) - \mathbb{P}(\e_U^{unif}=x_U |k_0 = l, \e_V^{unif}=x_V) \right] \mathbb{P}\left(k_0 = l | \e_V =x_V\right)$$
 }
 
-\noindent Nous obtenons donc, comme majoration de la distance statistique, une somme sur les indices $x_U$, $x_V$ et $l$. Nous allons maintenant étudier la somme sur les indices $x_U$.
-\noindent De plus, les ensembles $\J$ étant inclus dans un ensemble d'information, l'aléa interne de \verb|DecodeU| et de \verb|VarDecodeU| ne dépendent pas du choix de $J_{x_V,l}^{unif}$ et $J_{x_V, l}^{\mathbf{H}_U}$. 
-Nous pouvons voir que $\mathbb{P}(\e_U=x_U|k_0 = l,\e_V=x_V)$ ne dépend que de $x_U$ et $J_{x_V, l}^{\mathbf{H}_U}$ et   $\mathbb{P}(\e_U^{unif}=x_U |k_0 = l, \e_V^{unif}=x_V)$ ne dépend que de $x_U$ et $J_{x_V, l}^{unif}$. 
-De plus, $J_{x_V,l}^{unif}$ et $J_{x_V, l}^{\mathbf{H}_U}$ vivent dans le même espace.
+\noindent Nous obtenons donc, comme majoration de la distance statistique, une somme sur les indices $x_U$, $x_V$ et $l$. Nous allons maintenant étudier la somme sur les indices $x_U$.\\
+\noindent Les ensembles $\J$ étant inclus dans un ensemble d'information, l'aléa interne de \verb|DecodeU| et de \verb|VarDecodeU| ne dépendent pas du choix de $J^{unif}$ et $J^{\mathbf{H}_U}$. 
+Nous pouvons voir que $\mathbb{P}(\e_U=x_U|k_0 = l,\e_V=x_V)$ ne dépend que de $x_U$ et $J^{\mathbf{H}_U}$ et   $\mathbb{P}(\e_U^{unif}=x_U |k_0 = l, \e_V^{unif}=x_V)$ ne dépend que de $x_U$ et $J^{unif}$. 
+De plus, $J^{unif}$ et $J^{\mathbf{H}_U}$ vivent dans le même espace.
 Ainsi d'après la proposition \ref{rho_f}, nous avons 
 {\scriptsize
-$$ \sum\limits_{x_U}\mathbb{P}(\e_U=x_U|k_0 = l,\e_V=x_V) - \mathbb{P}(\e_U^{unif}=x_U |k_0 = l, \e_V^{unif}=x_V)\quad \leq\quad \rho(J_{x_V, l}^{\mathbf{H}_U},J_{x_V, l}^{unif})$$
+$$ \sum\limits_{x_U}\mathbb{P}(\e_U=x_U|k_0 = l,\e_V=x_V) - \mathbb{P}(\e_U^{unif}=x_U |k_0 = l, \e_V^{unif}=x_V)\quad \leq\quad \rho(J^{\mathbf{H}_U},J^{unif})$$
 }
 
-
-
-
-\begin{equation}
-\rho\left(J_{x_V,l}^{unif},J_{x_V, l}^{\mathbf{H}_U}\right) = \frac{N_{x_V,l}}{\dbinom{|x_V|}{l}\dbinom{n/2-|x_V}{k_U-d-l}}
-\end{equation}
-Avec $N_{x_V,l}$ le nombre de mauvais sous-ensembles de $\llbracket1,n/A\rrbracket$ de taille $k_U-d$ pour $\mathbf{H}_U$.
+En combinant les différentes équations obtenues, nous avons alors :
+\begin{equation*}
+\begin{split}
+\rho\left(\e ,\e^{unif}\right) &\leq \sum\limits_{x_V,l} \rho\left(J^{\mathbf{H}_U},J^{unif}\right)\mathbb{P}(\e_V = x_V)\mathbb{P}\left(k_0 = l| \e_V = x_V\right)\\
+&=\sum\limits_{x_V,l} \rho\left(J^{\mathbf{H}_U},J^{unif}\right)\mathbb{P}\left(k_0 = l, \e_V = x_V\right)
+\end{split}
+\end{equation*}
 \end{proof}
 
+\subsection*{Démonstration du lemme \ref{esp}}
 
+\begin{lemme}\label{proba_rang}
+Soient $d$ et $m$ deux entiers tels que $d<m$ et $M \hookleftarrow\F_3^{(m-d)\times m}$ alors $\mathbb{P}(rg(M) < m-d) \leq \frac{1}{2 . 3^d}$
+\end{lemme}
+
+\begin{proof}[Preuve]
+Soit $P$ la probabilité que $M$ ne soit pas de rang plein, c'est-à-dire de rang inférieur à $m-d$.
+Notons $V_i$ le sous-espace vectoriel engendré par les $i$ premières lignes de $M$. Si $M$ n'est pas de rang plein c'est qu'au moins une de ses lignes est une combinaison linéaire des précédentes, c'est-à-dire qu'il existe un $i$ tel que $\dim(V_i) = \dim(V_{i-1}) = i-1$. On a alors
+\begin{equation*}
+\begin{split}
+P &\leq \sum\limits_{i=1}^{m-d} \mathbb{P}(\dim(V_i) = \dim(V_{i-1}) = i-1) \\
+&= \sum\limits_{i=1}^{m-d} \mathbb{P}(\dim(V_i) =i-1 | \dim(V_{i-1}) = i-1)\mathbb{P}(\dim(V_{i-1}) = i-1) \\
+&\leq \sum\limits_{i=1}^{m-d} \mathbb{P}(\dim(V_i) =i-1 | \dim(V_{i-1}) = i-1) \\
+\end{split}
+\end{equation*}
+Si $\dim(V_{i-1}) = i-1$, alors $\dim(V_i) = i-1$ est équivalent à dire que la ligne $i$ de la matrice est une combinaison linéaire des $i-1$ précédentes. Nous avons donc :
+$$ \mathbb{P}(\dim(V_i) =i-1 | \dim(V_{i-1}) = i-1) = \frac{3^{i-1}}{3^m} = \frac{1}{3^{m-i+1}} $$
+Nous pouvons donc conclure avec :
+\begin{equation*}
+\begin{split}
+P &\leq \sum\limits_{i=1}^{m-d} \frac{1}{3^{m-i+1}}\\
+& = \frac{1}{2.3^{-d}} - \frac{1}{2;3^m}\\
+&\leq  \frac{1}{2.3^{-d}} 
+\end{split}
+\end{equation*}
+\end{proof}
+
+\begin{proof}[Preuve du lemme \ref{esp}]
+
+Nous voulons ici montrer que $$ \mathbb{E}\left(\rho\left(J_{x_V,l}^{unif},J_{x_V, l}^{\mathbf{H}_U}\right)\right) \leq \frac{3^{-d}}{2} $$
+Notons $n_{U,d}$ le nombre de sous-ensembles de $\llbracket 1, n/2\rrbracket$ de taille $k_U-d$ ie \mbox{$n_{U,d} = $ {\scriptsize$\dbinom{n/2}{k_U-d}$}}. On a alors $$\rho(J^{unif},\ J^{\mathbf{H}_U}) = \frac{N}{n_{U,d}}$$ avec $N = \#\{J \subset \llbracket 1,\ n/2\rrbracket \text{ de taille } k_U - d \text{ mauvais pour } \mathbf{H}_U\}$.\\
+Notons $X_i$ l'événement "le sous-ensemble $\varepsilon_i$ est un mauvais ensemble pour $\mathbf{H}_U$", c'est-à-dire la matrice $M_{\overline{\varepsilon_i}}$ n'est pas de rang plein. D'après le lemme \ref{proba_rang}, nous avons $\mathbb{P}(X_i = 1)\leq \frac{1}{2.3^d}$
+De plus, nous pouvons maintenant écrire $N = \sum\limits_{i=1}^{n_{U,d}}X_i$.\\
+Ainsi nous avons :
+\begin{equation*}
+\begin{split}
+\mathbb{E}\left(\rho\left(J_{x_V,l}^{unif},J_{x_V, l}^{\mathbf{H}_U}\right)\right)  &= \mathbb{E}\left(\frac{N}{n_{U,d}}\right)  \\
+&= \mathbb{E}\Bigg(\frac{\sum\limits_{i=1}^{n_{U,d}}X_i}{n_{U,d}}\Bigg)\\
+&= \sum\limits_{i=1}^{n_{U,d}}\mathbb{E}\left(\frac{X_i}{n_{U,d}}\right)\\
+&= \sum\limits_{i=1}^{n_{U,d}}\frac{\mathbb{P}(X_i = 1)}{n_{U,d}}\\
+&\leq \frac{1}{2.3^d}\\
+\end{split}
+\end{equation*}
+\end{proof}
+
+\subsection*{Démonstration de la propostion \ref{dim_hull_UV}}
 \begin{proof}[Preuve de la proposition \ref{dim_hull_UV}]
 La dimension d'un $hull$ étant invariante par permutation nous allons ici montrer que nous avons $dim(hull(U,U+V)) = k_U - k_V$ avec probabilité $1-\mathcal{O}(2^{k_U-k_V})$.
 Par définition du $hull$, nous avons :
@@ -1009,6 +1122,8 @@ Donc $v\in V\cap U^{\bot}$.
 De plus, nous avons $dim(V) + dim(U^{\bot}) = \frac{n}{2} +k_V - k_U < \frac{n}{2}$
 SUITE À ÉCRIRE
 \end{proof}
+
+\end{appendix}
 
 \bibliographystyle{plain}
 \bibliography{bibliography}
