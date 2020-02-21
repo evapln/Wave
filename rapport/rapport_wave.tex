@@ -829,7 +829,7 @@ Soit $\mathcal{A}$ un adversaire ayant accès à $N_{sign}$ signatures de son ch
 \begin{algorithm}[h]
 	\caption{Sign($s$)}
 	\begin{algorithmic}[1]
-    	\STATE $\e \Leftarrow \mathcal{D}_{\varphi,\mathbf{H}_{U},\mathbf{H}_{V}}(\s)$
+    	\STATE $\e \leftarrow \mathcal{D}_{\varphi,\mathbf{H}_{U},\mathbf{H}_{V}}(\s)$
     	\RETURN $\e$
     \end{algorithmic}
 \end{algorithm}
@@ -863,11 +863,12 @@ Le protocole est alors sûr au sens EUF-CMA si ce succès est négligeable. \\
 $$Succ^{DOOM(n,q,k,N)}(t) := \max_{\mathcal{A};|A|\leq t}(\mathbb{P}(\mathcal{A}(\mathbf{H},\mathbf{s}_1,...,\mathbf{s}_n)=\mathbf{e}\text{ tel que }$$
 $$ \mathbf{eH}^T = \mathbf{s}_j \text{ pour un certain } j \in \{1,...,N\})).$$
 
-\noindent La réduction à ce problème est naturelle pour un schéma de signature puisque EXPLICATION INFORMELLE DE LA REDUCTION, POURQUOI ELLE VA MARCHER \\
+\noindent La réduction à ce problème est naturelle pour un schéma de signature. Il suffit de s'assurer que l'on peut considérer notre matrice de parité comme une matrice d'un code aléatoire. Ainsi, si $\mathcal{A}$ arrive à créer une signature valide sans connaître l'algorithme de décodage $\mathcal{D}_{\varphi,\mathbf{H}_{U},\mathbf{H}_{V}}$, alors il a bien résolu le problème du décodage. Puisqu'on a montré préalablement que les sorties $\e$ de \verb|sign| sont uniformément distribuées sur $S_{\omega}$, la connaissance des $N_{sign}$ couples $(\s,\e)$ ne donnent pas d'avantage à $\mathcal{A}$. Ainsi la réduction se fait naturellement. \\
 
 
 \subsubsection{Preuve formelle de la réduction}
-Afin de faire une preuve formelle de la sécurité EUF-CMA, nous allons changer le jeu en rajoutant une fonction de hachage. L'attaquant $\mathcal{A}$ peut maintenant faire $N_{hash}$ appelle à la fonction de hachage et ainsi obtenir des couples (m,s). De plus, la fonction de signature prends maintenant en entrée un message quelconque. Elle prend ensuite un aléa $r$ dans $\{0,1\}^{\lambda_0}$. Le tout est alors donné à la fonction de hachage qui renvoit un syndrome valide. \\
+Afin de faire une preuve formelle de la sécurité EUF-CMA, nous allons changer le jeu en rajoutant une fonction de hachage. L'attaquant $\mathcal{A}$ peut maintenant faire $N_{hash}$ appelle à la fonction de hachage et ainsi obtenir des couples (m,s). Il cherchera alors à créer une signature valide pour l'un d'entre eux. On retrouve bien la question du problème DOOM. \\
+De plus, la fonction de signature prends maintenant en entrée un message quelconque. Elle prend ensuite un aléa $r$ dans $\{0,1\}^{\lambda_0}$. Le tout est alors donné à la fonction de hachage qui renvoit un syndrome valide. \\
 
 \noindent Nous allons aussi introduire un système de jeux qui nous permettra de réduire la sécurité d'un système à un problème $P$. Soit $\mathcal{A}$ un attaquant et $\mathcal{R}$ un rival. Soient $G_0, G_1, ...,G_N$ un ensemble de jeux et soit $\mathbb{P}(G_i)$ la probabilité pour $\mathcal{A}$ de répondre au défi posé par $\mathcal{R}$ pour le jeu $G_i$. $\mathbb{P}(G_0)$ est alors la probabilité de cassé le système considérer et $\mathbb{P}(G_N)$ la probabilité de répondre au problème $P$. \\
 L'idée est de changer pas à pas les jeux $G_0$ à $G_N$ de façon à ce que :
@@ -879,6 +880,7 @@ Il n'est pas possible de changer le comportement de $\mathcal{A}$ puisqu'il est 
 Soit $N_{sign}$ le nombre de requêtes faites à l'oracle de signature. Soit $\lambda$ le paramètre de sécurité et $\lambda_0=\lambda + 2\log_2(N_{sign})$. On a :
 $$Succ^{EUF-CMA}_{Wave}(t,N_{sign}) \leq 2Succ^{DOOM(n,q,k,N)}(t) +\rho(\mathcal{D}_{rand},\mathcal{D}_{pub})(t) + $$
 $$ f(\mathcal{U}_{\omega},\mathcal{D}_{\omega}^{\mathbf{H}_{pk}}) + g(\epsilon) + c + \frac{N_{hash}}{2}\sqrt{\epsilon} + \frac{1}{2^{\lambda}}$$
+où $\epsilon$ est une fonction en $n$ qui décroît exponentiellement, $\mathcal{D}_{rand}$ est la distribution des matrices prises aléatoirement dans $\F_q{(n-k)\times n}$, $\mathcal{D}_{pub}$ celle des matrices prises aléatoirement dans l'ensemble des matrices de parité d'un code $(U,U+V)$-généralisé (et $U$, $V$ de dimension respectives $k_U$ et $k_V$), $f$ l'espérance de la distance calculatoire entre les deux distributions, $g$ linéaire en $\epsilon$ et $c$ une constante.
 \end{thm}
 
 \begin{proof}[Preuve] On rappelle que $G_0$ correspond à notre jeu pour la sécurité EUF-CMA de Wave.
