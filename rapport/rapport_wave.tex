@@ -288,7 +288,10 @@ $$\mathbb{P}(\mathcal{A}(H,s) = e \;| \;eH^T = s) \in \text{negl}(\lambda).$$
 C'est une définition relaxée des fonctions GPV.
 \end{defi}
 
-\noindent Nous pouvons maintenant définir notre système de signature.
+\noindent Nous générons notre paire de clés publique et privée comme :
+$$ (pk, sk) = (H,T) \leftarrow \verb|Trapdoor|(\lambda)$$
+Plus précisément, nous aurons donc pour clé publique la matrice de parité du code $(U,U+V)$, notée $H$, et pour clé privée, les matrices de parité des codes $U$ et $V$, respectivement notées $H_U$ et $H_V$.\\
+Nous pouvons maintenant définir notre système de signature.
 \begin{multicols}{2}
 \begin{flushleft}
 $\verb|Sign|^{sk}(s)$:\\
@@ -318,16 +321,12 @@ f_{\omega,\mathbf{H}} & : & \mathcal{S}_{\omega,n} & \to & \F_q^{n-k} \\
 \noindent On rappelle que la fonction $f_{\omega,\mathbf{H}}$ avec $\mathbf{H} \in \F_q^{(n-k)\times n}$ s'inverse génériquement si $\omega \in \{\omega_{easy}^-,\omega_{easy}^+\}$, où :
 $$ \omega_{easy}^- := \frac{q-1}{q}(n-k) \qquad \text{ et }\qquad  \omega_{easy}^+ := k + \frac{q-1}{q}(n-k).$$
 
-\begin{proof}[Preuve] TODO
-\end{proof}
+
 
 
 \noindent On rappelle aussi que la fonction $f_{\omega,\mathbf{H}}$ admet un inverse pour toute entrée $s \in \F_q^{n-k}$ si $\omega \in \{\omega^-,\omega^+\}$, où :
 $$\omega^- := \min\left\{\omega\in \llbracket0,n\rrbracket , \dbinom{\omega}{n}(q-1)^{\omega} \geq q^{n-k}\right\} $$
 $$\omega^+ := \max\left\{\omega\in \llbracket0,n\rrbracket , \dbinom{\omega}{n}(q-1)^{\omega} \geq q^{n-k}\right\}$$
-
-\begin{proof}[Preuve] TODO
-\end{proof}
 
 
 \noindent Nous voulons donc un moyen d'inverser la fonction syndrome pour $\omega \in \llbracket\omega_{UV}^-,\omega_{UV}^+\rrbracket$ avec $\omega_{UV}^-$ et $\omega_{UV}^+$ tels que :
@@ -494,11 +493,11 @@ $\left \{
 \end{propo}
 
 \begin{proof}[Preuve]
-TODO
+La preuve étant similaire à celle de la proposition \ref{Wuv-}, nous ne la détaillerons pas ici.\\
 \end{proof}
 
 
-\begin{propo} Soit $\mathbf{e}_V$ une sortie de \verb|DECODE_V|. Soit \verb|DECODE_U| un algorithme prenant en entrée $\mathbf{s}_U$ et $\mathbf{e}_V$ et renvoyant $\mathbf{e}_U$ tel que $\mathbf{e}_U\mathbf{H}_U^T = \mathbf{s}^U$ et tel que pour $k_U$ positions de $\mathbf{e}_U$ 
+\begin{propo}\label{Wuv-} Soit $\mathbf{e}_V$ une sortie de \verb|DECODE_V|. Soit \verb|DECODE_U| un algorithme prenant en entrée $\mathbf{s}_U$ et $\mathbf{e}_V$ et renvoyant $\mathbf{e}_U$ tel que $\mathbf{e}_U\mathbf{H}_U^T = \mathbf{s}^U$ et tel que pour $k_U$ positions de $\mathbf{e}_U$ 
 \begin{equation}\label{syst petit poid}
 \left \{
 \begin{array}{rcl}
@@ -629,16 +628,14 @@ $$ |\mathbf{e_V}| = \# \; \{1  \leq i \leq n/2 \;|\; e_i \neq e_{i+n/2}\}$$
 Si le vecteur $\mathbf{e_V}$ est obtenu par l'algorithme de Prange, alors il est de poids moyen $\frac{2}{3}(\frac{n}{2}-k_V)$.
 \end{propo}
 
-\begin{proof}[Preuve]
-TODO
-\end{proof}
+
 
 Alors, pour tout $i \ in \{1,n/2\}$, on a :
 $$ \mathbb{P}(\mathbf{e}_i \neq \mathbf{e}_{i+n/2}) = \frac{2}{3(n/2)}(n/2-k_V)(1+o(1))$$
-PREUVE \\
-En revanche, pour les autres paires $(i,j)$, on a :
+
+\noindent En revanche, pour les autres paires $(i,j)$, on a :
 $$ \mathbb{P}(\mathbf{e}_i \neq \mathbf{e}_{j}) = \frac{4wn - 3w^2-w}{n(n-1)}$$
-PREUVE \\
+
 Ces deux probabilités n'ont donc aucune raison d'être égales. On a donc une fuite d'information. En effet, dans la pratique et afin de cacher la structure, on effectue une permutation sur les coordonnées de $\mathbf{e}$ lors de la signature. Si un attaquant récupère suffisemment de signatures, il pourra donc en analysant la fréquence des $\mathbf{e}_i \neq \mathbf{e}_j$ retrouver cette permutation. Il est donc nécéssaire pour la sécurité du schéma de s'assurer de l'uniformité des sorties de l'algorithme \verb|sign|.
 
 \subsection{La méthode du rejet}
@@ -691,15 +688,16 @@ Notre but étant de faire apparaître les expressions énoncées lors du lemme, 
 \end{equation*}
 avec $n(y) := \#\left\{ \left.\e \in \F_3^{n/2} \right| |e| = y\right\}$.
 De la même façon, nous obtenons :
-\begin{equation*}
+{\footnotesize \begin{equation*}
 \begin{split}
 \mathbb{P}(\e_U = x_U |\ |\e_V| = y) &= \left.\mathbb{P}(\e_U = x_U ,\ m_1(\e) = z\ \right|\ |\e_V| = y)\\
 &= \left.\mathbb{P}(\e_U = x_U\ \right|\ m_1(\e) = z,\ |\e_V| = y)\mathbb{P}(m_1(\e) = z\ |\ |\e_V| = y)\\
 &= \frac{\mathbb{P}(m_1(\e) = z\ |\ |\e_V| = y)}{n(y,z)}\\
 \end{split}
-\end{equation*}
+\end{equation*}}
 avec $n(y,z) := \#\left\{ \left.\e \in \F_3^{n/2} \right|\  m1(\e) = z\text{ et } |\e_V| = y \right\}$.\\
-Ainsi nous obtenons
+
+\noindent Ainsi nous obtenons
 \begin{equation*}
 \begin{split}
 \mathbb{P}(\e = x) &= \frac{\mathbb{P}(m_1(\e) = z\ |\ |\e_V| = y)}{n(y,z)}\frac{\mathbb{P}(|\e_V| = y)}{n(y)}\\
@@ -764,6 +762,7 @@ La première ligne vient de l'indépendance du tirage du réel rand($[0,1]$) du 
 \end{proof}
 
 \subsection{Choix des algorithmes de décodage}
+À FAIRE :\\
 description explicite de \verb|DECODE_V| \\
 description explicite de \verb|DECODE_U| \\
 Application de la méthode du rejet selon ces choix et choix des distributions. 
@@ -860,11 +859,6 @@ $$ \mathbb{P}\left(\rho(\e,\e^{unif})>3^{-d/2}\right) \leq \frac{3^{-d/2}}{2} $$
 
 
 \noindent La probabilité d'avoir un rejet équivaut à la probabilité d'avoir une distance significative entre $\e$ et $\e^{unif}$. D'après le théorème \ref{rejet}, nous voyons donc qu'en faisant augmenter $d$, nous serons en mesure d'effectuer très peu de rejets.
-
-
-\subsection{Une famille de fonctions uniformément distribuée}
-On a donc le point (2) de la définition des fonctions GPV qui est obtenu dans la section précédente. On va montrer le point (1), à savoir, notre famille de fonctions syndromes est uniformément distribuée avec les codes (U,U+V)-généralisés. \\
-TODO
 
 
 \section{Sécurité du schéma}
@@ -983,9 +977,18 @@ En rassemblant toutes les inégalités on termine la preuve. (On trouvera le dé
 
 
 \subsection{Indistinguabilité des codes (U,U+V)-généralisés}
-Distinguer une matrice de parité d'un code (U,U+V)-généralisé d'une matrice de parité aléatoire. \\
-Réduction à un problème NP-complet. \\
-Utilisation de S et P pour masquer les propriétés de la matrice. \\
+
+Le schéma Wave est, d'après ce qui précède, sûr à condition que l'on ne puisse pas distinguer une matrice de parité d'un code (U,U+V)-généralisé d'une matrice de parité aléatoire. \\
+
+\noindent Nous avons, tout au long de ce rapport, simplifié les notations et les algorithmes pour se focaliser sur l'essentiel. 
+Mais il est temps d'ajouter quelques précisions.
+La trappe du schéma Wave étant la structure du code $(U,U+V)$-généralisé utilisé, nous avons besoin de masquer cette structure. Nous introduisons donc une matrice $S\in\F_q^{(n-k)\times(n-k)}$ inversible et une matrice de permutation $P\in\F_q^{n\times n}$ de telle sorte que la clé publique ne soit pas directement la matrice de parité du code $(U,U+V)$, en effet, nous masquons sa structure en posant $pk = SHP$. Les matrices $S$ et $P$ faisant donc partie de la clé privée.\\
+Bien entendu, cela ne suffit pas, il faut donc étudier le problème de distinction avec plus d'attention.\\
+
+\noindent Lorsque $\dim(U) < \dim(V)$, il est possible de montrer que ce problème est NP-complet à l'aide d'une réduction au problème du mariage tri-dimensionnel lui-même NP-complet. \\
+En revanche, dans le cas où $\dim(U) > \dim(V)$ nous avons montré précédemment qu'il est facile de distinguer un code binaire $(U,U+V)$-généralisé d'un code aléatoire d'où le passage à $q>2$.
+La démonstration du caractère NP-complet de Wave lorsque $q=3$ et $\dim(U) > \dim(V)$ reste non achevée pour l'instant.
+Les chercheurs ayant travaillé sur ce projet pensent néanmoins que la généralisation des codes $(U,U+V)$ comme nous l'avons présentée dans la définition \ref{UV-normalise} et notamment le grand choix des vecteurs $a$, $b$, $c$, et $d$ offrent la possibilité d'étendre la réduction au problème u mariage tri-dimensionnel à ce cas.\\
 
 \section*{Conclusion}
 \addcontentsline{toc}{section}{\protect\numberline{}Conclusion}

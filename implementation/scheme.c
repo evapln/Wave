@@ -1,17 +1,10 @@
 #include "scheme.h"
 
-const float LAMBDA = 3.08;
-const int SIZE = 50;
+const int SIZE = floor(LAMBDA/0.0154)+((int)(floor(LAMBDA/0.0154))%2);
 const int OMEGA = 0.9261*SIZE;
 const int d = 0;
 const int K_U = 0.7978*SIZE/2;
 const int K_V = 0.4201*SIZE/2;
-// const float LAMBDA = 3.08;
-// const int SIZE = 16;
-// const int OMEGA = 13;
-// const int d = 0;
-// const int K_U = SIZE/4;
-// const int K_V = SIZE/4;
 matrix_t* A = NULL;
 matrix_t* B = NULL;
 matrix_t* C = NULL;
@@ -149,6 +142,8 @@ void sign_free(sign_t *signature) {
 /* Ecrit keys->sk dans secret et keys->pk dans public */
 void keys_print(const keys_t *keys, FILE *secret, FILE *public) {
   if (keys && keys->pk && keys->sk && keys->sk->parite_U && keys->sk->parite_V && keys->sk->S && keys->sk->P) {
+    puts("génération des clés de chiffrement avec les paramètres :");
+    printf("lambda = %f, n = %d, w = %d, Ku = %d, Kv = %d\n", LAMBDA, SIZE, OMEGA, K_U, K_V);
     fputs("parité U :\n", secret); matrix_print(keys->sk->parite_U, secret);
     fputs("parité V :\n", secret); matrix_print(keys->sk->parite_V, secret);
     fputs("S :\n", secret); matrix_print(keys->sk->S, secret);
@@ -157,6 +152,34 @@ void keys_print(const keys_t *keys, FILE *secret, FILE *public) {
     fprintf(secret, "dim V : %d\n\n", keys->sk->dim_V);
     fputs("Pk :\n", public); matrix_print(keys->pk, public);
   }
+}
+
+void sign_print(const sign_t *signature, FILE *file) {
+  if (signature && signature->e && signature->r) {
+    fputs("signature :",file);
+    fprintf(file, "e :\n"); matrix_print(signature->e, file);
+    fprintf(file, "r :\n"); matrix_print(signature->r, file);
+    printf("m1(e) = %d\n", m1(signature->e));
+    printf("m1(r) = %d\n", m1(signature->r));
+  }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////// gestion des paramètres de keys_t et sk_t /////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+sk_t *keys_get_sk(keys_t *keys) {
+  if (!keys)
+    return NULL;
+  return keys->sk;
+}
+
+/* Renvoie la clé publique */
+matrix_t *keys_get_pk(keys_t *keys) {
+  if (!keys)
+    return NULL;
+  return keys->pk;
 }
 
 
@@ -294,6 +317,25 @@ void coeff_phi (int mode) {
     coef_init = true;
 }
 
+int m1(matrix_t *x) {
+  int m1 = 0;
+  if (!x || matrix_get_row(x) != 1 || matrix_get_col(x) != SIZE)
+    return -1;
+  for (int i = 0; i < SIZE/2; ++i) {
+    char xi = matrix_get_cell(x,0,i), xin = matrix_get_cell(x,0,i+SIZE/2);
+    if ((xi == 0 && xin != 0) || (xi != 0 && xin == 0))
+      ++m1;
+  }
+  return m1;
+}
+
+
+// float proba_unif(int s, int t) {
+//
+//
+// }
+//
+// float proba(int s, int t);
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////// génération des clés /////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -609,69 +651,6 @@ matrix_t *invert_alg(const sk_t *sk, const matrix_t *synd) {
   matrix_free(e);
   return eP;
 }
-
-// int *freeset(const matrix_t *H, const matrix_t *ev, const int k) {
-//   if (!H || !ev)
-//     return NULL;
-//   // création su supp de ev
-//   int len_supp = 0;
-//   int col = matrix_get_col(ev);
-//   for (int j = 0; j < col; ++j) {
-//     if (matrix_get_cell(ev,0,j) != 0 % ORDER) {
-//       ++len_supp;
-//     }
-//   }
-//   int supp[len_supp];
-//   int i = 0;
-//   for (int j = 0; j < col; ++j) {
-//     if (matrix_get_cell(ev,0,j) != 0 % ORDER) {
-//       supp[i] = j;
-//       ++i;
-//     }
-//   }
-//   // création de [1,n]\supp(ev)
-//   int len_inv_supp = SIZE - len_supp;
-//   int inv_supp[len_inv_supp];
-//   // int i = 0;
-//   for (int j = 0; j < SIZE; ++j) {
-//     if (!is_in_array(supp, len_supp, j)) {
-//       inv_supp[i] = j;
-//       ++i;
-//     }
-//   }
-//   // int J1[k];
-//   // int J2[DIM - SIZE - k];
-//   int J[DIM-d];
-//   int rank = 0;
-//   while (rank != SIZE - DIM) {
-//     // création de J = J1 U J2
-//     // ajout de J1 dans la première partie de J
-//     shuffle(supp, len_supp);
-//     for (int j = 0; j < k; ++j)
-//       J[j] = supp[j];
-//     // ajout de J2 dans la deuxième partie de J
-//     shuffle(inv_supp, len_inv_supp);
-//     for (int j = 0; j < DIM-d-k; ++j)
-//       J[j+k] = supp[j];
-//     // créatino de [1,SIZE]\J : inv_J
-//     int len_inv_J = SIZE - DIM - d;
-//     int inv_J[len_inv_J];
-//     int i = 0;
-//     for (int j = 0; j < SIZE; ++j) {
-//       if (!is_in_array(J, DIM-d, j)) {
-//         inv_J[i] = j;
-//         ++i;
-//       }
-//     }
-//     matrix_t *sub_H = sub_col_matrix(H, inv_J, len_inv_J);
-//     puts("sub_H : ");
-//     matrix_print(sub_H,stdout);
-//     rank = matrix_rank(sub_H);
-//     printf("rang de sub_H : %d\nn-k = %d\nd = %d\n", rank, SIZE-DIM, d);
-//     matrix_free(sub_H);
-//   }
-//   return NULL;
-// }
 
 
 ////////////////////////////////////////////////////////////////////////////////

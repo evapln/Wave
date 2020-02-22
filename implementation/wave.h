@@ -1,6 +1,7 @@
 #ifndef WAVE_H
 #define WAVE_H
 
-#define SEC_MAX 50
+#define LAMBDA (0.77)
+
 
 #endif /* WAVE_H */

@@ -1,4 +1,10 @@
+#ifndef SCHEME_H
+#define SCHEME_H
+
+#define LAMBDA (0.77)
+
 #include "matrix.h"
+
 
 typedef struct sk_t sk_t;
 
@@ -35,16 +41,19 @@ void sign_free(sign_t *signature);
 /* Ecrit keys->sk dans secret et keys->pk dans public */
 void keys_print(const keys_t *keys, FILE *secret, FILE *public);
 
+/* Ecrit keys->sk dans secret et keys->pk dans public */
+void sign_print(const sign_t *signature, FILE *file);
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ///////////////////// gestion des paramètres de keys_t et sk_t /////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-// /* Renvoie la clé privée */
-// sk_t *keys_get_sk(keys_t *keys);
-//
-// /* Renvoie la clé publique */
-// matrix_t *keys_get_pk(keys_t *keys);
+/* Renvoie la clé privée */
+sk_t *keys_get_sk(keys_t *keys);
+
+/* Renvoie la clé publique */
+matrix_t *keys_get_pk(keys_t *keys);
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -65,6 +74,11 @@ matrix_t *parite(const matrix_t *parite_U, const matrix_t *parite_V);
    Si mode = 1 a,b,c,d random avec les bonnes propriétés */
 void coeff_phi(int mode);
 
+/* Renvoie m1(x) = #{1 <= i <= n/2 tq |(x(i),x(i+n/2)| = 1} */
+int m1(matrix_t *x);
+
+float proba_unif(int s, int t);
+float proba(int s, int t);
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////// génération des clés /////////////////////////////
@@ -99,10 +113,6 @@ matrix_t *decode_uv(const sk_t *sk, const matrix_t *synd);
 /* inverse la fonction syndrome */
 matrix_t *invert_alg(const sk_t *sk, const matrix_t *synd);
 
-/* alloue en mémoire en renvoie le vecteur x tel que Ax=y */
-// matrix_t *resol_syst(const matrix_t *A, const matrix_t *y);
-
-// int *freeset(const matrix_t *H, const matrix_t *ev, const int k);
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -122,7 +132,6 @@ matrix_t *iteration_prange(const matrix_t *parite, const matrix_t *syndrome);
 
 
 
-
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////// signature et vérification ///////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -132,3 +141,5 @@ matrix_t *hash(const matrix_t *m, const matrix_t *r, const matrix_t *pk);
 sign_t *sign(const keys_t *keys, const matrix_t *m);
 
 bool verify(const matrix_t *pk, const matrix_t *m, const sign_t *signature);
+
+#endif

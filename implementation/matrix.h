@@ -1,3 +1,8 @@
+#ifndef MATRIX_H
+#define MATRIX_H
+
+// #define LAMBDA (3.08)
+
 #include "algebra.h"
 #include <math.h>
 
@@ -156,8 +161,6 @@ void shuffle(int *array, const int n);
 void shuffle_info(int *array, const int len_a, const int *info, const int len_i,
                   const int dim);
 
-
-
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////// gestion de vecteurs /////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -184,10 +187,6 @@ matrix_t *vect_scal(const matrix_t *vect1, const matrix_t *vect2);
 
 /* Alloue et renvoie le supp de vect */
 matrix_t *vect_supp(const matrix_t *vect);
-
-// matrix_t *int_to_vect(const long long m);
-//
-// long long vect_to_int(const matrix_t *vect);
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////// calculs et tests sur les lignes d'une matrice ///////////////
@@ -231,3 +230,5 @@ void random_word(matrix_t *c, const matrix_t *G);
 
 /* Ecrit matrix dans fd */
 void matrix_print(const matrix_t *matrix, FILE *fd);
+
+#endif
