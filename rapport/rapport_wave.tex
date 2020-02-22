@@ -737,7 +737,61 @@ On peut alors introduire l'algorithme suivant :
     M(t) &:= \max_{0 \leq s \leq t} \frac{q^{unif}(s,t)}{q(s,t)}\\[.6cm]
     \end{split}
 \end{equation*}
-On peut alors énoncer la proposition suivante :
+
+
+
+Pour montrer que la sortie de notre algorithme \verb|DecodeUV| suit bien une distribution uniforme, énonçons le lemme suivant :
+
+\begin{lemme}\label{rejet} Soient $X$ et $X^{unif}$ deux variables aléatoires à valeur dans un même ensemble $\mathcal{X}$ telles que :
+\begin{itemize}
+\item $X$ suit une distribution quelconque,
+\item $X^{unif}$ suit une distribution uniforme.
+\end{itemize} 
+Pour tout $x \in \mathcal{X}$ on pose :
+\begin{equation*}
+   \begin{split}
+    &r(x) := \frac{1}{M} \frac{\mathbb{P}(X^{unif}=x)}{\mathbb{P}(X=x)} \\[0.6cm]
+    &M := \max_{y \in \mathcal{X}}\frac{\mathbb{P}(X^{unif}=y)}{\mathbb{P}(X=y)}\\[0.6cm]
+    \end{split}
+\end{equation*}
+Alors la variable aléatoire $Y$ définie telle que pour tout $x$:
+\begin{enumerate}
+\item On tire $\theta$ uniformément dans l'intervalle $\llbracket 0,1 \rrbracket$,
+\item Si $\theta \leq r(x)$, alors $Y$ prend la valeur $x$.
+\item Sinon, $Y$ ne prends aucune valeur.
+\end{enumerate}
+Alors la variable $Y$ suit une loi uniforme. 
+\end{lemme}
+
+
+\begin{proof}[Preuve] Remarquons d'abord que pour tout $x$:
+$$0 \leq r(x) = \frac{1}{M}\frac{\mathbb{P}(X^{unif}=x)}{\mathbb{P}(X=x)} = \Bigg(\inf_{y \ in \mathcal{X}}\frac{\mathbb{P}(X=y)}{\mathbb{P}(X^{unif}=y)}\Bigg)\frac{\mathbb{P}(X^{unif}=x)}{\mathbb{P}(X=x)}\leq 1$$
+Donc les coordonnées de $r$ sont bien des probabilités.\\
+
+\noindent On remarque aussi que,
+\begin{equation*}
+   \begin{split}
+    \mathbb{P}(\text{ "y soit accepté" }) &:= \mathbb{P}(\; \theta \leq r(x)\quad \text{et} \quad X=x\;) \\[0.6cm]
+    &:=  \mathbb{P}(\theta \leq r(x)) \times\mathbb{P}(X=x) \\[0.6cm]
+    \end{split}
+\end{equation*}
+
+De plus, la probabilité que $Y = x$ est égale à la probabilité que $x$ ai été tiré et qu'il ai été accepté. 
+\noindent Pour tout $x \in \mathcal{X}$, on a alors,
+\begin{equation*}
+   \begin{split}
+    \mathbb{P}(Y=x) &:= \frac{ \mathbb{P}(\theta \leq r(x)) \times\mathbb{P}(X=x)}{\sum_{y \in \mathcal{X}} \mathbb{P}(\theta \leq r(y)) \times\mathbb{P}(X=y)} \\[0.6cm]
+    &:=\frac{  r(x) \times\mathbb{P}(X=x)}{\sum_{y \in \mathcal{X}}  r(y) \times\mathbb{P}(X=y)}\qquad \Big(\text{car}\quad \mathbb{P}(\theta \leq r(x)) =  r(x)\Big)\\[0.6cm]
+    &:=\frac{ \mathbb{P}(X^{unif}=x)}{M\times\sum_{y \in \mathcal{X}} 1/M \times\mathbb{P}(X^{unif}=y)}\qquad \Big(\text{car}\quad \sum_{y\in \mathcal{X}}\mathbb{P}(X^{unif}=y) = 1\Big)\\[0.6cm]
+    &:= \mathbb{P}(X^{unif}=x) \\[0.6cm]
+    \end{split}
+\end{equation*}
+
+\end{proof}
+
+
+
+\noindent On peut alors énoncer la proposition suivante :
 
 
 \begin{propo}
@@ -745,20 +799,12 @@ Si \verb|DecodeV| est uniforme en poids et si \verb|DecodeU| est $m_1$-uniforme,
 \end{propo}
 
 \begin{proof}[Preuve]
-Soit $\e_U'$ le vecteur obtenu à la sortie de la boucle dans \verb|DECODE_UV|. On remarque que pour tout $i,j$:
-$$0 \leq r(i,j) = \frac{1}{M(i,j)}\frac{q^{unif}(i,j)}{q(i,j)} = \Bigg(\inf_{0 \leq k \leq l}\frac{q(k,l)}{q^{unif}(k,l}\Bigg)\frac{q^{unif}(i,j)}{q(i,j)} \leq 1$$
-Donc les coordonnées de $r$ sont bien des probabilités. Notons pour tout $i,j \in \llbracket 1,n \rrbracket$:
+Soit $\e_U'$ le vecteur obtenu à la sortie de la boucle dans \verb|DECODE_UV|.  Notons pour tout $i,j \in \llbracket 1,n \rrbracket$:
 $$q'(i,j) := \mathbb{P}(m_1(\mathbf{e'}_U)=i\;|\;|\mathbf{e'}_V|=j)$$
 
-On a alors 
-\begin{equation}
-\begin{aligned}
-q'(i,j) &= \frac{r(i,j)q(i,j)}{\sum_{0 \leq k \leq l}r(k,l)q(k,l)} \\
- &= \frac{q^{unif}(i,j)}{M(i,j)\sum_{0 \leq k \leq l}\frac{1}{M(k,l)}q^{unif}(l)} \\
- &= q^{unif}(i,j) \\
-\end{aligned}
-\end{equation}
-La première ligne vient de l'indépendance du tirage du réel rand($[0,1]$) du poids de $\e_V$ et de $m_1(\e)$. La dernière ligne vient du fait que la somme sur $i,j$ des $q^{unif}(i,j)$ vaut $1$. De plus la sortie de l'algorithme \verb|DECODE_V| est uniforme, ce qui conclu la preuve.
+\noindent On a alors par le lemme \ref{rejet}
+$$q'(i,j) = q^{unif}(i,j)$$
+De plus la sortie de l'algorithme \verb|DECODE_V| est uniforme, ce qui conclu la preuve.
 \end{proof}
 
 \subsection{Choix des algorithmes de décodage}
@@ -919,7 +965,7 @@ Le protocole est alors sûr au sens EUF-CMA si ce succès est négligeable. \\
 $$Succ^{DOOM(n,q,k,N)}(t) := \max_{\mathcal{A};|A|\leq t}(\mathbb{P}(\mathcal{A}(\mathbf{H},\mathbf{s}_1,...,\mathbf{s}_n)=\mathbf{e}\text{ tel que }$$
 $$ \mathbf{eH}^T = \mathbf{s}_j \text{ pour un certain } j \in \{1,...,N\})).$$
 
-\noindent La réduction à ce problème est naturelle pour un schéma de signature. Il suffit de s'assurer que l'on peut considérer notre matrice de parité comme une matrice d'un code aléatoire. Ainsi, si $\mathcal{A}$ arrive à créer une signature valide sans connaître l'algorithme de décodage $\mathcal{D}_{\varphi,\mathbf{H}_{U},\mathbf{H}_{V}}$, alors il a bien résolu le problème du décodage. Puisqu'on a montré préalablement que les sorties $\e$ de \verb|sign| sont uniformément distribuées sur $S_{\omega}$, la connaissance des $N_{sign}$ couples $(\s,\e)$ ne donnent pas d'avantage à $\mathcal{A}$. Ainsi la réduction se fait naturellement. \\
+\noindent La réduction à ce problème est naturelle pour un schéma de signature. Il suffit de s'assurer que l'on peut considérer notre matrice de parité comme une matrice d'un code aléatoire. Ainsi, si $\mathcal{A}$ arrive à créer une signature valide sans connaître l'algorithme de décodage $\mathcal{D}_{\varphi,\mathbf{H}_{U},\mathbf{H}_{V}}$, il a bien résolu le problème du décodage. Puisqu'on a montré préalablement que les sorties $\e$ de \verb|sign| sont uniformément distribuées sur $S_{\omega}$, la connaissance des $N_{sign}$ couples $(\s,\e)$ ne donnent pas d'avantage à $\mathcal{A}$. Ainsi la réduction se fait naturellement. \\
 
 
 \subsubsection{Preuve formelle de la réduction}
@@ -939,7 +985,7 @@ $$ f(\mathcal{U}_{\omega},\mathcal{D}_{\omega}^{\mathbf{H}_{pk}}) + g(\epsilon) 
 où $\epsilon$ est une fonction en $n$ qui décroît exponentiellement, $\mathcal{D}_{rand}$ est la distribution des matrices prises aléatoirement dans $\F_q{(n-k)\times n}$, $\mathcal{D}_{pub}$ celle des matrices prises aléatoirement dans l'ensemble des matrices de parité d'un code $(U,U+V)$-généralisé (et $U$, $V$ de dimension respectives $k_U$ et $k_V$), $f$ l'espérance de la distance calculatoire entre les deux distributions, $g$ linéaire en $\epsilon$ et $c$ une constante.
 \end{thm}
 
-\begin{proof}[Preuve] On rappelle que $G_0$ correspond à notre jeu pour la sécurité EUF-CMA de Wave.
+\begin{proof}[Preuve] (On trouvera le détail des preuves de probabilité en annexe de ce rapport.) On rappelle que $G_0$ correspond à notre jeu pour la sécurité EUF-CMA de Wave.
 \begin{itemize} 
 \item $G_1$ : Le jeu $G_1$ est identique au jeu $G_0$ sauf si l'évènement 
 \begin{center}
@@ -972,7 +1018,7 @@ $$ \mathbb{P}(G_4) \leq  2\mathbb{P}(G_5) + \rho(\mathcal{D}_{rand},\mathcal{D}_
 où $\mathbb{P}(G_5)$ est exactement la probabilité pour $\A$ de renvoyer $\e_j \in S_{\omega}$ et tel que $\e_j\mathbf{H}_0^T = \s_j$ pour un certain indice $j$ du problème DOOM. On a donc 
 $$ \mathbb{P}(G_5) \leq Succ^{n,k,N_{hash}, \omega}_{DOOM}(t)$$
 \end{itemize}
-En rassemblant toutes les inégalités on termine la preuve. (On trouvera le détail des preuves de probabilité en annexe de ce rapport.)
+En rassemblant toutes les inégalités on termine la preuve. 
 \end{proof}
 
 
@@ -997,7 +1043,7 @@ Les chercheurs ayant travaillé sur ce projet pensent néanmoins que la généra
 
 
 \begin{appendix}
-\section*{Quelques démonstrations supplémentaires}
+\section*{Quelques preuves supplémentaires}
 \addcontentsline{toc}{section}{\protect\numberline{}Quelques démonstrations supplémentaires}
 
 \subsection*{Démonstration du lemme \ref{maj_dist_e_eunif}}
