@@ -15,10 +15,13 @@
 \theoremstyle{plain}
 \newtheorem{thm}{Théorème}[section]
 \newtheorem{lemme}[thm]{Lemme}
+\newtheorem{propo}[thm]{Proposition}
+
+\theoremstyle{definition}
 \newtheorem{remarque}[thm]{Remarque}
 \newtheorem{defi}[thm]{Définition}
-\newtheorem{propo}[thm]{Proposition}
 \newtheorem{nota}[thm]{Notation}
+
 
 \renewcommand{\a}{\alpha}
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}} 
@@ -609,8 +612,8 @@ Nous nous trouvons donc bien dans le deuxième cas : lorsque $k \geq n/2$. Final
 
 \noindent La connaissance de la trappe apporte donc bien un avantage puisqu'elle permet un décodage pour des erreurs de poids ne permettant pas de décodage générique. 
 
-\begin{remarque} Fonction de hachage
-À FAIRE
+\begin{remarque} En pratique, notre système de signature comporterait une fonction de hachage. Ainsi, la fonction de signature prendrait en entrée un mot $m$ quelconque. Puis un aléa $r$ serait pris aléatoirement dans $\{0,1\}^{\lambda_0}$. On aurait $s \leftarrow \verb|Hash| (m,r)$, qui serait alors signé. \verb|Sign| renvoit alors le couple $(e,r)$. \\
+La fonction \verb|Verify| prend en entrée $(m,(\e',r))$, récupère $s \leftarrow \verb|Hash| (m,r)$ puis fait ses vérifications. Ainsi un attaquant ne peut pas falsifier une signature à partir d'un vecteur $e$ choisi aléatoirement dans $S_{\omega}$ et en récupérant $s = e\mathbf{H}^T$. Sans la fonction de hachage, il aurait alors signé $s$.
 \end{remarque}
 
 \subsection{Implémentation et choix de paramètres}
@@ -731,7 +734,7 @@ On peut alors introduire l'algorithme suivant :
 
 \begin{equation*}
    \begin{split}
-    r(s,t) &:= \frac{1}{M(t)}\frac{q^{unif}(s,t)}{q(s,t)} \\
+    r(s,t) &:= \frac{1}{M(t)}\frac{q^{unif}(s,t)}{q(s,t)}\\[.6cm]
     q(s,t) &:= \mathbb{P}(m_1(\mathbf{e})=s\;|\;|\mathbf{e}_V|=t)\\[.6cm]
     q^{unif}(s,t) &:= \mathbb{P}(m_1(\mathbf{e}^{unif})=s\;|\;|\mathbf{e}^{unif}_V|=t)\\[.6cm]
     M(t) &:= \max_{0 \leq s \leq t} \frac{q^{unif}(s,t)}{q(s,t)}\\[.6cm]
@@ -811,10 +814,6 @@ De plus la sortie de l'algorithme \verb|DECODE_V| est uniforme, ce qui conclu la
 À FAIRE :\\
 description explicite de \verb|DECODE_V| \\
 description explicite de \verb|DECODE_U| \\
-Application de la méthode du rejet selon ces choix et choix des distributions. 
-
-\subsection{Estimation du nombre de rejet}
-
 
 \begin{algorithm}
 	\caption{DecodeU($\varphi, \e_V, \s^U, \mathbf{H}_U$)}
@@ -845,13 +844,16 @@ Application de la méthode du rejet selon ces choix et choix des distributions.
 EXPLIQUER POURQUOI ON AJOUTE LE $d$.\\
 Avec $d\in [0,k_U]$, qui permettra de montrer que notre sortie est uniforme.
 
+\subsection{Estimation du nombre de rejet}
+Nous souhaitons estimer le nombre de rejets effectué dans notre algorithme \verb|DecodeUV| utilisant les algorithmes \verb|DecodeU|, \verb|DecodeV| définit précédemment. Pour cela, introduisons la définition suivante:
+
 \begin{defi} (Bon ensemble).
 Soient $d \leq k \leq n$, $\mathbf{H}\in\F_3^{(n-k)\times n}$ et $\varepsilon \subseteq \llbracket1,n\rrbracket$ de taile $k-d$. On dit que $\varepsilon$ est un bon ensemble pour $\mathbf{H}$ si $\mathbf{H}_{\overline{\varepsilon}}$ est de rang plein. Sinon, on dit que $\varepsilon$ est un mauvais ensemble.
 \end{defi}
 
 
-\noindent Nous voulons compter le nombre de rejets moyen, pour cela nous allons comparer $\e$ la sortie de \verb|DecodeUV| avec $\e^{unif}$ une erreur aléatoire uniforme de poids $\omega$.\\
-Nous savons dores et déjà que la sortie de \verb|DecodeV| est uniforme, nous allons donc étudier la sorite de \verb|DecodeU|.
+\noindent Pour estimer ce nombre de rejets moyen, nous allons comparer $\e$ la sortie de \verb|DecodeUV| avec $\e^{unif}$ une erreur aléatoire uniforme de poids $\omega$.\\
+Nous savons que la sortie de \verb|DecodeV| est uniforme, nous allons donc étudier la sortie de \verb|DecodeU|.
 Nous introduisons pour cela \verb|VarDecodeU| qui fonctionne de la même façon que \verb|DecodeU| quand $\J$ est un bon ensemble pour $\mathbf{H}$ et qui renvoie une erreur aléatoire selon la distribution $\D_U^t$ sur $\J$ dans le cas contraire.
 Il n'y a donc aucune raison que la sortie soit une solution du problème de décodage lorsque $\J$ n'est pas un bon ensemble pour $\mathbf{H}$.
 Nous pouvons facilement voir que \verb|VarDecodeU| est $m_1$-uniforme.\\
@@ -1026,15 +1028,13 @@ En rassemblant toutes les inégalités on termine la preuve.
 
 Le schéma Wave est, d'après ce qui précède, sûr à condition que l'on ne puisse pas distinguer une matrice de parité d'un code (U,U+V)-généralisé d'une matrice de parité aléatoire. \\
 
-\noindent Nous avons, tout au long de ce rapport, simplifié les notations et les algorithmes pour se focaliser sur l'essentiel. 
-Mais il est temps d'ajouter quelques précisions.
-La trappe du schéma Wave étant la structure du code $(U,U+V)$-généralisé utilisé, nous avons besoin de masquer cette structure. Nous introduisons donc une matrice $S\in\F_q^{(n-k)\times(n-k)}$ inversible et une matrice de permutation $P\in\F_q^{n\times n}$ de telle sorte que la clé publique ne soit pas directement la matrice de parité du code $(U,U+V)$, en effet, nous masquons sa structure en posant $pk = SHP$. Les matrices $S$ et $P$ faisant donc partie de la clé privée.\\
-Bien entendu, cela ne suffit pas, il faut donc étudier le problème de distinction avec plus d'attention.\\
+\noindent Nous avons, tout au long de ce rapport, simplifié les notations et les algorithmes. Afin de discuter ce problème de distinction, il est nécéssaire d'en réintroduire certaines. \\
+La trappe du schéma Wave étant la structure du code $(U,U+V)$-généralisé utilisé, nous devons nous assurer qu'on ne peut pas la retrouver à partir de la clé secrète. Nous introduisons donc une matrice $S\in\F_q^{(n-k)\times(n-k)}$ inversible et une matrice de permutation $P\in\F_q^{n\times n}$, la clé publique devient alors $pk = SHP$. Les matrices $S$ et $P$ faisant donc partie de la clé privée.\\
 
 \noindent Lorsque $\dim(U) < \dim(V)$, il est possible de montrer que ce problème est NP-complet à l'aide d'une réduction au problème du mariage tri-dimensionnel lui-même NP-complet. \\
 En revanche, dans le cas où $\dim(U) > \dim(V)$ nous avons montré précédemment qu'il est facile de distinguer un code binaire $(U,U+V)$-généralisé d'un code aléatoire d'où le passage à $q>2$.
 La démonstration du caractère NP-complet de Wave lorsque $q=3$ et $\dim(U) > \dim(V)$ reste non achevée pour l'instant.
-Les chercheurs ayant travaillé sur ce projet pensent néanmoins que la généralisation des codes $(U,U+V)$ comme nous l'avons présentée dans la définition \ref{UV-normalise} et notamment le grand choix des vecteurs $a$, $b$, $c$, et $d$ offrent la possibilité d'étendre la réduction au problème u mariage tri-dimensionnel à ce cas.\\
+Les auteurs du papier d'origine pensent néanmoins que la généralisation des codes $(U,U+V)$ comme nous l'avons présentée dans la définition \ref{UV-normalise} et notamment le grand choix des vecteurs $a$, $b$, $c$, et $d$ offrent la possibilité d'étendre la réduction au problème du mariage tri-dimensionnel.\\
 
 \section*{Conclusion}
 \addcontentsline{toc}{section}{\protect\numberline{}Conclusion}
