@@ -932,7 +932,7 @@ $$\forall i \in {0,...,N-1}, |\mathbb{P}(G_i)-\mathbb{P}(G_i+1)| \in negl(\lambd
 où $\lambda$ est un paramètre de sécurité. Autrement dis, les changements sur les jeux ne changent qu'à un facteur négligeable près les probabilités de succès de l'attaquant $\mathcal{A}$. \\
 Il n'est pas possible de changer le comportement de $\mathcal{A}$ puisqu'il est quelconque, en revanche nous pouvons modifier celui de $R$. \\
 
-\begin{thm} (Réduction de sécurité). \\
+\begin{thm} (Réduction de sécurité).\label{DOOM} \\
 Soit $N_{sign}$ le nombre de requêtes faites à l'oracle de signature. Soit $\lambda$ le paramètre de sécurité et $\lambda_0=\lambda + 2\log_2(N_{sign})$. On a :
 $$Succ^{EUF-CMA}_{Wave}(t,N_{sign}) \leq 2Succ^{DOOM(n,q,k,N)}(t) +\rho(\mathcal{D}_{rand},\mathcal{D}_{pub})(t) + $$
 $$ f(\mathcal{U}_{\omega},\mathcal{D}_{\omega}^{\mathbf{H}_{pk}}) + g(\epsilon) + c + \frac{N_{hash}}{2}\sqrt{\epsilon} + \frac{1}{2^{\lambda}}$$
@@ -1122,9 +1122,61 @@ Ainsi $\forall u\in U$ et $\forall v\in V$ tels que $(u,u+v)\in hull(U,U+V)$, il
 \right.
 \end{equation*}
 Donc $v\in V\cap U^{\bot}$.
-De plus, nous avons $dim(V) + dim(U^{\bot}) = \frac{n}{2} +k_V - k_U < \frac{n}{2}$
-SUITE À ÉCRIRE
+De plus, nous avons $$\dim(V) + \dim(U^{\bot}) = \frac{n}{2} +k_V - k_U < \frac{n}{2}$$
+Alors, avec probabilité $1-0(2^{k_V-k_U})$ sur le choix des codes, nous aurons $V \cap U^{\bot} = {0}$ et $v=u^{\bot} = 0$. Ainsi, les vecteurs de hull$(U,U+V)$ seront de la forme $(x,x)$ où $x \in U \cap V^{\bot}$ avec probabilité  $1-0(2^{k_V-k_U})$ .
+De même on a,
+$$\dim(U) + \dim(V^{\bot}) = \frac{n}{2} +k_U - k_V < \frac{n}{2}$$
+
+Alors avec probabilité $1-0(2^{k_V-k_U})$, on aura 
+$$\dim(\text{hull}((U,U+V))) = \dim(U\cap V^{\bot}) = k_U-k_V $$
+ce qui conclue la preuve.
 \end{proof}
+
+\subsection*{Démonstration du théorème \ref{DOOM}}
+\begin{proof}[Preuve du théorème \ref{DOOM}] \
+\begin{itemize}
+\item \textbf{Passage de $G_0$ à $G_1$ : } Montrons que $$\mathbb{P}(F) \leq \frac{1}{2^\lambda}$$.
+Remarquons d'abord que la probabilité de n'avoir aucune collision sur $t$ tirages indépendants et uniforme dans un ensemble de taille $n$ est majoré par $t^2/n$ (admis). Dans notre cas, $t=N_{sign}$ et $n=2^{\lambda_0}$. Ainsi avec $\lambda_0 = \lambda +2 \log_2N_{sign}$, on en déduit que 
+$$ \mathbb{P}(F) \leq \frac{N^2_{sign}}{2^{\lambda_0}}=\frac{1}{2^{\lambda_0 -2 \log_2N_{sign}}} =\frac{1}{2^\lambda}$$ ce qui conclu la preuve.
+\item \textbf{Passage de $G_1$ à $G_2$ : } Montrons que $$ \mathbb{P}(G_1) \leq  \mathbb{P}(G_2) +  \frac{N_{hash}}{2}\sqrt{\epsilon} $$
+où $\epsilon$ est une fonction en $n$ qui décroît exponentiellement.
+Nous utiliserons la proposition suivante (admise) :
+\begin{propo} Soient les variables aléatoires discrètes $X_i$ et $Y_i$ où $i \in \{1,2\}$ de même domaine $\mathcal{A}_i$. Notons pour $a_i \in \mathcal{A}_i$ :
+	\begin{itemize}
+	\item $p(.|a_i)$ la distribution de $X_2$ conditionnée à l'évènement $X_1 = a_i$
+	\item $q(.|a_i)$ la distribution de $Y_2$ conditionnée à l'évènement $Y_1 = a_i$
+	\end{itemize}
+Alors nous avons,
+$$\rho(X_1,X_2,Y_1,Y_2) \leq \sup_{a_i \in \mathcal{A}_i}\rho(p(.|a_i),q(.|a_i)) + \rho(X_1,Y_1).$$
+\end{propo}
+Les distributions des jeux $G_1$ et $G_2$ diffèrent par les sorties de la fonction de hachage. Dans le jeu $G_1$ les sorties $X_i$ sont uniformément distribuées dans $\F_q^{n-k}$. Dans le jeu  $G_2$, les sorties $Y_i$ valent $\e\mathbf{H}^T$ avec $e$ uniformément distribué dans $S_{\omega}$ si $r\in L_m$, sinon $Y_i$ est uniformément distribuée.  On a,
+\begin{equation}
+\begin{split}
+\mathbb{P}(G_1) - \mathbb{P}(G_2) &= \sum_{\mathbf{H}}\mathbb{P}(\mathbf{H}_{pk}=\mathbf{H})(\mathbb{P}(G_1|\mathbf{H}_{pk}=\mathbf{H})-\mathbb{P}(G_1|\mathbf{H}_{pk}=\mathbf{H}) \\
+&\leq \mathbb{E}_{\mathbf{H}_{pk}}(\rho(X_1,...,X_{N_{hash}},Y_1,...,Y_{N_{hash}}))\\
+\end{split}
+\end{equation}
+\begin{propo} Soit $X$ la distribution uniforme dans $\F_q^{n-k}$ et $Y$ la distribution de $\e\mathbf{H}^T$ avec $e$ uniformément distribué dans $S_{\omega}$. Alors
+$$\mathbb{E}_{H_{pk}}(\rho(X,Y)) \leq \frac{1}{2}\sqrt{\epsilon} $$
+où $\epsilon$ est une borne qui décroit exponentiellement avec $n$.
+\end{propo}
+Par les deux propositions précédentes et par un raisonnement par récurrence, on termine la preuve. 
+\item \textbf{Passage de $G_2$ à $G_3$ : } Nous avons
+$$ \mathbb{P}(G_2) \leq  \mathbb{P}(G_3) + f(\mathcal{U}_{\omega},\mathcal{D}_{\omega}^{\mathbf{H}_{pk}}) + g(\epsilon) + c$$
+où $f$ et $g$ sont linéaires et $c$ un certaine constante.
+La fonction en $\epsilon$ découle d'un raisonnement similaire au raisonnement précédent. Ensuite, à constante près, les différences de distributions entre les jeux $G_2$ et $G_3$ ne dépendent que de l'espérance de la distance statistique entre les distributions $\mathcal{U}_{\omega}$ et $\mathcal{D}_{\omega}^{\mathbf{H}_{pk}}$, où $\mathcal{U}_{\omega}$ et la distribution uniforme sur $S_{\omega}$ et où $\mathcal{U}_{\omega}$ et $\mathcal{D}_{\omega}^{\mathbf{H}_{pk}}$ est la distribution des couples $(e,r)$ où $r$ est un aléa uniforme dans $\{0,1\}^{\lambda_0}$ et $e$ est la sortie de l'algorothme de décodage avec trappe sur une entrée $s$ prise uniformément dans $\F_q^{n-k}$.
+\item \textbf{Passage de $G_3$ à $G_4$ : } La différence entre ces deux jeux ne vient que de la distance entre la distributions des matrices de parité de nos codes $(U,U+V)$-généralisés et celle des matrices prises uniformément dans $\F_q^{n-k}$.
+\item \textbf{Passage de $G_4$ à $G_5$ : } Le jeu $G_5$ diffère du jeu $G_4$ uniquement par la vérification finale. Soit le couple $(e,r)$ la réponse de $\mathcal{A}$ comme signature d'un message $m$. Sa probabilité de succès pour le jeu $G_5$ est exatement la probabilité de l'évènement "réussit $G_4$ et $r\notin L_m$".  \\
+Si la signature est valise, alors $m$ n'a jamais été demandé à l'oracle de signature, donc $\mathcal{A}$ n'a jamais eu accès aux éléments de $L_m$. Donc les évenements sont indépendants et nous avons,
+$$\mathbb{P}(G_5) = (1 - 2^{- \lambda_0})^{N_{sign}}\mathbb{P}(G_4).$$
+où $\lambda_0 \leq \log_2(N²_{sign})$. Donc
+$$(1-2^{-\lambda_0})^{N_{sign}} \geq (1-\frac{1}{N²_{sign}})^{N_{sign}} \geq \frac{1}{2} $$
+
+D'où $\mathbb{P}(G_5) \geq\frac{1}{2}\mathbb{P}(G_4)$.
+\end{itemize}
+
+\end{proof}
+
 
 \end{appendix}
 
