@@ -1075,31 +1075,18 @@ En rassemblant toutes les inégalités on termine la preuve.
 
 
 \subsection{Indistinguabilité des codes (U,U+V)-généralisés}
-
 Le schéma Wave est, d'après ce qui précède, sûr à condition que l'on ne puisse pas distinguer une matrice de parité d'un code (U,U+V)-généralisé d'une matrice de parité aléatoire. \\
 
 \noindent Nous avons, tout au long de ce rapport, simplifié les notations et les algorithmes. Afin de discuter ce problème de distinction, il est nécéssaire d'en réintroduire certaines. \\
-La trappe du schéma Wave étant la structure du code $(U,U+V)$-généralisé utilisé, nous devons nous assurer qu'on ne peut pas la retrouver à partir de la clé secrète. Nous introduisons donc une matrice $S\in\F_q^{(n-k)\times(n-k)}$ inversible et une matrice de permutation $P\in\F_q^{n\times n}$, la clé publique devient alors $pk = SHP$. Les matrices $S$ et $P$ faisant donc partie de la clé privée.\\
+La trappe du schéma Wave étant la structure du code $(U,U+V)$-généralisé utilisé, nous devons nous assurer qu'on ne peut pas la retrouver à partir de la clé secrète. Nous introduisons donc une matrice $S\in\F_q^{(n-k)\times(n-k)}$ inversible et une matrice de permutation $P\in\F_q^{n\times n}$, la clé publique devient alors $pk = SHP$. Les matrices $S$ et $P$ faisant donc partie de la clé privée. Ainsi, on peut espérer que la matrice de parité de laisse plus apparaître cette structure. \\
 
 \noindent Lorsque $\dim(U) < \dim(V)$, il est possible de montrer que ce problème est NP-complet à l'aide d'une réduction au problème du mariage tri-dimensionnel lui-même NP-complet. \\
-En revanche, dans le cas où $\dim(U) > \dim(V)$ nous avons montré précédemment qu'il est facile de distinguer un code binaire $(U,U+V)$-généralisé d'un code aléatoire d'où le passage à $q>2$.
+Malheureusement notre algorithme de décodage ne fonctionne pas dans le cas où $\dim(U) < \dim(V)$. En effet, afin d'obtenir des erreurs de grands poids et d'assurer qu'il sera difficile de décoder sans trappe, on a fixé $2k_U$ coordonnées de $e$. Si $\dim(U) < \dim(V)$, alors le fait que $e$ soit de poids supérieur ou égal à $2k_U$ ne suffit plus à sortir de l'intervalle $\llbracket \omega^-_{easy},\omega^+_{easy}\rrbracket$. \\
+
+Nous devons donc nécéssairement nous placer dans où $\dim(U) > \dim(V)$. Or nous avons montré précédemment qu'il est alors facile de distinguer un code binaire $(U,U+V)$-généralisé d'un code aléatoire. On fixe alors $q>2$. \\
 La démonstration du caractère NP-complet de Wave lorsque $q=3$ et $\dim(U) > \dim(V)$ reste non achevée pour l'instant.
-Les auteurs du papier d'origine pensent néanmoins que la généralisation des codes $(U,U+V)$ comme nous l'avons présentée dans la définition \ref{UV-normalise} et notamment le grand choix des vecteurs $a$, $b$, $c$, et $d$ offrent la possibilité d'étendre la réduction au problème du mariage tri-dimensionnel.\\
+Les auteurs du papier pensent néanmoins que la généralisation des codes $(U,U+V)$ comme nous l'avons présentée dans la définition \ref{UV-normalise} et notamment le grand choix des vecteurs $a$, $b$, $c$, et $d$ offrent la possibilité d'étendre la réduction au problème du mariage tri-dimensionnel.\\
 
-
-Nous avons montré que le problème de décider si un code est un
-pU, U ` V q-généralisé permuté ou non est NP-complet par une réduction polynomiale
-au problème du mariage Tri-dimensionnel. En revanche cette réduction s’est faite
-dans le cas binaire (q “ 2) pour les codes uniquement pU, U ` V q et pour un régime273
-Conclusion et perspectives
-4
-4
-de paramètres dimpU q “ k U ă dimpV q “ k V . Or dans le cas de Wave nous sommes
-dans un autre régime de paramètres, à savoir q ą 2 et k U ą k V . En revanche, du fait
-que q ą 2, nous avons une plus grande liberté de choix de codes dans la trappe (d’où
-notre généralisation des codes pU, U ` V q) ce qui offre sûrement une plus grande
-liberté pour une réduction. Ceci nous amène donc à penser qu’une réduction au cas
-où justement k U ą k V est possible.
 
 \section*{Conclusion}
 \addcontentsline{toc}{section}{\protect\numberline{}Conclusion}
