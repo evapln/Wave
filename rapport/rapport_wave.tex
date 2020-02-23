@@ -92,9 +92,10 @@ Février, 2020
 
 \section*{Introduction}
 \addcontentsline{toc}{section}{\protect\numberline{}Introduction}
-La cryptographie à clé publique est depuis ??? dominée par RSA et DH. Mais ces systèmes ne sont pas quantiquement sûrs. Or l'éventualité de l'arrivée dans les décénies à venir de l'ordinateur quantique impose la recherche d'alternatives à RSA et DH.\\
-- Appel d'offre NIST \\
-Le papier sur lequel nous avons travaillé se pose donc dans ce contexte. Il propose un système de signature à base de code correcteurs. Les codes correcteurs, proposés depuis les années 70 pour le chiffrement (ex: crypto-système de McEliece) présentent une alternative quantiquement sûr puisqu'ils reposent sur le problème du décodage, un problème NP-complet. En revanche, les recherches pour utiliser des codes dans des systèmes de signatures sont peu concluantes, en témoigne le tableau des soumissions au NIST pour le second tour. \\
+Dans le milieu des années 70, la cryptograhie à clé publique fut marquée par l'arrivée du chiffrement RSA ainsi que du protocole d'échange de clés Diffie-Hellman. De nos jours, ces deux méthodes sont les plus utilisés en pratique. Le chriffrement RSA repose sur le problème de la factorisation, tandis que le protocole DH repose sur le problème du logarithme discret. La cryptographie à clef publique repose donc uniquement sur deux problèmes, tous les deux des instances du problème dit du sous-groupe caché dans un groupe abélien. Il n’existe pas à ce jour d’attaque classique contre ce problème. \\ 
+En revanche, il existe des attaques utilisant des algorithmes quantiques. \\
+Dans le contexte de l'éventualité de l'arrivée dans les décénies à venir de l'ordinateur quantique, le National Institute of Standard Technology (NIST) lança en 2017 un appel pour la standardisation de systèmes à clef publique, afin de trouver des alternatives à RSA et DH.
+Le papier sur lequel nous avons travaillé propose un système de signature à base de code correcteurs. Les codes correcteurs, proposés depuis les années 70 pour le chiffrement (ex: crypto-système de McEliece) présentent une alternative quantiquement sûr puisqu'ils reposent sur le problème du décodage, un problème NP-complet. En revanche, les recherches pour utiliser des codes dans des systèmes de signatures sont peu concluantes, en témoigne le tableau des soumissions au NIST pour le second tour. \\
 
 \begin{figure}[h]
 \label{nist 2}
@@ -104,12 +105,12 @@ Le papier sur lequel nous avons travaillé se pose donc dans ce contexte. Il pro
 \caption{\small Comparaison des soumissions au NIST du second tour.}
 \end{figure}
 \noindent Alors pourquoi est-il si compliqué de faire des signatures avec des codes correcteurs ? \\
-- car il est difficile de tomber dans l'ensemble des syndromes facilement décodables, ie. difficile de créer une fonction de hachage qui envoie le message $m$ dans l'ensemble des syndromes possibles. En effet, pour un décodage au sens stricte il faudrait un syndrome $s$ associé à un unique mot $c$ du code, le plus proche de $m$.\\
-quand on chiffre -> ne pose pas de problème. \\
-quand on signe -> pose un problème car il est dur de trouver un syndrome de cette sorte. \\
-Les solutions à ce problème ont pour l'instant soit été cassées, soit impraticables.\\
+Premièrement, il est difficile de tomber dans l'ensemble des syndromes facilement décodables, ie. il est difficile de créer une fonction de hachage qui envoie le message $m$ dans l'ensemble des syndromes possibles. En effet, pour un décodage au sens stricte il faudrait un syndrome $s$ associé à un unique mot $c$ du code, le plus proche de $m$.\\
+Cela ne pose pas de problème lorsqu'on chiffre, puisque notre chiffré sera justement le syndrome. Il suffit donc de choisir un vecteur erreur en conséquance et de le transformer en le syndrome associé. Le déchiffrement consistera alors à retrouver le vecteur erreur à partir du syndrome. \\
+En revanche, pour la signature, il faudra trouver un moyen de transformer notre message en un syndrome qui sera dans l'ensemble des syndromes associés à un vecteur erreur de poids minimal. \\
+Tous les systèmes de signatures basés sur des codes ont pour l'instant soit été cassées, soit sont inutilisables dans la pratique.\\
 La solution de Wave est d'enlever la restriction au mot le plus proche. On cherche maintenant une famille de codes permettant de trouver, pour un mot quelconque, un des mots de code à distance $\omega$. En particulier, la distance de décodage $\omega$ est très grande, ce qui assure typiquement de l’existence d’un mot de code à distance $\omega$.\\
-Explication rapide du schéma wave + on cherchera à rendre les sorties uniformes + preuves de sécurité. \\
+Nous expliquerons dans ce rapport comment fonctionne le système de signature Wave. Nous montrerons ensuite comment s'assurer qu'il ne fait pas fuiter d'information grâce à une uniformisation des sorties, puis nous démontrerons qu'il est sûr pour la sécurité UEF-CMA.
 
 \section{Le schéma de signature Wave}
 Nous allons détailler dans cette section le schéma de signature Wave. C'est un schéma de type hache et signe à base de codes correcteurs. Pour des raisons de clarté nous oublierons dans un premier temps la problématique du hachage. Nous la réintroduirons en fin de rapport afin de proposer une preuve formelle de la sécurité du schéma, où la fonction de hachage est alors nécessaire. Pour l'instant, nous considérerons que l'entrée de l'algorithme de signature est déjà un syndrome du code considéré.\\
@@ -332,7 +333,7 @@ C'est une définition relaxée des fonctions GPV.
 
 \noindent Nous générons notre paire de clés publique et privée comme :
 $$ (pk, sk) = (H,T) \leftarrow \verb|Trapdoor|(\lambda)$$
-EXPLIQUER SYNDROME GPVM blablabla \\
+Ainsi, $\mathbb{H}$ sera la matrice de parité de notre code $(U,U+V)$-généralisé, 
 Plus précisément, nous aurons donc pour clé publique la matrice de parité du code $(U,U+V)$, notée $H$, et pour clé privée, les matrices de parité des codes $U$ et $V$, respectivement notées $H_U$ et $H_V$.\\
 Nous pouvons maintenant définir notre système de signature.
 \begin{multicols}{2}
@@ -1068,11 +1069,30 @@ En revanche, dans le cas où $\dim(U) > \dim(V)$ nous avons montré précédemme
 La démonstration du caractère NP-complet de Wave lorsque $q=3$ et $\dim(U) > \dim(V)$ reste non achevée pour l'instant.
 Les auteurs du papier d'origine pensent néanmoins que la généralisation des codes $(U,U+V)$ comme nous l'avons présentée dans la définition \ref{UV-normalise} et notamment le grand choix des vecteurs $a$, $b$, $c$, et $d$ offrent la possibilité d'étendre la réduction au problème du mariage tri-dimensionnel.\\
 
+
+Nous avons montré que le problème de décider si un code est un
+pU, U ` V q-généralisé permuté ou non est NP-complet par une réduction polynomiale
+au problème du mariage Tri-dimensionnel. En revanche cette réduction s’est faite
+dans le cas binaire (q “ 2) pour les codes uniquement pU, U ` V q et pour un régime273
+Conclusion et perspectives
+4
+4
+de paramètres dimpU q “ k U ă dimpV q “ k V . Or dans le cas de Wave nous sommes
+dans un autre régime de paramètres, à savoir q ą 2 et k U ą k V . En revanche, du fait
+que q ą 2, nous avons une plus grande liberté de choix de codes dans la trappe (d’où
+notre généralisation des codes pU, U ` V q) ce qui offre sûrement une plus grande
+liberté pour une réduction. Ceci nous amène donc à penser qu’une réduction au cas
+où justement k U ą k V est possible.
+
 \section*{Conclusion}
 \addcontentsline{toc}{section}{\protect\numberline{}Conclusion}
+Le schéma de signature Wave présente une solution originale au problème de signature à base de codes correcteurs. Il est le premier, et actuellement seul, cryptosystème utilisant des codes avec un décodage en grande distance.
+La méthode du rejet, ajoutée afin de garantir des signatures uniformément distribuées, empêche bien de tirer la moindre information sur la structure du code à partir de la signature $e$. De plus, c'est une solution très efficace, puisque le nombre de rejet effectués est surprenemment faible. \\
+Dans notre implémentation de la signature, nous avons effectivement constaté un très petit nombre de rejets. \\
+En revanche, il y a encore peu de certitudes sur l'indistinguabilité des matrices de parités, ce qui remet en question les preuves de sécurité. On peut cependant espérer que la grande liberté sur le choix des vecteurs a,b,c,d laisse espérer que réduction de sécurité dans les cas qui nous intéressent soit possible. 
+
 
 \newpage
-
 
 \begin{appendix}
 \section*{Quelques preuves supplémentaires}
