@@ -651,7 +651,18 @@ La fonction \verb|Verify| prend en entrée $(m,(\e',r))$, récupère $s \leftarr
 \end{remarque}
 
 \subsection{Implémentation et choix de paramètres}
-TODO \\
+
+Nous avons choisi d'implémenter le système de signature Wave en \verb|C|. 
+Nous avons également fait le choix d'implémenter nous-même toutes les fonctions nécessaires à la manipulation des matrices. \\
+Pour implémenter la clé privée, nous avons créé une structure contenant $\mathbf{H}_U$, $\mathbf{H}_V$, $S$, et $P$. La clé publique, quant à elle, est une simple matrice puisqu'il s'agit de $S\mathbf{H}P$ avec $\mathbf{H}$ la matrice de parité du code $(U,U+V)$-généralisé.\\
+Nous avons donc écrit une fonction qui génère une paire de clé publique et privée, une fonction qui signe un message et une fonction qui vérifie la signature.
+Notre fonction de signature appelle \verb|InvertAlg| qui, pour cacher la structure de $\mathbf{H}$, appelle la fonction \verb|DecodeUV| sur $\s(S^{-1})^T$ et renvoie la sortie récupérée multipliée par $P$. Nous obtenons bien une signature valide tout en ayant masqué les données lors des calculs.\\
+Pour optimiser le rendement et minimiser le nombre de rejets,\\
+Pour obtenir $\lambda$ bits de sécurité, les paramètres sont choisis de la façon suivante :
+$$ n = \frac{\lambda}{0.0154} \quad \omega = 0.9261n \quad k_U = 0.07978\frac{n}{2} \quad k_V = 0.4201\frac{n}{2}$$
+Nous les donnons ici sans démonstration, celle-ci peut-être trouvée dans la thèse de Thomas Debris-Alazard section 5.3.5.\\
+Lors de nous test sur le nombre de rejets effectués, nous trouvons en effet des résultats cohérents avec ce qui précède, nous avons en moyenne 1 rejet toutes les 20 signatures.\\
+
 \section{Uniformisation des sorties}
 
 \subsection{Une fuite d'information}
@@ -756,7 +767,7 @@ On peut alors introduire l'algorithme suivant :
     	\REPEAT 
     	\STATE $\e_U \leftarrow \text {DecodeU}(\varphi, \e_V, \s^U, \mathbf{H}_U)$
     	\STATE $\e \leftarrow \varphi(\e_U,\e_V)$
-    	\UNTIL {$\text{rand}([0,1]) > \mathbf{r}_U(|\e_V|, m_1(\e))$}
+    	\UNTIL {$\text{rand}([0,1]) > \mathbf{r}_U(m_1(\e),|\e_V|)$}
     	\RETURN $\e$
     \end{algorithmic}
 \end{algorithm}\
@@ -847,6 +858,24 @@ De plus la sortie de l'algorithme \verb|DecodeV| est uniforme, ce qui conclu la 
 description explicite de \verb|DecodeV| \\
 description explicite de \verb|DecodeU| \\
 
+\noindent Nous allons maintenant détailler les algorithmes \verb|DecodeU| et \verb|DecodeV| utilisés lors de \verb|DecodeUV|. \\
+Nous n'avons aucune contrainte sur la sortie de $\e_V$ si ce n'est qu'elle doit être uniforme. Nous avons donc choisi, contrairement à ce qui est spécifié dans l'article que nous avons étudié, de choisir $\e_V$ directement de façon à ce qu'il soit aléatoire. Celui est décrit ci-dessous :
+
+\begin{algorithm}
+	\caption{DecodeV($\s^V$)}
+	\begin{algorithmic}[1]
+    	\STATE $c$ mot aléatoire du code $V$
+    	\STATE $\s \leftarrow$ le syndrome $\s^V$ paddé avec des zéros
+    	\STATE $\e_V \leftarrow \s + c$
+    	\RETURN $\e_V$
+    \end{algorithmic}
+\end{algorithm}
+
+\noindent Nous prenons donc un mot aléatoire du code que nous ajoutons au syndrome voulu (celui-ci ayant été complété avec des zéros pour être de la bonne longueur). 
+Nous obtenons alors bien une erreur choisi uniformément dans les mots à distance $\s^V$ du code.\\
+
+\noindent En revanche, dans l'algorithme \verb|DecodeU|, nous avons des contraintes supplémentaires sur les coordonnées de $\e_U$ pour garantir un poids de $\e$ élevé. De plus, nous ajoutons le paramètre $d\in [0,k_U]$ dans le but de minimiser le nombre de rejets, en effet en fixant $k_U - d$ positions de $\e_U$, nous dépendrons moins de la structure du code et l'erreur se rapprochera donc plus de l'uniforme.
+
 \begin{algorithm}
 	\caption{DecodeU($\varphi, \e_V, \s^U, \mathbf{H}_U$)}
 	\begin{algorithmic}[1]
@@ -862,19 +891,8 @@ description explicite de \verb|DecodeU| \\
     \end{algorithmic}
 \end{algorithm}
 
-
-\begin{algorithm}
-	\caption{DecodeV($\s^V$)}
-	\begin{algorithmic}[1]
-    	\STATE $c$ mot aléatoire du code $V$
-    	\STATE $\s \leftarrow$ le syndrome $\s^V$ paddé avec des zéros
-    	\STATE $\e_V \leftarrow \s + c$
-    	\RETURN $\e_V$
-    \end{algorithmic}
-\end{algorithm}
-
-EXPLIQUER POURQUOI ON AJOUTE LE $d$.\\
-Avec $d\in [0,k_U]$, qui permettra de montrer que notre sortie est uniforme.
+Lors de \verb|DecodeU|, nous faisons varier les ensembles $\mathcal{I}$ et $\mathcal{J}$ pour garantir un maximum de possibilité dans le choix de $\e_U$.\\
+Puis nous appelons \verb|PRANGE| qui est ici une version modifié du décodage par ensemble d'information dans lequel nous choisissons $\e_U$ égal à $x_U$ sur les positions de $\mathcal{I}$. Nous répétons tout cela jusqu'à obtenir une erreur du bon poids.
 
 \subsection{Estimation du nombre de rejet}
 Nous souhaitons estimer le nombre de rejets effectués dans notre algorithme \verb|DecodeUV| utilisant les algorithmes \verb|DecodeU|, \verb|DecodeV| définis précédemment. Pour cela, introduisons la définition suivante:
@@ -889,7 +907,7 @@ Nous savons que la sortie de \verb|DecodeV| est uniforme, nous allons donc étud
 Nous introduisons pour cela \verb|VarDecodeU| qui fonctionne de la même façon que \verb|DecodeU| quand $\J$ est un bon ensemble pour $\mathbf{H}$ et qui renvoie une erreur aléatoire selon la distribution $\D_U^t$ sur $\J$ dans le cas contraire.
 Il n'y a donc aucune raison que la sortie soit une solution du problème de décodage lorsque $\J$ n'est pas un bon ensemble pour $\mathbf{H}$.
 Nous pouvons facilement voir que \verb|VarDecodeU| est $m_1$-uniforme.\\
-La sortie de l'algorithme \verb|DecodeUV| utilisant \verb|VarDecodeU| est alors uniforme, on la note $\e^{unif}$.\\
+\noindent La sortie de l'algorithme \verb|DecodeUV| utilisant \verb|VarDecodeU| est alors uniforme, on la note $\e^{unif}$.\\
 
 \begin{defi}\
 \begin{itemize}
