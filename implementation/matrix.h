@@ -1,8 +1,6 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 
-// #define LAMBDA (3.08)
-
 #include "algebra.h"
 #include <math.h>
 

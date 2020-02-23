@@ -191,7 +191,6 @@ void keys_get_sk(sk_t *sk, const keys_t *keys) {
   sk_copy(sk,keys->sk);
 }
 
-/* Renvoie la clé publique */
 void keys_get_pk(matrix_t *pk, const keys_t *keys) {
   if (!keys)
     return;
@@ -349,14 +348,6 @@ int m1(matrix_t *x) {
 /////////////////////////////// calcul du rejet ////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-
-// int fact(int n) {
-//   if (n == 0)
-//     return 0;
-//   if (n == 1)
-//     return 1;
-//   return n*fact(n-1);
-// }
 
 int binom(int k, int n) {
   if (n < k)

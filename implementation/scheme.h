@@ -80,9 +80,13 @@ void coeff_phi(int mode);
 int m1(matrix_t *x);
 
 int binom(int k, int n);
+
 double reject(int s, int t);
+
 double proba_unif(int s, int t);
+
 double proba(int s, int t);
+
 double max_proba(int t);
 
 ////////////////////////////////////////////////////////////////////////////////
