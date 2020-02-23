@@ -2,7 +2,7 @@
 
 const int SIZE = floor(LAMBDA/0.0154)+((int)(floor(LAMBDA/0.0154))%2);
 const int OMEGA = 0.9261*SIZE;
-const int d = 0;
+const int d = 4;
 const int K_U = 0.7978*SIZE/2;
 const int K_V = 0.4201*SIZE/2;
 matrix_t* A = NULL;
@@ -107,6 +107,13 @@ void keys_free(keys_t *keys) {
     sk_free(keys->sk);
   }
   free(keys);
+  matrix_free(A);
+  matrix_free(B);
+  matrix_free(C);
+  matrix_free(D);
+  matrix_free(H);
+  matrix_free(gen_U);
+  matrix_free(gen_V);
 }
 
 sign_t *sign_alloc(void) {
@@ -135,6 +142,17 @@ void sign_free(sign_t *signature) {
   free(signature);
 }
 
+void sk_copy(sk_t *dest,const sk_t *src) {
+  if(!src || !dest)
+    return;
+  matrix_copy2(dest->parite_U, src->parite_U);
+  matrix_copy2(dest->parite_V, src->parite_V);
+  matrix_copy2(dest->S, src->S);
+  matrix_copy2(dest->P, src->P);
+  dest->dim_U = src->dim_U;
+  dest->dim_V = src->dim_V;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////// affichage ////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -143,7 +161,7 @@ void sign_free(sign_t *signature) {
 void keys_print(const keys_t *keys, FILE *secret, FILE *public) {
   if (keys && keys->pk && keys->sk && keys->sk->parite_U && keys->sk->parite_V && keys->sk->S && keys->sk->P) {
     puts("génération des clés de chiffrement avec les paramètres :");
-    printf("lambda = %f, n = %d, w = %d, Ku = %d, Kv = %d\n", LAMBDA, SIZE, OMEGA, K_U, K_V);
+    printf("lambda = %f, n = %d, w = %d, Ku = %d, Kv = %d, d = %d\n", LAMBDA, SIZE, OMEGA, K_U, K_V, d);
     fputs("parité U :\n", secret); matrix_print(keys->sk->parite_U, secret);
     fputs("parité V :\n", secret); matrix_print(keys->sk->parite_V, secret);
     fputs("S :\n", secret); matrix_print(keys->sk->S, secret);
@@ -159,8 +177,6 @@ void sign_print(const sign_t *signature, FILE *file) {
     fputs("signature :",file);
     fprintf(file, "e :\n"); matrix_print(signature->e, file);
     fprintf(file, "r :\n"); matrix_print(signature->r, file);
-    printf("m1(e) = %d\n", m1(signature->e));
-    printf("m1(r) = %d\n", m1(signature->r));
   }
 }
 
@@ -169,17 +185,17 @@ void sign_print(const sign_t *signature, FILE *file) {
 ///////////////////// gestion des paramètres de keys_t et sk_t /////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-sk_t *keys_get_sk(keys_t *keys) {
+void keys_get_sk(sk_t *sk, const keys_t *keys) {
   if (!keys)
-    return NULL;
-  return keys->sk;
+    return;
+  sk_copy(sk,keys->sk);
 }
 
 /* Renvoie la clé publique */
-matrix_t *keys_get_pk(keys_t *keys) {
+void keys_get_pk(matrix_t *pk, const keys_t *keys) {
   if (!keys)
-    return NULL;
-  return keys->pk;
+    return;
+  matrix_copy2(pk, keys->pk);
 }
 
 
@@ -329,13 +345,89 @@ int m1(matrix_t *x) {
   return m1;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////// calcul du rejet ////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
-// float proba_unif(int s, int t) {
-//
-//
+
+// int fact(int n) {
+//   if (n == 0)
+//     return 0;
+//   if (n == 1)
+//     return 1;
+//   return n*fact(n-1);
 // }
-//
-// float proba(int s, int t);
+
+int binom(int k, int n) {
+  if (n < k)
+    return 0;
+  if (n == k)
+    return 1;
+  long long num = 1;
+  long long den = 1;
+  if (k < n-k) {
+    for (int i = 0; i < k; ++i) {
+      num *= (n-i);
+      den *= (k-i);
+    }
+  } else {
+    for (int i = 1; i <= n-k; ++i) {
+      num *= k+i;
+      den *= i;
+    }
+  }
+  return num/den;
+}
+
+double reject(int s, int t) {
+  double pu = proba_unif(s,t);
+  double p = proba(s,t);
+  double m = max_proba(t);
+  if (p == 0 || m == 0)
+    return 0;
+  return ((pu/p)/m);
+}
+
+double proba_unif(int s, int t) {
+  if ((OMEGA + s) % 2 == 1)
+    return 0;
+  // printf("s: %d, t : %d\ts parmi t :%d %d\n",s,t,binom(s,t), binom((OMEGA+s)/2-t,SIZE/2-t));
+  double num = binom(s,t)*binom((OMEGA+s)/2-t,SIZE/2-t)*2^(3*s/2);
+  double den = 0;
+  for (int p = 0; p <= t; ++p)
+    den += binom(p,t)*binom((OMEGA+p)/2-t,SIZE/2-t)*2^(3*p/2);
+  // printf("num = %lf, den = %lf\n", num , den);
+  double div = num/den;
+  // printf("div = %lf\n", div);
+  return div;
+}
+
+double proba(int s, int t) {
+  if ((OMEGA - s) % 2 == 1)
+    return 0;
+  double prob = 0, num, den;
+  int k;
+  for (int i = t + K_U - d -SIZE/2; i <= t; ++i) {
+    k = K_U - d - i;
+    num = binom(s,t-i)*binom((OMEGA+s)/2-t-k,SIZE/2-t-k)*2^(3*s/2);
+    den = 0;
+    for (int p = 0; p <= t-i; ++p)
+      den += binom(p,t-i)*binom((OMEGA+p)/2-t-k,SIZE/2-t-k)*2^(3*p/2);
+    prob += num/(den*K_U);
+  }
+  return prob;
+}
+
+double max_proba(int t) {
+  double max = 0, quo;
+  for (int s = 0; s <= t; ++s) {
+    quo = proba_unif(s,t)/proba(s,t);
+    if (quo > max)
+      max = quo;
+  }
+  return max;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////// génération des clés /////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -499,27 +591,29 @@ void decode_ev(matrix_t * ev,const matrix_t *G, const matrix_t *synd) {
   matrix_free(s);
 }
 
-void decode_eu(matrix_t * eu, const sk_t *sk, const matrix_t *synd,
+int decode_eu(matrix_t * eu, const sk_t *sk, const matrix_t *synd,
                const matrix_t *ev) {
   // Vérification des entrées
   if (!eu || !synd || !ev || !sk)
-    return;
+    return 1;
   if (matrix_get_row(ev) != 1 || matrix_get_row(eu) != 1)
-    return;
+    return 1;
   // déclarations
   int dim_U = sk->dim_U;
   int a, b, c, d, w, r;
-  char no1, no2, evi, eui, eui_not;
+  int cpt_boucle;
+  char no1, no2, evi, eui = 0, eui_not;
   matrix_t *eu_int = NULL;
   matrix_t *x = NULL;
   matrix_t *e = NULL;
-  matrix_t * eu_not = NULL;
-
+  matrix_t *eu_not = NULL;
   // création des ensembles I et J
   int ens[SIZE/2];
   for (int i = 0; i < SIZE/2; ++i)
     ens[i] = i;
+  int cpt = 0;
   do {
+    ++cpt;
     matrix_free(eu_int); // en cas de repassage dans la boucle
     // création de I aléatoirement
     shuffle(ens,SIZE/2);
@@ -527,10 +621,11 @@ void decode_eu(matrix_t * eu, const sk_t *sk, const matrix_t *synd,
     int ens_I[len_I];
     for (int i = 0; i < len_I; ++i)
       ens_I[i] = ens[i];
+    cpt_boucle = 0;
     do {
       eu_not = matrix_alloc(1,SIZE/2);
       if (!eu_not)
-        return;
+        return 1;
       for (int i = 0; i < SIZE/2; ++i) {
         matrix_set_cell(eu, 0, i, '*');
         matrix_set_cell(eu_not, 0, i, '*');
@@ -581,75 +676,119 @@ void decode_eu(matrix_t * eu, const sk_t *sk, const matrix_t *synd,
       // on résoud le système en appelant prange_algebra
       eu_int = prange_algebra(sk->parite_U, synd, ens_I, len_I, x);
       matrix_free(x);
+      ++cpt_boucle;
+      if (cpt_boucle  > 20) {
+        break;
+      }
     } while(!eu_int);
+    if (!eu_int)
+      continue;
     e = phi(eu_int, ev);
     w = weight(e);
     matrix_free(e);
+    if (cpt > 30000) {
+      matrix_free(eu_int);
+      return 1;
+    }
   } while (w != OMEGA);
   matrix_copy2(eu, eu_int);
   matrix_free(eu_int);
+  return 0;
 }
 
-matrix_t *decode_uv(const sk_t *sk, const matrix_t *synd) {
+int decode_uv(matrix_t *er, const sk_t *sk, const matrix_t *synd) {
   // vérifiaction des entrées
-  if(!sk || !synd)
-    return NULL;
+  if(!sk || !synd || !er)
+    return -1;
 
   //initialisation
   matrix_t *su = matrix_alloc(1,SIZE/2 - K_U);
   matrix_t *sv = matrix_alloc(1,SIZE/2 - K_V);
   matrix_separate(synd, su, sv);
   if (!su || !sv)
-    return NULL;
+    return -1;
 
   // decodage de ev
-  matrix_t *ev = matrix_alloc(1,SIZE/2);
+  matrix_t *ev = NULL;
+  decodeV:
+  ev = matrix_alloc(1,SIZE/2);
   decode_ev(ev, gen_V, sv);
   if (!ev)
-    return NULL;
+    return -1;
   matrix_t *verifv = syndrome(ev, sk->parite_V);
   if (!verifv)
-    return  NULL;
+    return -1;
+  matrix_free(verifv);
+  int w = weight(ev);
 
   // decodage de eu
-  matrix_t *eu = matrix_alloc(1,SIZE/2);
-  decode_eu(eu, sk, su, ev);
-  if (!eu)
-    return NULL;
-  matrix_t *verifu = syndrome(eu, sk->parite_U);
-  if (!verifu)
-    return NULL;
-  matrix_t *e = phi(eu,ev);
+  matrix_t *eu = NULL;
+  matrix_t *verifu = NULL;
+  matrix_t *e = NULL;
+  int rej = -1;
+  double rejet;
+  double r;
+  prng_init(time(NULL) + getpid());
+  int tem;
+  do {
+    ++ rej;
+    matrix_free(eu);
+    matrix_free(verifu);
+    matrix_free(e);
+    eu = matrix_alloc(1,SIZE/2);
+    tem = decode_eu(eu, sk, su, ev);
+    if (tem == 1) {
+      matrix_free(eu);
+      matrix_free(ev);
+      goto decodeV;
+    }
+    if (!eu)
+      return -1;
+    verifu = syndrome(eu, sk->parite_U);
+    if (!verifu)
+      return -1;
+    e = phi(eu,ev);
+    printf("eu : "); matrix_print(eu,stdout);
+    printf("e  : "); matrix_print(e,stdout);
+    rejet = reject(m1(e),w);
+    printf("valeur rejet : %f\n",rejet);
+    r = (double)rand() / (double)RAND_MAX;
+    printf("rand = %f\n", r);
+  } while (r > rejet);
   matrix_free(ev);
   matrix_free(eu);
-  matrix_free(verifv);
   matrix_free(verifu);
   matrix_free(su);
   matrix_free(sv);
-  return e;
+  matrix_copy2(er, e);
+  matrix_free(e);
+  return rej;
 }
 
-matrix_t *invert_alg(const sk_t *sk, const matrix_t *synd) {
-  if (!sk || !synd)
-    return NULL;
+int invert_alg(matrix_t *er, const sk_t *sk, const matrix_t *synd) {
+  if (!sk || !synd || !er)
+    return -1;
   matrix_t *S_inv = matrix_inv(sk->S);
   if (!S_inv)
-    return NULL;
+    return -1;
   matrix_t *S_inv_T = matrix_trans(S_inv);
   matrix_free(S_inv);
   if (!S_inv_T)
-    return NULL;
+    return -1;
   matrix_t *entree = matrix_prod(synd, S_inv_T);
   matrix_free(S_inv_T);
   if (!entree)
-    return NULL;
-  matrix_t *e = decode_uv(sk, entree);
+    return -1;
+  matrix_t *e = matrix_alloc(1,SIZE);
+  int rej = decode_uv(e, sk, entree);
   matrix_free(entree);
   if (!e)
-    return NULL;
+    return -1;
   matrix_t *eP = matrix_prod(e,sk->P);
   matrix_free(e);
-  return eP;
+  matrix_copy2(er,eP);
+  matrix_free(eP);
+  return rej;
 }
 
 
@@ -723,6 +862,9 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome,
     matrix_free(left);
     ++cpt;
     if (cpt > 10) {
+      matrix_free(left_inv);
+      matrix_free(P);
+      matrix_free(right);
       return NULL;
     }
   }
@@ -734,6 +876,7 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome,
     matrix_free(ep);
     matrix_free(P);
     matrix_free(right);
+    matrix_free(left_inv);
     return NULL;
   }
   matrix_separate(x, zero, ep);
@@ -742,6 +885,7 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome,
     matrix_free(ep);
     matrix_free(P);
     matrix_free(right);
+    matrix_free(left_inv);
     return NULL;
   }
   // calcul de e
@@ -750,6 +894,7 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome,
   if (!right_T) {
     matrix_free(ep);
     matrix_free(P);
+    matrix_free(left_inv);
     return NULL;
   }
   matrix_t *epright_T = matrix_prod(ep,right_T); // e'*Bt
@@ -757,12 +902,14 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome,
   if (!epright_T) {
     matrix_free(ep);
     matrix_free(P);
+    matrix_free(left_inv);
     return NULL;
   }
   matrix_t *s = matrix_copy(syndrome);
   if (!s) {
     matrix_free(ep);
     matrix_free(P);
+    matrix_free(left_inv);
     return NULL;
   }
   matrix_add_modified(s, epright_T, -1); // s - e'*Bt
@@ -770,6 +917,7 @@ matrix_t *prange_algebra(const matrix_t *parite, const matrix_t *syndrome,
   if (!s) {
     matrix_free(ep);
     matrix_free(P);
+    matrix_free(left_inv);
     return NULL;
   }
   matrix_t *left_inv_T = matrix_trans(left_inv); // (A-1)t
@@ -846,57 +994,58 @@ matrix_t *hash(const matrix_t *m, const matrix_t *r, const matrix_t *pk) {
   if (!m_high)
     return NULL;
   matrix_t *s = syndrome(m_high, pk);
+  matrix_free(m_high);
   return s;
 }
 
-sign_t *sign(const keys_t *keys, const matrix_t *m) {
+int sign(sign_t *signature, const keys_t *keys, const matrix_t *m) {
   // vérifiations des entrées
-  if (!keys || !m)
-    return NULL;
+  if (!keys || !m || !signature || !signature->e || !signature->r)
+    return -1;
   // tirage de r aléatoirement de taille SIZE
   matrix_t *r = matrix_random(1,SIZE);
   if (!r)
-    return NULL;
+    return -1;
   // hachage de (m,r)
   matrix_t *s = hash(m,r, keys->pk);
   if (!s) {
     matrix_free(r);
-    return NULL;
+    return -1;
   }
   // inversion de f
-  matrix_t *e = invert_alg(keys->sk, s);
+  matrix_t *e = matrix_alloc(1,SIZE);
+  int rej = invert_alg(e, keys->sk, s);
   matrix_free(s);
   if (!e) {
     matrix_free(r);
-    return NULL;
+    return -1;
   }
   // allocation de la structure sign_t
-  sign_t *signature = sign_alloc();
-  if (!signature) {
-    matrix_free(r);
-    matrix_free(e);
-    return NULL;
-  }
+  // if (!signature) {
+  //   matrix_free(r);
+  //   matrix_free(e);
+  //   return NULL;
+  // }
   matrix_copy2(signature->e, e);
   matrix_copy2(signature->r, r);
   matrix_free(e);
   matrix_free(r);
-  return signature;
+  return rej;
 }
 
-bool verify(const matrix_t *pk, const matrix_t *m, const sign_t *signature) {
+bool verify(const keys_t *keys, const matrix_t *m, const sign_t *signature) {
   // vérifiations des entrées
-  if (!pk || !m || !signature || !signature->r || !signature->e)
+  if (!keys || !keys->pk || !m || !signature || !signature->r || !signature->e)
     return false;
   // calcul du poids de e
   if (weight(signature->e) != OMEGA)
     return false;
   // hachage de (m,r)
-  matrix_t *s = hash(m,signature->r, pk);
+  matrix_t *s = hash(m,signature->r, keys->pk);
   if (!s)
     return false;
   // calcul du syndrome de e
-  matrix_t *synd = syndrome(signature->e, pk);
+  matrix_t *synd = syndrome(signature->e, keys->pk);
   if (!synd) {
     matrix_free(s);
     return false;
@@ -911,457 +1060,3 @@ bool verify(const matrix_t *pk, const matrix_t *m, const sign_t *signature) {
   matrix_free(synd);
   return true;
 }
-
-// main (à mettre dans un autre fichier peut-être)
-// int main(void) {
-//
-//
-//   // matrix_t *X = NULL;
-//   // X = matrix_random(3,4);
-//   // puts("X : \n");
-//   // matrix_print(X, stdout);
-//   // matrix_t *Y = NULL;
-//   // Y = matrix_random(2,4);
-//   // puts("Y : \n");
-//   // matrix_print(Y, stdout);
-//   // matrix_t *pariteUV = NULL;
-//   // pariteUV = parite (X,Y);
-//   // puts("parite : \n");
-//   // matrix_print(pariteUV, stdout);
-//   //
-//   // matrix_t *A = NULL;
-//   // A = matrix_random(4,6);
-//   // matrix_print(A, stdout);
-//   // matrix_systematisation(A);
-//   // matrix_print(A, stdout);
-//   // if (matrix_is_syst(A))
-//   //   puts("A syst");
-//   // matrix_t *B = NULL;
-//   // B = matrix_del_null_row(A);
-//   // matrix_print(B, stdout);
-//   // if (matrix_is_syst(B))
-//   //   puts("B syst");
-//   // matrix_free(A);
-//   // matrix_free(B);
-//
-//   // matrix_t *A = NULL;
-//   // A = matrix_alloc(4,6);
-//   // matrix_set_cell(A,0,0,1);
-//   // matrix_set_cell(A,0,1,1);
-//   // matrix_set_cell(A,0,2,1);
-//   // matrix_set_cell(A,0,3,0);
-//   // matrix_set_cell(A,0,4,1);
-//   // matrix_set_cell(A,0,5,1);
-//   // matrix_set_cell(A,1,0,0);
-//   // matrix_set_cell(A,1,1,1);
-//   // matrix_set_cell(A,1,2,0);
-//   // matrix_set_cell(A,1,3,0);
-//   // matrix_set_cell(A,1,4,1);
-//   // matrix_set_cell(A,1,5,1);
-//   // matrix_set_cell(A,2,0,1);
-//   // matrix_set_cell(A,2,1,0);
-//   // matrix_set_cell(A,2,2,1);
-//   // matrix_set_cell(A,2,3,1);
-//   // matrix_set_cell(A,2,4,0);
-//   // matrix_set_cell(A,2,5,1);
-//   // matrix_set_cell(A,3,0,0);
-//   // matrix_set_cell(A,3,1,1);
-//   // matrix_set_cell(A,3,2,1);
-//   // matrix_set_cell(A,3,3,1);
-//   // matrix_set_cell(A,3,4,0);
-//   // matrix_set_cell(A,3,5,1);
-//   // matrix_print(A,stdout);
-//   // matrix_systematisation(A);
-//   // matrix_print(A,stdout);
-//   // // matrix_free(A);
-//   // matrix_t *B = NULL;
-//   // B = matrix_parite(A);
-//   // if (!B)
-//   //   puts("error");
-//   // else
-//   //   matrix_print(B, stdout);
-//   // matrix_free(B);
-//
-//   // // test de sub_weight
-//   // matrix_t *vect = matrix_random(1,13);
-//   // for (int i = 0; i <13; ++i) printf(" %d ", i);
-//   // puts("");
-//   // matrix_print(vect, stdout);
-//   // int len_s = 6;
-//   // int subset[6] = {2,5,6,8,10,12};
-//   // printf("%d\n", sub_weight(vect, subset, len_s));
-//   // matrix_free(vect);
-//
-//
-//   // // test de infoset
-//   // int len_i = 6;
-//   // int info[len_i];
-//   // infoset(info, 10, len_i);
-//   // printf("info : ");
-//   // for (int i = 0; i < len_i; ++i)
-//   //   printf("%d ", info[i]);
-//   // puts("");
-//
-//   //
-//   // // test de vector_rand_sub_weight
-//   // int t = 4;
-//   // matrix_t *vect = vector_rand_sub_weight(10, info, len_i, t);
-//   // puts("vect");
-//   // for (int i = 0; i <10; ++i) printf(" %d ", i);
-//   // puts("");
-//   // matrix_print(vect, stdout);
-//   // matrix_free(vect);
-//
-//   // // test de vector_rand_sub_weight
-//   // int w = 7;
-//   // matrix_t *vect = vector_rand_weight(10, w);
-//   // puts("vect");
-//   // for (int i = 0; i <10; ++i) printf(" %d ", i);
-//   // puts("");
-//   // matrix_print(vect, stdout);
-//   // matrix_free(vect);
-//
-//   // // test matrix_perm_random_info et matrix_perm_random
-//   // matrix_t *matrix = matrix_perm_random(20);
-//   // puts("permutation normale :");
-//   // matrix_print(matrix, stdout);
-//   //
-//   // int tab[5] = {0,1,2,3,4};
-//   // DIM = 7;
-//   // matrix_t *matr = matrix_perm_random_info(20, tab, 5, DIM);
-//   // puts("permutation avec les 5 premières coordonnées à la fin :");
-//   // matrix_print(matr, stdout);
-//   //
-//   // matrix_free(matrix);
-//   // matrix_free(matr);
-//
-//   //// test matrix_separate
-//   // matrix_t *matrix = matrix_random(10,17);
-//   // matrix_t *left = matrix_alloc(10,6);
-//   // matrix_t *right = matrix_alloc(10,11);
-//   // matrix_separate(matrix, left, right);
-//   // matrix_print(matrix, stdout);
-//   // matrix_print(left, stdout);
-//   // matrix_print(right, stdout);
-//   // matrix_free(matrix);
-//   // matrix_free(left);
-//   // matrix_free(right);
-//
-//   // test key_gen
-//   // keys_t *keys = key_gen(0);
-//   // matrix_print(keys->pk,stdout);
-//   // key_free(keys);
-//
-//   ///////////////////////////////// GENERATION DE CLES
-//   puts("génération des clés de chiffrement avec les paramètres :");
-//   printf("lambda = %f, n = %d, w = %d, Ku = %d, Kv = %d\n",LAMBDA, SIZE, OMEGA, K_U, K_V);
-//   keys_t *keys = key_gen(0);
-//   if (keys == NULL) {
-//     puts ("Key_gen revoit NULL\n");
-//     return EXIT_FAILURE;
-//   }
-//   puts("\tgénération des clés terminée !!");
-//
-//   matrix_t *m = vector_rand(10);
-//   printf("m : "); matrix_print(m, stdout);
-//   sign_t *signature = sign(keys, m);
-//   if(!signature) {
-//     puts("ouch");
-//     return EXIT_FAILURE;
-//   }
-//   printf("signature de m : \ne :"); matrix_print(signature->e, stdout);
-//   printf("r :"); matrix_print(signature->r, stdout);
-//   printf("la signature est correct : %d\n", verify(keys->pk, m, signature));
-//   matrix_free(m);
-//   sign_free(signature);
-//   /////////////////////////////////// test decode_uv
-//   // // puts("initialisation de e_test :");
-//   // matrix_t *e_test = vector_rand_weight(SIZE, OMEGA);
-//   // if (!e_test)
-//   //   return EXIT_FAILURE;
-//   // // puts("initialisation de synd_test :");
-//   // matrix_t *synd_test = syndrome(e_test, keys->pk);
-//   // if (!synd_test)
-//   //   return EXIT_FAILURE;
-//   // // printf("\tS : \n"); matrix_print(keys->sk->S, stdout);
-//   // // printf("\tS-1 : \n"); matrix_print(S_inv, stdout);
-//   // // printf("\tS-1t : \n"); matrix_print(S_inv_T, stdout);
-//   // // printf("\tentre : \n"); matrix_print(entree, stdout);
-//   // matrix_t *e = invert_alg(keys, synd_test);
-//   // matrix_t *synd = syndrome(e, keys->pk);
-//   // if (!synd)
-//   //   return EXIT_FAILURE;
-//   // printf("\te de base : "); matrix_print(e_test, stdout);
-//   // printf("\te obtenu  : "); matrix_print(eP, stdout);
-//   // printf("\tsyndrome de base : "); matrix_print(synd_test, stdout);
-//   // printf("\tsyndrome obtenu  : "); matrix_print(synd, stdout);
-//   // printf("vraie %d\n", true);
-//   // printf("syndromes égaux : %d \n", matrix_is_equal(synd, synd_test));
-//   // matrix_free(e_test);
-//   // matrix_free(e);
-//   // matrix_free(synd_test);
-//   // matrix_free(synd);
-//
-//   // long long mm = 1911191110;
-//   // matrix_t *m = int_to_vect(mm);
-//   // long long mmm = vect_to_int(m);
-//   // printf("m = %lld = ", mm); matrix_print(m, stdout);
-//   // printf("= %lld\n", mmm);
-//   // matrix_free(m);
-//   // printf("a : "); matrix_print(A, stdout);
-//   // printf("b : "); matrix_print(B, stdout);
-//   // printf("c : "); matrix_print(C, stdout);
-//   // printf("d : "); matrix_print(D, stdout);
-//
-//   // ////////////////////////////// test decode ev seul
-//   // matrix_t *ev = matrix_alloc(1,SIZE/2);
-//   // matrix_t *ev_base = vector_rand(SIZE/2);
-//   // matrix_t *synd_v = syndrome(ev_base, keys->sk->parite_V);
-//   // decode_ev(ev, gen_V, synd_v, keys);
-//   // matrix_t *verif = syndrome(ev, keys->sk->parite_V);
-//   // printf("\tsyn v : "); matrix_print(synd_v, stdout);
-//   // printf("\tverif : "); matrix_print(verif, stdout);
-//   // matrix_free(ev);
-//   // matrix_free(ev_base);
-//   // matrix_free(synd_v);
-//   // matrix_free(verif);
-//
-//   ///////////////////////////////////////test decode_ev
-//   //
-//   // matrix_t *ev = matrix_alloc(1,SIZE/2);
-//   // matrix_t *eu = matrix_alloc(1,SIZE/2);
-//   // matrix_t *e = vector_rand_weight(SIZE, OMEGA);
-//   // printf("\te : "); matrix_print(e, stdout);
-//   // matrix_t *synd = syndrome(e, keys->pk);
-//   // printf("\tsyndrome : "); matrix_print(synd, stdout);
-//   // matrix_t *synd_U = matrix_alloc(1,SIZE/2 - K_U);
-//   // matrix_t *synd_V = matrix_alloc(1,SIZE/2 - K_V);
-//   // matrix_separate(synd, synd_U, synd_V);
-//   // if (!ev || !e || !synd || !synd_U || !synd_V) {
-//   //   puts("error 1");
-//   //   return EXIT_FAILURE;
-//   // }
-//   // puts("test de decode_ev...");
-//   // // printf("dim V %d\n", keys->sk->dim_V);
-//   // decode_ev(ev, gen_V, synd_V, keys);
-//   // if (!ev) {
-//   //   puts("error 2");
-//   //   return EXIT_FAILURE;
-//   // }
-//   // printf("\tcol : %d, row : %d\n",matrix_get_col(synd_V), matrix_get_row(synd_V));
-//   // // matrix_print(synd_V, stdout);
-//   // matrix_t *verif = syndrome(ev, keys->sk->parite_V);
-//   // if (!verif) {
-//   //   puts("\terror 3");
-//   //   return EXIT_FAILURE;
-//   // }
-//   // printf("\tsv :    ");
-//   // matrix_print(synd_V, stdout);
-//   // printf("\tverif : ");
-//   // matrix_print(verif, stdout);
-//   // // printf("ev obtenu :   "); matrix_print(ev, stdout);
-//   // // matrix_t *supp_ev = vect_supp(ev);
-//   // // printf("suppp de ev : "); matrix_print(supp_ev, stdout);
-//   // // printf("taille du supp : %d\nKu: %d\n", matrix_get_col(supp_ev), keys->sk->dim_U);
-//   // // matrix_free(supp_ev);
-//   // /////////////////////////////////////////test decode_ev
-//   // puts("test de decove_eu...");
-//   // puts("\tmatrice de parité de U"); matrix_print(keys->sk->parite_U, stdout);
-//   // // matrix_t *synd_U = syndrome(e, keys->sk->parite_U);
-//   // decode_eu(eu, keys, synd_U, ev);
-//   // if (!eu) {
-//   //   puts("\terror 2");
-//   //   return EXIT_FAILURE;
-//   // }
-//   // // printf("\tcol : %d, row : %d\n",matrix_get_col(synd_U), matrix_get_row(synd_U));
-//   // // matrix_print(synd_U, stdout);
-//   // matrix_t *verif2 = syndrome(eu, keys->sk->parite_U);
-//   // if (!verif2) {
-//   //   puts("\terror 3");
-//   //   return EXIT_FAILURE;
-//   // }
-//   // printf("eu sortant : "); matrix_print(eu, stdout);
-//   // printf("\tsu :    "); matrix_print(synd_U, stdout);
-//   // printf("\tverif : "); matrix_print(verif2, stdout);
-//   //
-//   // printf("ev obtenu : "); matrix_print(ev, stdout);
-//   // matrix_t *e_ob = phi(eu,ev);
-//   // printf("e obtenu : "); matrix_print(e_ob, stdout);
-//   // matrix_t *sy = syndrome(e_ob, keys->pk);
-//   // printf("syndrome voulu :  "); matrix_print(synd, stdout);
-//   // printf("syndrome obtenu : "); matrix_print(sy, stdout);
-//   // // printf("a : "); matrix_print(A, stdout);
-//   // // printf("b : "); matrix_print(B, stdout);
-//   // // printf("c : "); matrix_print(C, stdout);
-//   // // printf("d : "); matrix_print(D, stdout);
-//   // matrix_free(e_ob);
-//   // matrix_free(sy);
-//   //
-//   // // matrix_t *gen_U_T = matrix_trans(gen_U);
-//   // // puts("matrice génératrice de U transposée"); matrix_print(gen_U_T, stdout);
-//   // // matrix_t *gen_U_T_inv = matrix_inv(gen_U_T);
-//   // // puts("inverse de la matrice génératrice de U transposée");
-//   // // matrix_print(gen_U_T_inv, stdout);
-//   // // matrix_t *ver = matrix_prod(gen_U_T, gen_U_T_inv);
-//   // // puts("doit être identité"); matrix_print(ver, stdout);
-//   // //
-//   // // matrix_free(gen_U_T);
-//   // // matrix_free(gen_U_T_inv);
-//   // // matrix_free(ver);
-//   // matrix_free(ev);
-//   // matrix_free(eu);
-//   // matrix_free(verif);
-//   // matrix_free(verif2);
-//   // matrix_free(e);
-//   // matrix_free(synd);
-//   // matrix_free(synd_V);
-//   // matrix_free(synd_U);
-//   // key_free(keys);
-//
-//
-//   ///////////////////////////////////////////// test matrix_rank
-//   // matrix_t *m = NULL;
-//   // m = matrix_random(160,207);
-//   // int rang = matrix_rank(m);
-//   // //puts("A"); matrix_print(m,stdout);
-//   // printf("rang : %d\n",rang);
-//   // matrix_free(m);
-//
-//   ///////////////////////////////////////////// test sub_col_matrix
-//   // matrix_t *m = matrix_random(10,12);
-//   // int ind[6] = {0,3,4,6,7,11};
-//   // for (int i = 0; i < 6; ++i)
-//   //   printf("%d\t",ind[i]);
-//   // puts("");
-//   // matrix_t *sub = sub_col_matrix(m,ind,6);
-//   // puts("m"); matrix_print(m, stdout);
-//   // printf("rang de m : %d\n",matrix_rank(m));
-//   // puts("sub"); matrix_print(sub, stdout);
-//   // printf("rang de sub : %d\n", matrix_rank(sub));
-//   // matrix_free(m);
-//   // matrix_free(sub);
-//
-//
-//   ///////////////////////////////////////////// test random_word
-//   // matrix_t *G = matrix_random(4,6);
-//   // if (!G)
-//   //   return EXIT_FAILURE;
-//   // matrix_systematisation(G);
-//   // if (!G)
-//   //   return EXIT_FAILURE;
-//   // while (!matrix_is_syst(G)) {
-//   //   matrix_free(G);
-//   //   G = matrix_random(4,6);
-//   //   if (!G)
-//   //     return EXIT_FAILURE;
-//   //   matrix_systematisation(G);
-//   //   if (!G)
-//   //     return EXIT_FAILURE;
-//   // }
-//   // matrix_t *c = matrix_alloc(1,6);
-//   // if (!G || !c) {
-//   //   matrix_free(G);
-//   //   matrix_free(c);
-//   //   return EXIT_FAILURE;
-//   // }
-//   // random_word(c,G);
-//   // if (!c){
-//   //   puts("erreur random_word");
-//   //   matrix_free(G);
-//   //   return EXIT_FAILURE;
-//   // }
-//   // matrix_t *H = matrix_parite(G);
-//   // if (!H) {
-//   //   puts("erreur matrix_parite");
-//   //   matrix_free(G);
-//   //   matrix_free(c);
-//   //   return EXIT_FAILURE;
-//   // }
-//   // matrix_t *syndrome_c = syndrome(c,H);
-//   // if (!syndrome_c) {
-//   //   puts("erreur syndrome");
-//   //   matrix_free(G);
-//   //   matrix_free(H);
-//   //   matrix_free(c);
-//   //   return EXIT_FAILURE;
-//   // }
-//   // puts("G :");
-//   // matrix_print(G, stdout);
-//   // puts("H :");
-//   // matrix_print(H, stdout);
-//   // puts("c :");
-//   // matrix_print(c, stdout);
-//   // puts("syndrome :");
-//   // matrix_print(syndrome_c, stdout);
-//   // matrix_free(G);
-//   // matrix_free(H);
-//   // matrix_free(c);
-//   // matrix_free(syndrome_c);
-//
-//
-//
-//   // printf("%d\n", DIM);
-//
-//   // // TEST PRANGE
-//   //
-//   // // Défini e
-//   // int ind[SIZE];
-//   // for (int i = 0; i < SIZE; i++)
-//   //   ind[i] = i;
-//   // matrix_t *e = vector_rand_weight(SIZE, OMEGA);
-//   // // matrix_t *e = matrix_random(1,SIZE);
-//   //
-//   // // calcule s le syndrome de e
-//   // matrix_t *synd = syndrome(e, H);
-//
-//   // // test inv
-//   // matrix_t *matrix = matrix_random(20,20);
-//   // matrix_t *inv = matrix_inv(matrix);
-//   // matrix_t *prod = matrix_prod(matrix,inv);
-//   // printf("res = %d\n", matrix_is_identity(prod));
-//   // matrix_free (matrix);
-//   // matrix_free (inv);
-//   // matrix_free (prod);
-//
-//   // // // calcule d'un vecteur erreur associé au syndrome s avec prange iteration
-//   // matrix_t *ep = NULL;
-//   // int sb = 0;
-//   // while (!ep || sb != OMEGA) {
-//   //   matrix_free(ep);
-//   //   // puts("ok1");
-//   //   ep = iteration_prange(H, synd);
-//   //   if(!ep)
-//   //     puts("pas de ep");
-//   //   // puts("ok2");
-//   //   sb = sub_weight(ep, ind, SIZE);
-//   //   printf(" %d ",sb);
-//   // }
-//   // puts("e");
-//   // matrix_print(e, stdout);
-//   // puts("ep");
-//   // matrix_print(ep, stdout);
-//   //
-//   // // Vérifie s = syndrome(ep)
-//   // matrix_t *verif = syndrome(ep, H);
-//   // puts("syndrome :");
-//   // matrix_print(synd, stdout);
-//   // puts("verif :");
-//   // matrix_print(verif, stdout);
-//   // matrix_free(verif);
-//   // matrix_free(e);
-//   // matrix_free(synd);
-//   // matrix_free(ep);
-//   // key_free(keys);
-//
-//   // clean up
-//   puts("Maintenant on nettoie notre bazard...");
-//   matrix_free(A);
-//   matrix_free(B);
-//   matrix_free(C);
-//   matrix_free(D);
-//   matrix_free(H);
-//   matrix_free(gen_U);
-//   matrix_free(gen_V);
-//   key_free(keys);
-//   return EXIT_SUCCESS;
-// }
