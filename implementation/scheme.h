@@ -34,6 +34,8 @@ sign_t *sign_alloc(void);
 /* Libère l'espace alloué pour la signature */
 void sign_free(sign_t *signature);
 
+void sk_copy(sk_t *dest,const sk_t *src);
+
 ////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////// affichage ////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -41,7 +43,7 @@ void sign_free(sign_t *signature);
 /* Ecrit keys->sk dans secret et keys->pk dans public */
 void keys_print(const keys_t *keys, FILE *secret, FILE *public);
 
-/* Ecrit keys->sk dans secret et keys->pk dans public */
+/* Ecrit signature dans file */
 void sign_print(const sign_t *signature, FILE *file);
 
 
@@ -50,10 +52,10 @@ void sign_print(const sign_t *signature, FILE *file);
 ////////////////////////////////////////////////////////////////////////////////
 
 /* Renvoie la clé privée */
-sk_t *keys_get_sk(keys_t *keys);
+void keys_get_sk(sk_t *sk, const keys_t *keys);
 
 /* Renvoie la clé publique */
-matrix_t *keys_get_pk(keys_t *keys);
+void keys_get_pk(matrix_t *pk, const keys_t *keys);
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -77,8 +79,11 @@ void coeff_phi(int mode);
 /* Renvoie m1(x) = #{1 <= i <= n/2 tq |(x(i),x(i+n/2)| = 1} */
 int m1(matrix_t *x);
 
-float proba_unif(int s, int t);
-float proba(int s, int t);
+int binom(int k, int n);
+double reject(int s, int t);
+double proba_unif(int s, int t);
+double proba(int s, int t);
+double max_proba(int t);
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////// génération des clés /////////////////////////////
@@ -102,16 +107,16 @@ void decode_ev(matrix_t * ev, const matrix_t *G, const matrix_t *synd);
   synd vecteur ligne est le syndrome cherché
   ev vecteur ligne estla sortie de decode_ev
   eu vecteur ligne est la sortie */
-void decode_eu(matrix_t * eu, const sk_t *sk, const matrix_t *synd,
+int decode_eu(matrix_t * eu, const sk_t *sk, const matrix_t *synd,
                const matrix_t *ev);
 
  /* decodage par ensemble d'information :
    synd vecteur ligne est le syndrome cherché
    alloue en mémoire et renvoie e vecteur ligne tq son syndrome vaille synd */
-matrix_t *decode_uv(const sk_t *sk, const matrix_t *synd);
+int decode_uv(matrix_t *er, const sk_t *sk, const matrix_t *synd);
 
 /* inverse la fonction syndrome */
-matrix_t *invert_alg(const sk_t *sk, const matrix_t *synd);
+int invert_alg(matrix_t *er, const sk_t *sk, const matrix_t *synd);
 
 
 
@@ -138,8 +143,8 @@ matrix_t *iteration_prange(const matrix_t *parite, const matrix_t *syndrome);
 
 matrix_t *hash(const matrix_t *m, const matrix_t *r, const matrix_t *pk);
 
-sign_t *sign(const keys_t *keys, const matrix_t *m);
+int sign(sign_t *signature, const keys_t *keys, const matrix_t *m);
 
-bool verify(const matrix_t *pk, const matrix_t *m, const sign_t *signature);
+bool verify(const keys_t *keys, const matrix_t *m, const sign_t *signature);
 
 #endif

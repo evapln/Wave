@@ -1,6 +1,6 @@
 .PHONY = all wave clean help
 EXE = wave
-CFLAGS = -Wall -Wextra -std=c11
+CFLAGS = -Wall -Wextra -std=c11 -O3
 LDFLAGS = -lm
 
 .PHONY: all wave clean help

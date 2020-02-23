@@ -870,43 +870,6 @@ matrix_t *vect_supp(const matrix_t *vect) {
   return supp;
 }
 
-// matrix_t *int_to_vect(const long long m) {
-//   if (m == 0)
-//     return matrix_init(1,1,0);
-//   float l = log(m)/log(ORDER);
-//   long long n = m;
-//   int size = floor(l+1), power = pow(ORDER, size);
-//   printf("size = %d\nl = %f\n", size, l);
-//   matrix_t *vect = matrix_init(1,size,0);
-//   if (!vect)
-//     return NULL;
-//   for (int i = 0; i < size; ++i) {
-//     power /= ORDER;
-//     while (n >= power) {
-//       n -= power;
-//       vect->mat[0][i] = vect->mat[0][i] + 1;
-//       // if (vect->mat[0][i] > 2)
-//       // puts("error !!!!");
-//     }
-//   }
-//   return vect;
-// }
-//
-// long long vect_to_int(const matrix_t *vect) {
-//   if (!vect || vect->nb_row != 1)
-//     return -1;
-//   int col = vect->nb_col, mul = 1;
-//   long long m = 0;
-//   matrix_print(vect,stdout); printf("%dx%d\n", vect->nb_row, vect->nb_col);
-//   for (int i = 0; i <col; ++i) {
-//     int v = vect->mat[0][col-1-i];
-//     m += v * mul;
-//     printf("%d : v = %d, m = %lld, mul = %d\n", i, v, m, mul);
-//     mul *= ORDER;
-//   }
-//   return m;
-// }
-
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////// calculs et tests sur les lignes d'une matrice ///////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -1065,6 +1028,5 @@ void matrix_print(const matrix_t *matrix, FILE *fd) {
       }
       fputs("\n", fd);
     }
-    fputs("\n\n", fd);
   }
 }
