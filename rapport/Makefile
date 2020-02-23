@@ -5,9 +5,12 @@ FILENAME = rapport_wave
 all:
 	pdflatex $(FILENAME).tex
 	pdflatex $(FILENAME).tex
+	bibtex $(FILENAME)
+	pdflatex $(FILENAME).tex
+	pdflatex $(FILENAME).tex
 
 clean:
-	rm -f $(FILENAME).log $(FILENAME).aux $(FILENAME).toc *.gz *.cb *.cb2
+	rm -f $(FILENAME).log $(FILENAME).aux $(FILENAME).toc *.gz *.cb *.cb2 *.log *.blg *.bbl
 
 help:
 	@echo "Usage:"

@@ -94,7 +94,7 @@ Février, 2020
 \addcontentsline{toc}{section}{\protect\numberline{}Introduction}
 Dans le milieu des années 70, la cryptograhie à clé publique fut marquée par l'arrivée du chiffrement RSA ainsi que du protocole d'échange de clés Diffie-Hellman. De nos jours, ces deux méthodes sont les plus utilisées en pratique. Le chriffrement RSA repose sur le problème de la factorisation, tandis que le protocole DH repose sur le problème de la résolution du logarithme discret. La cryptographie à clef publique repose donc principalement sur ces deux problèmes, tous les deux des instances du problème dit du sous-groupe caché dans un groupe abélien. Il n’existe pas à ce jour d’attaque classique contre ce problème. \\ 
 
-En revanche, il existe des attaques utilisant des algorithmes quantiques. \\
+\noindent En revanche, il existe des attaques utilisant des algorithmes quantiques. \\
 Dans le contexte de l'éventualité de l'arrivée dans les décénies à venir de l'ordinateur quantique, le National Institute of Standard Technology (NIST) lança en 2017 un appel pour la standardisation de systèmes à clef publique, afin de trouver des alternatives à RSA et DH.
 Le papier sur lequel nous avons travaillé propose un système de signature à base de code correcteurs. Les codes correcteurs, que l'on sait déjà utiliser depuis les années 70 pour le chiffrement (ex: crypto-système de McEliece) présentent une alternative quantiquement sûr puisqu'ils reposent sur le problème du décodage, un problème NP-complet. En revanche, les recherches pour utiliser des codes dans des systèmes de signatures sont peu concluantes, en témoigne le tableau des soumissions au NIST pour le second tour. \\
 
@@ -111,7 +111,7 @@ Cela ne pose pas de problème lorsqu'on chiffre, puisque notre chiffré sera jus
 En revanche, pour la signature, il faudra trouver un moyen de transformer notre message en un syndrome qui sera dans l'ensemble des syndromes associés à un vecteur erreur de poids minimal. \\
 Tous les systèmes de signatures basés sur des codes sont pour l'instant soit cassés, soit inutilisables dans la pratique.\\
 
-La solution de Wave est d'enlever la restriction au mot le plus proche. On cherche maintenant une famille de codes permettant de trouver, pour un mot quelconque, un des mots de code à distance $\omega$. En particulier, la distance de décodage $\omega$ est très grande, ce qui assure typiquement de l’existence d’un mot de code à cette distance. Ainsi, l'ensemble des syndromes utilisables est l'ensemble de tous les syndromes.\\
+\noindent La solution de Wave est d'enlever la restriction au mot le plus proche. On cherche maintenant une famille de codes permettant de trouver, pour un mot quelconque, un des mots de code à distance $\omega$. En particulier, la distance de décodage $\omega$ est très grande, ce qui assure typiquement de l’existence d’un mot de code à cette distance. Ainsi, l'ensemble des syndromes utilisables est l'ensemble de tous les syndromes.\\
 Nous expliquerons dans ce rapport comment fonctionne le système de signature Wave. Nous montrerons ensuite comment s'assurer qu'il ne fait pas fuiter d'information grâce à une uniformisation des sorties, puis nous démontrerons qu'il est sûr pour la sécurité EUF-CMA.
 
 \section{Le schéma de signature Wave}
@@ -1092,10 +1092,10 @@ Les auteurs du papier pensent néanmoins que la généralisation des codes $(U,U
 \newpage
 \section*{Conclusion}
 \addcontentsline{toc}{section}{\protect\numberline{}Conclusion}
-Le schéma de signature Wave présente une solution originale au problème de signature à base de codes correcteurs. Il est le premier, et actuellement seul, cryptosystème utilisant des codes avec un décodage en grande distance.
-La méthode du rejet, ajoutée afin de garantir des signatures uniformément distribuées, empêche bien de tirer la moindre information sur la structure du code à partir de la signature $e$. De plus, c'est une solution très efficace, puisque le nombre de rejet effectués est surprenemment faible. \\
-Dans notre implémentation de la signature, nous avons effectivement constaté un très petit nombre de rejets. \\
-En revanche, il y a encore peu de certitudes sur l'indistinguabilité des matrices de parités, ce qui remet en question les preuves de sécurité. On peut cependant espérer que la grande liberté sur le choix des vecteurs a,b,c,d laisse espérer que réduction de sécurité dans les cas qui nous intéressent soit possible. 
+Le schéma de signature Wave présente une solution originale pour répondre aux problèmes rendant difficile la génération de signatures à base de codes correcteurs. Il est le premier, et actuellement seul, cryptosystème utilisant des codes avec un décodage en grande distance.
+La méthode du rejet, ajoutée afin de garantir des signatures uniformément distribuées, empêche bien toute fuite d'information sur la structure du code à partir de la signature $e$. De plus, c'est une solution très efficace, puisque le nombre de rejet effectués est surprenamment faible. \\
+Dans notre implémentation, nous avons effectivement constaté un très petit nombre de rejets. \\
+En revanche, il y a encore peu de certitudes sur l'indistinguabilité des matrices de parités, ce qui remet en question les preuves de sécurité. On peut cependant espérer que la grande liberté sur le choix des vecteurs $a,b,c,d$ permettrait une réduction de sécurité dans les cas qui nous intéressent. 
 
 
 \newpage
@@ -1200,7 +1200,7 @@ Ainsi nous avons :
 
 
 \subsection*{Démonstration du théorème \ref{DOOM}}
-\begin{proof}[Preuve du théorème \ref{DOOM}] \
+\begin{proof}[Preuve] \
 \begin{itemize}
 \item \textbf{Passage de $G_0$ à $G_1$ : } Montrons que $$\mathbb{P}(F) \leq \frac{1}{2^\lambda}$$.
 Remarquons d'abord que la probabilité de n'avoir aucune collision sur $t$ tirages indépendants et uniforme dans un ensemble de taille $n$ est majoré par $t^2/n$ (admis). Dans notre cas, $t=N_{sign}$ et $n=2^{\lambda_0}$. Ainsi avec $\lambda_0 = \lambda +2 \log_2N_{sign}$, on en déduit que 
@@ -1247,6 +1247,9 @@ D'où $\mathbb{P}(G_5) \geq\frac{1}{2}\mathbb{P}(G_4)$.
 
 \end{appendix}
 
+\newpage
+\nocite{ref1}
+\nocite{ref2}
 \bibliographystyle{plain}
 \bibliography{bibliography}
 
