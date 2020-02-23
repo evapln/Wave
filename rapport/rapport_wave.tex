@@ -333,8 +333,8 @@ C'est une définition relaxée des fonctions GPV.
 
 \noindent Nous générons notre paire de clés publique et privée comme :
 $$ (pk, sk) = (H,T) \leftarrow \verb|Trapdoor|(\lambda)$$
-Ainsi, $\mathbb{H}$ sera la matrice de parité de notre code $(U,U+V)$-généralisé, 
-Plus précisément, nous aurons donc pour clé publique la matrice de parité du code $(U,U+V)$, notée $H$, et pour clé privée, les matrices de parité des codes $U$ et $V$, respectivement notées $H_U$ et $H_V$.\\
+Plus précisément, dans notre cas, nous aurons donc pour clé publique la matrice de parité du code $(U,U+V)$-généralisé, notée $H$, et pour clé privée, les matrices de parité des codes $U$ et $V$, respectivement notées $H_U$ et $H_V$.\\
+Notre algorithme $\verb|InvertAlg|$ sera un algorithme utilisant la structure des codes  $(U,U+V)$-généralisés afin d'inverser la fonction syndrome avec un avantage par rapport à un algorithme de décodage générique. \\
 Nous pouvons maintenant définir notre système de signature.
 \begin{multicols}{2}
 \begin{flushleft}
@@ -350,7 +350,6 @@ $\verb|Verify|^{pk}(s,e')$: \\
 \end{flushleft}
 \end{multicols}
 
-EXPLIQUER POURQUOI LE SYSTÈME FONCTIONNE.
 
 \subsection{Le décodage avec trappe}
 
