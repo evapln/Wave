@@ -92,11 +92,9 @@ Février, 2020
 
 \section*{Introduction}
 \addcontentsline{toc}{section}{\protect\numberline{}Introduction}
-
-- Passage au post-quantique --> On cherche des alternatives à RSA et DH.\\
+La cryptographie à clé publique est depuis ??? dominée par RSA et DH. Mais ces systèmes ne sont pas quantiquement sûrs. Or l'éventualité de l'arrivée dans les décénies à venir de l'ordinateur quantique impose la recherche d'alternatives à RSA et DH.\\
 - Appel d'offre NIST \\
-- On aimerai bien un système de signature utilisant les codes, puisque le problème du décodage d'un code aléatoire est NP-complet. \\
-- Ça marche pas mal pour le chiffrement, mais encore très compliqué pour les signatures, comme en témoigne le tableau des soumissions au NIST pour le second tour. \\
+Le papier sur lequel nous avons travaillé se pose donc dans ce contexte. Il propose un système de signature à base de code correcteurs. Les codes correcteurs, proposés depuis les années 70 pour le chiffrement (ex: crypto-système de McEliece) présentent une alternative quantiquement sûr puisqu'ils reposent sur le problème du décodage, un problème NP-complet. En revanche, les recherches pour utiliser des codes dans des systèmes de signatures sont peu concluantes, en témoigne le tableau des soumissions au NIST pour le second tour. \\
 
 \begin{figure}[h]
 \label{nist 2}
@@ -115,23 +113,22 @@ Explication rapide du schéma wave + on cherchera à rendre les sorties uniforme
 
 \section{Le schéma de signature Wave}
 Nous allons détailler dans cette section le schéma de signature Wave. C'est un schéma de type hache et signe à base de codes correcteurs. Pour des raisons de clarté nous oublierons dans un premier temps la problématique du hachage. Nous la réintroduirons en fin de rapport afin de proposer une preuve formelle de la sécurité du schéma, où la fonction de hachage est alors nécessaire. Pour l'instant, nous considérerons que l'entrée de l'algorithme de signature est déjà un syndrome du code considéré.\\
-Le schéma de signature Wave s'appuie sur une famille de codes appelés des codes $(U,U+V)$-généralisés. La structure de ces codes nous permettra de proposer un algorithme de décodage $\mathcal{D}$ utilisant une trappe $T$ et donnant un avantage par rapport à un algorithme de décodage générique. Ce système s'appuie aussi sur la notion de fonctions GPV en moyenne, que nous détaillerons.
+Le schéma de signature Wave s'appuie sur une famille de codes appelés des codes $(U,U+V)$-généralisés. La structure de ces codes nous permettra de proposer un algorithme de décodage $\mathcal{D}$ utilisant une trappe $T$ et donnant un avantage par rapport à un algorithme de décodage générique. Ce système s'appuie aussi sur la notion de fonctions GPVM, que nous détaillerons. \\
 
 \subsection{La famille de codes (U,U+V)-généralisés}
-Pour définir la famille de code utilisée dans le schéma de signature Wave, on part de deux codes de longueur $n/2$ aléatoires de dimensions respectives $k_u$ et $k_v$. On a premièrement la définition suivante :
+Pour définir la famille de code utilisée dans le schéma de signature Wave, on part de deux codes de longueur $n/2$ aléatoires de dimensions respectives $k_U$ et $k_V$. Nous avons la définition suivante :
 
-\begin{defi}\label{UV} (Code (U,U+V).) Un code $(U,U+V)$ est un code de longueur $n$ et de dimension $k=k_U+k_V$ et tel que :
+\begin{defi}\label{UV} (Code (U,U+V)) Un code $(U,U+V)$ est un code de longueur $n$ et de dimension $k=k_U+k_V$ et tel que :
 \begin{center}
 $(U,U+V) = \{(u,u+v)$ tel que $u \in U$ et $v \in V \}$
 \end{center}
 \end{defi}
 
 
-\noindent En revanche, pour le système de signature Wave, nous n'utiliserons pas cette définition. En effet, on peut facilement tirer des informations sur la structure de ces codes.\\
+\noindent En revanche, pour le système de signature Wave, nous n'utiliserons pas cette définition. En effet, nous allons voir que l'on peut facilement tirer des informations sur la structure de ces codes.\\
 
 
-\begin{defi}($hull$).
-Le  $hull$ d'un code $\mathcal{C}$ est défini comme $hull(\mathcal{C}) := \mathcal{C} \cap \mathcal{C}^{\bot}$
+\begin{defi} Le  $hull$ d'un code $\mathcal{C}$ est défini comme $hull(\mathcal{C}) := \mathcal{C} \cap \mathcal{C}^{\bot}$
 \end{defi}
 
 \begin{propo}\label{dim_hull}
@@ -139,18 +136,56 @@ Soit $\mathcal{C}$ un code aléatoire binaire de longueur $n$ et de dimension $k
 \end{propo}
 
 \begin{propo}\label{dim_hull_UV}
-Soit $UV$ un code $(U,U+V)$ binaire permuté de longueur $n$ tel que $k_U > k_V$, alors nous avons avec probabilité $1-\mathcal{O}(2^{k_U-k_V})$
+Soit $UV$ un code $(U,U+V)$-binaire permuté de longueur $n$ tel que $k_U > k_V$, alors nous avons avec probabilité $1-\mathcal{O}(2^{k_U-k_V})$
 $$ dim(hull(UV)) = k_U - k_V $$
 \end{propo}
 
+
+
 \begin{proof}[Preuve]
-En annexe.
+La dimension d'un $hull$ étant invariante par permutation nous allons ici montrer que nous avons $dim(hull(U,U+V)) = k_U - k_V$ avec probabilité $1-\mathcal{O}(2^{k_U-k_V})$.
+Par définition du $hull$, nous avons :
+\begin{equation*}
+\begin{split}
+hull(U,U+V) &= (U,U+V) \cap (U,U+V)^{\bot } \\
+&= (U,U+V) \cap (V^{\bot}+U^{\bot}, V^{\bot}) \\
+\end{split}
+\end{equation*} 
+Ainsi $\forall u\in U$ et $\forall v\in V$ tels que $(u,u+v)\in hull(U,U+V)$, il existe $u_t\in U^{\bot}$ et $v_t\in V^{\bot}$ tels que
+
+\begin{equation*}
+\left\{
+\begin{aligned}
+&u = v_t + u_t\\
+&u + v = v_t\\
+\end{aligned}
+\right.
+\iff
+\left\{
+\begin{aligned}
+&v = u_t\\
+&u + v = v_t\\
+\end{aligned}
+\right.
+\end{equation*}
+Donc $v\in V\cap U^{\bot}$.
+De plus, nous avons $$\dim(V) + \dim(U^{\bot}) = \frac{n}{2} +k_V - k_U < \frac{n}{2}$$
+Alors, avec probabilité $1-0(2^{k_V-k_U})$ sur le choix des codes, nous aurons $V \cap U^{\bot} = {0}$ et $v=u^{\bot} = 0$. Ainsi, les vecteurs de hull$(U,U+V)$ seront de la forme $(x,x)$ où $x \in U \cap V^{\bot}$ avec probabilité  $1-0(2^{k_V-k_U})$ .
+De même on a,
+$$\dim(U) + \dim(V^{\bot}) = \frac{n}{2} +k_U - k_V < \frac{n}{2}$$
+
+\noindent Alors avec probabilité $1-0(2^{k_V-k_U})$, on aura 
+$$\dim(\text{hull}((U,U+V))) = \dim(U\cap V^{\bot}) = k_U-k_V $$
+ce qui conclue la preuve.
 \end{proof}
 
 \noindent Ainsi nous ne pouvons pas utiliser les codes $(U,U+V)$ binaires où $\dim(U) > \dim(V)$ puisque nous pouvons facilement les distinguer de codes aléatoires.
 En effet, il suffit de calculer la dimension de  leur $hull$ puis de le comparer au résultat de la proposition \ref{dim_hull}.
-Pour résoudre ce problème, nous poserons $q=3$ pour toute la suite du rapport.
-Nous utiliserons également une nouvelle famille de codes, les codes $(U,U+V)$-généralisés :\\
+Pour résoudre ce problème, nous poserons $q=3$ pour toute la suite du rapport, nous pouvons alors travailler avec $\dim(U) > \dim(V)$. \\
+ESSAYER DE TROUVER PK DIM V > DIM U IMPOSSIBLE. \\
+ENLEVER PERMUTATION DES DEF \\
+Dans la pratique, les sorties de l'algorithme de signature seraient permutées afin de cacher la structure du code. Ainsi, comme vu dans la preuve, le fait que des éléments de la forme $(x,x)$ apparaissent avec bonne probabilité pose un problème puisque cela révèle des informations sur cette permutation, partie intégrante du secret. \\
+Pour pallier à cela nous utiliserons une nouvelle famille de codes, les codes $(U,U+V)$-généralisés :\\
 \begin{defi} \label{UV-normalise} (codes $(U,U+V)$-généralisés) Soient $n$ un entier pair et $a$,$b$,$c$,$d$ quatres vecteurs de $\F_q^{n/2}$ tels que pour tout $i \in \llbracket 1,n/2\rrbracket$ :
 \begin{equation}\label{ac}
 a_ic_i \neq 0 
@@ -167,7 +202,7 @@ où $x.y$ est le produit coordonnée par coordonnée des $x_i$ et $y_i$.\\
 \end{defi}
 
 
-\noindent Les conditions sur les vecteurs $a$, $b$, $c$, $d$ permet de garantir que :
+\noindent Les conditions sur les vecteurs $a$, $b$, $c$, $d$ permettent de garantir que :
 \begin{itemize}
 \item[-] toutes les coordonnées de $u \in U$ apparaîtront deux fois, ce qui sera nécessaire pour utiliser la structure du code dans notre algorithme de décodage (par l'équation \eqref{ac}).
 \item[-] la dimension du code $(U,U+V)$-généralisé sera la somme des dimensions des codes $U$ et $V$ (par l'équation \eqref{ad-bc}).
@@ -177,9 +212,13 @@ où $x.y$ est le produit coordonnée par coordonnée des $x_i$ et $y_i$.\\
 
 \begin{propo} Soient $U$, $V$, $a$, $b$, $c$ et $d$ définis comme précédemment. Soit $UV$ le code $(U,U+V)$-généralisé associé. Alors
 $$ k = \dim\; (UV) = k_U + k_V.$$
-De plus soient $G_U \in \F_q^{k_U \times n/2}$ (respectivement $G_V \in \F_q^{k_V \times n/2}$) et $H_U \in \F_q^{(n/2-k_U) \times n/2}$ (respectivement $H_V \in \F_q^{(n/2-k_V) \times n/2}$) les matrices génératrices et de parité des codes $U$ et $V$. Soient $A$, $B$, $C$, $D$ de $\F_q^{n \times n}$ les matrices diagonales de diagonale respectives les vecteurs $a$, $b$, $c$ et $d$.  \\
-\vspace{0.2in}
-Alors la matrice de $\F_q^{(k_U + k_V) \times n}$: 
+De plus soient:
+\begin{itemize}
+\item$G_U \in \F_q^{k_U \times n/2}$ (respectivement $G_V \in \F_q^{k_V \times n/2}$)
+\item$H_U \in \F_q^{(n/2-k_U) \times n/2}$ (respectivement $H_V \in \F_q^{(n/2-k_V) \times n/2}$) 
+\end{itemize}  les matrices génératrices et de parité des codes $U$ et $V$. \\
+Soient $A$, $B$, $C$, $D$ de $\F_q^{n \times n}$ les matrices diagonales de diagonale respectives les vecteurs $a$, $b$, $c$ et $d$.  \\
+\noindent Alors la matrice de $\F_q^{(k_U + k_V) \times n}$: 
 
 \vspace{0.1in}
 
@@ -209,7 +248,7 @@ H_UD & -H_UB \\
 $$
 \vspace{0.1in}
 
-\noindent sont des matrices génératrices et de parité du code $UV$. 
+\noindent sont les matrices génératrice et de parité du code $UV$. 
 \end{propo}
 
 \begin{proof}[Preuve]
@@ -263,14 +302,14 @@ On remarque aussi que $GH^T = 0$ et que $H$ est de rang plein par le même raiso
 
 \subsection{Le principe de signature}
 
-Notre schéma de signature utilisera donc les codes $(U,U+V)$-généralisés et la fonction syndrome comme fonction à sens unique, sous l'hypothèse de la difficulté de résoudre le problème du décodage. \\
+Notre schéma de signature utilisera donc les codes $(U,U+V)$-généralisés et la fonction syndrome comme fonction à sens unique (sous l'hypothèse de la difficulté de résoudre le problème du décodage). \\
 
 \noindent Nous allons définir la notion de fonctions GPV en moyenne (GPVM). Pour cela, introduisons d'abord la notion de distance statistique.
 
 \begin{defi}
 Soient $X$ et $Y$ deux variables aléatoires à valeurs dans le même espace $\epsilon$. 
 Soient $\mathcal{D}_X$ et $\mathcal{D}_Y$ leurs distributions respectives. On définit la distance statistique entre ces deux distributions comme :
-$$ \rho(\mathcal{D}_X,\mathcal{D}_Y) := \frac{1}{2} \sum_{x \in \epsilon} |\mathcal{D}_X(x) \mathcal{D}_Y(x)|.$$
+$$ \rho(\mathcal{D}_X,\mathcal{D}_Y) := \frac{1}{2} \sum_{x \in \epsilon} |\mathcal{D}_X(x) - \mathcal{D}_Y(x)|.$$
 \end{defi}
 
 \begin{defi} (Fonctions GPVM). On appelle fonction GPV en moyenne une paire d'algorithmes (\verb|Trapdoor|,\verb|InvertAlg|) ainsi qu'un triplet de fonctions ($n(\lambda),k(\lambda),\omega(\lambda)$) en fonction d'un paramètre de sécurité $\lambda$, tels que :
@@ -280,19 +319,20 @@ $$ \rho(\mathcal{D}_X,\mathcal{D}_Y) := \frac{1}{2} \sum_{x \in \epsilon} |\math
 \end{itemize}
 De plus, pour \textit{presque toutes} matrice $H$ renvoyée par \verb|Trapdoor|, la fonction est :
 \begin{enumerate}
-\item bien distribuée : \\
-$\rho(eH^T,s) \in \text{negl}(\lambda)$ où $e$ est pris uniformément dans l'ensemble des mots de poids $\omega$ et de longueur $n$ et $s$ est pris uniformément dans $\F_q^{n-k}$. 
-\item sans fuite d'information \textit{en moyenne} : \\
-$ \rho(\verb|InvertAlg|(s,T),e) \in \text{negl}(\lambda)$ où $e$ est pris uniformément dans l'ensemble des mots de poids $\omega$ et de longueur $n$ et $s$ est pris uniformément dans $\F_q^{n-k}$. 
-\item \`A sens unique sans la trappe : \\
-Pour tout algorithme probabiliste polynomial $\mathcal{A}$, on a 
-$$\mathbb{P}(\mathcal{A}(H,s) = e \;| \;eH^T = s) \in \text{negl}(\lambda).$$
+\item bien distribuée : 
+$$\rho(eH^T,s) \in \text{negl}(\lambda)$$ où $e$ est pris uniformément dans l'ensemble des mots de poids $\omega$ et de longueur $n$ et $s$ est pris uniformément dans $\F_q^{n-k}$. 
+\item sans fuite d'information \textit{en moyenne} : 
+$$ \rho(\verb|InvertAlg|(s,T),e) \in \text{negl}(\lambda)$$ où $e$ est pris uniformément dans l'ensemble des mots de poids $\omega$ et de longueur $n$ et $s$ est pris uniformément dans $\F_q^{n-k}$. 
+\item \`A sens unique sans la trappe : 
+$$\mathbb{P}(\mathcal{A}(H,s) = e \;| \;eH^T = s) \in \text{negl}(\lambda)$$
+pour tout algorithme probabiliste polynomial $\mathcal{A}$.
 \end{enumerate}
 C'est une définition relaxée des fonctions GPV.
 \end{defi}
 
 \noindent Nous générons notre paire de clés publique et privée comme :
 $$ (pk, sk) = (H,T) \leftarrow \verb|Trapdoor|(\lambda)$$
+EXPLIQUER SYNDROME GPVM blablabla \\
 Plus précisément, nous aurons donc pour clé publique la matrice de parité du code $(U,U+V)$, notée $H$, et pour clé privée, les matrices de parité des codes $U$ et $V$, respectivement notées $H_U$ et $H_V$.\\
 Nous pouvons maintenant définir notre système de signature.
 \begin{multicols}{2}
@@ -313,7 +353,7 @@ EXPLIQUER POURQUOI LE SYSTÈME FONCTIONNE.
 
 \subsection{Le décodage avec trappe}
 
-En partant de l'hypothèse que la matrice de parité $\mathbf{H}$ du code $(U,U+V)$-généralisé ressemble à une matrice aléatoire, la difficulté de créer une fausse signature sans connaître la trappe $\mathbf{T}$ est exactement celle de résoudre le problème du décodage d'un code aléatoire, que l'on sait difficile. Nous allons expliciter dans cette section l'algorithme d'inversion de la fonction syndrome connaissant la trappe, et discuter de sa difficulté en fonction du poids $\omega$ de $\e$. \\
+En partant de l'hypothèse que la matrice de parité $\mathbf{H}$ du code $(U,U+V)$-généralisé ressemble à une matrice aléatoire, la difficulté de créer une fausse signature sans connaître la trappe $T$ est exactement celle de résoudre le problème du décodage d'un code aléatoire, que l'on sait difficile. Nous allons expliciter dans cette section l'algorithme d'inversion de la fonction syndrome connaissant la trappe, et discuter de sa difficulté en fonction du poids $\omega$ de $\e$. \\
 
 \noindent Notons $\mathcal{S}_{\omega,n}$ l'ensemble des mots de poids $\omega$ et de longueur $n$. On notera dans la suite $\mathcal{S}_{\omega}$ s'il n'y a pas d’ambiguïté sur la longueur. On rappelle que l'algorithme \verb|InvertAlg| cherche à inverser la fonction syndrome : 
 $$\begin{array}{ccccc}
@@ -321,13 +361,13 @@ f_{\omega,\mathbf{H}} & : & \mathcal{S}_{\omega,n} & \to & \F_q^{n-k} \\
  & & \mathbf{e} & \mapsto & \mathbf{eH^T} \\
 \end{array}$$
 
-\noindent On rappelle que la fonction $f_{\omega,\mathbf{H}}$ avec $\mathbf{H} \in \F_q^{(n-k)\times n}$ s'inverse génériquement si $\omega \in \{\omega_{easy}^-,\omega_{easy}^+\}$, où :
+\noindent On rappelle aussi que la fonction $f_{\omega,\mathbf{H}}$ avec $\mathbf{H} \in \F_q^{(n-k)\times n}$ s'inverse génériquement si $\omega \in \llbracket\omega_{easy}^-,\omega_{easy}^+\rrbracket$, où :
 $$ \omega_{easy}^- := \frac{q-1}{q}(n-k) \qquad \text{ et }\qquad  \omega_{easy}^+ := k + \frac{q-1}{q}(n-k).$$
 
 
 
 
-\noindent On rappelle aussi que la fonction $f_{\omega,\mathbf{H}}$ admet un inverse pour toute entrée $s \in \F_q^{n-k}$ si $\omega \in \{\omega^-,\omega^+\}$, où :
+\noindent De plus la fonction $f_{\omega,\mathbf{H}}$ admet un inverse pour toute entrée $s \in \F_q^{n-k}$ si $\omega \in \llbracket\omega^-,\omega^+\rrbracket$, où :
 $$\omega^- := \min\left\{\omega\in \llbracket0,n\rrbracket , \dbinom{\omega}{n}(q-1)^{\omega} \geq q^{n-k}\right\} $$
 $$\omega^+ := \max\left\{\omega\in \llbracket0,n\rrbracket , \dbinom{\omega}{n}(q-1)^{\omega} \geq q^{n-k}\right\}$$
 
@@ -346,23 +386,28 @@ $$\begin{array}{ccccc}
 
 \noindent Si cette fonction respecte les conditions sur les vecteurs $\mathbf{a},\mathbf{b},\mathbf{c},\mathbf{d}$ définies dans la définition \ref{UV-normalise}, on dit qu'elle est UV-normalisée. Dans ce cas on peut vérifier qu'elle est bijective d'inverse :
 
+\vspace{0.2in}
 $$\begin{array}{ccccc}
 \varphi^{-1}_{\mathbf{a},\mathbf{b},\mathbf{c},\mathbf{d}} & : & \F_q^{n/2} \times  \F_q^{n/2} & \to & \F_q^{n/2} \times  \F_q^{n/2} \\
  & & (\mathbf{x} , \mathbf{y}) & \mapsto &  (\mathbf{d}.\mathbf{x} - \mathbf{b}.\mathbf{y}, -\mathbf{c}.\mathbf{x} + \mathbf{a}.\mathbf{y}) \\
 \end{array}$$
+
+\vspace{0.2in}
 
 \noindent Ainsi, pour chaque vecteur $\mathbf{e}$ de $\F_q^n$, on peut associer deux vecteurs $\mathbf{e_U}$ et $\mathbf{e_V}$ de $\F_q^{n/2}$ tels que 
 $$ (\mathbf{e_U},\mathbf{e_V}) = \varphi^{-1}_{\mathbf{a},\mathbf{b},\mathbf{c},\mathbf{d}}(\mathbf{e}).$$
 
 \begin{propo} Inverser $f_{\omega,\mathbf{H}}$ pour un certain $\mathbf{s} \in F_q^{n-k}$ est équivalent à trouver $\mathbf{e} \in \F_q^n$ tel que:
 $$ \mathbf{e}_U\mathbf{H}_U^T = \mathbf{s}^U \qquad \text{et} \qquad \mathbf{e}_V\mathbf{H}_V^T = \mathbf{s}^V $$
+
+\vspace{0.1in}
 où $\mathbf{s} = (\mathbf{s}^U, \mathbf{s}^V)$ avec $\mathbf{s}^U \in \F_q^{n/2-k_U}$ et $\mathbf{s}^V \in \F_q^{n/2-k_V}$.
 \end{propo}
 
+\vspace{0.2in}
 \begin{proof}[Preuve]
 Nous voulons montrer que le syndrome de $\e$ vaut $(\e_U\mathbf{H}_U^T,\e_V\mathbf{H}_V^T)$.
 Remarquons d'abord que nous avons
-
 \begin{equation*}
 \begin{split}
 e &= \varphi(\e_U,\e_V)\\
@@ -381,7 +426,6 @@ H^T :=
 \begin{array}{c|c}
 D^TH_U^T & -C^TH_V^T \\
  \hline 
-
 -B^TH_U^T & A^TH_V^T \\
 \end{array} \\
 \end{pmatrix}
@@ -398,6 +442,7 @@ $$
 -(\e_UA+\e_VB)C^T\mathbf{H}_V^T + (\e_UC+\e_VD)A^T\mathbf{H}_V^T &= \s^V \\
 \end{split}
 \right.\\
+\\
 \iff
 &\left\{
 \begin{split}
@@ -418,32 +463,24 @@ $$
 \right.
 \end{equation*}
 
-\noindent De plus, nous avons posé, lors de la définition des codes $(U,U+V)$-généralisées que nous utilisons que $\forall i \in \llbracket 1,n/2\rrbracket \quad a_id_i - b_ic_i = 1$, donc $AD-BC = I_{n/2}$. Nous obtenons donc bien le résultat souhaité, c'est-à-dire :
-
-\begin{equation*}
-\left\{
-\begin{split}
-\e_U\mathbf{H}_U^T &= \s^U\\
-\e_V\mathbf{H}_V^T &= \s^V\\
-\end{split}
-\right.
-\end{equation*}
+\noindent Rappelons que $\forall i \in \llbracket 1,n/2\rrbracket$ nous avons $a_id_i - b_ic_i = 1$. \\
+Ainsi $AD-BC = I_{n/2}$, ce qui conclut la preuve.
 
 \end{proof}
 
-\noindent Ainsi, on on aura : \\
+\noindent Au lieu de décoder $e$ directement, on peut donc décoder $e_U$ et $e_V$ indépendemment. On a alors l'algorithme suivant : \\
 \begin{flushleft}
 \leftskip=2cm
 \verb|InvertAlg|$(\mathbf{s},\mathbf{T}) : $\\
 $\qquad (\mathbf{s}_U, \mathbf{s}_V) = s $\\
-$\qquad \mathbf{e}_U = \verb|DECODE_U|(\mathbf{s}_U) $\\
-$\qquad \mathbf{e}_V = \verb|DECODE_V|(\mathbf{s}_V)$ \\
+$\qquad \mathbf{e}_U = \verb|DecodeU|(\mathbf{s}_U) $\\
+$\qquad \mathbf{e}_V = \verb|DecodeV|(\mathbf{s}_V)$ \\
 $\qquad \verb|renvoie | \varphi_{\mathbf{a},\mathbf{b},\mathbf{c},\mathbf{d}}(\mathbf{e_U},\mathbf{e_V})$ \\
 \leftskip=0cm
 \vspace{0.1in}
 
 \end{flushleft}
-Si l'on choisit un algorithme générique pour \verb|DECODE_U| et \verb|DECODE_V|, alors nous obtiendrons un vecteur $\mathbf{e}$ de poids $\omega \in \{\omega_{easy}^-,\omega_{easy}^+\}$. Nous allons montrer comment utiliser les propriétés des codes $(U,U+V)$-généréralisés pour permettre un décodage hors de cet intervalle. 
+Si l'on choisit un algorithme générique pour \verb|DecodeU| et \verb|DecodeV|, alors nous obtiendrons un vecteur $\mathbf{e}$ de poids $\omega \in \llbracket\omega_{easy}^-,\omega_{easy}^+\rrbracket$. Nous allons montrer comment utiliser les propriétés des codes $(U,U+V)$-généréralisés pour permettre un décodage hors de cet intervalle. 
 
 \begin{remarque} Pour tout $\mathbf{e} = \varphi_{\mathbf{a},\mathbf{b},\mathbf{c},\mathbf{d}}(\mathbf{e_U},\mathbf{e_V})$, on a pour tout $i \in \llbracket 1,n/2\rrbracket$ :
 \begin{center}
@@ -462,8 +499,8 @@ c_i\mathbf{e}_U(i) + d_i\mathbf{e}_V(i) &=& \mathbf{e}(i+n/2)
 \leftskip=2cm
 \verb|InvertAlg|$(\mathbf{s},\mathbf{T}) : $\\
 $\qquad (\mathbf{s}_U, \mathbf{s}_V) = s $\\
-$\qquad \mathbf{e}_V = \verb|DECODE_V|(\mathbf{s}_V)$ \\
-$\qquad \mathbf{e}_U = \verb|DECODE_U|(\mathbf{s}_U, \mathbf{e}_V) $\\
+$\qquad \mathbf{e}_V = \verb|DecodeV|(\mathbf{s}_V)$ \\
+$\qquad \mathbf{e}_U = \verb|DecodeU|(\mathbf{s}_U, \mathbf{e}_V) $\\
 $\qquad \verb|renvoie | \varphi_{\mathbf{a},\mathbf{b},\mathbf{c},\mathbf{d}}(\mathbf{e_U},\mathbf{e_V})$ \\
 \leftskip=0cm
 \vspace{0.1in}
@@ -471,7 +508,7 @@ $\qquad \verb|renvoie | \varphi_{\mathbf{a},\mathbf{b},\mathbf{c},\mathbf{d}}(\m
 
 \end{remarque}
 
-\begin{propo} Soit $\mathbf{e}_V$ une sortie de \verb|DECODE_V|. Soit \verb|DECODE_U| un algorithme prenant en entrée $\mathbf{s}_U$ et $\mathbf{e}_V$ et renvoyant $\mathbf{e}_U$ tel que $\mathbf{e}_U\mathbf{H}_U^T = \mathbf{s}^U$ et tel que pour $k_U$ positions de $\mathbf{e}_U$ 
+\begin{propo} \label{uv+} Soit $\mathbf{e}_V$ une sortie de \verb|DecodeV|. Soit \verb|DecodeU| un algorithme prenant en entrée $\mathbf{s}_U$ et $\mathbf{e}_V$ et renvoyant $\mathbf{e}_U$ tel que $\mathbf{e}_U\mathbf{H}_U^T = \mathbf{s}^U$ et tel que pour $k_U$ positions de $\mathbf{e}_U$ 
 \begin{center}
 $\left \{
 \begin{array}{rcl}
@@ -483,7 +520,7 @@ c_i\mathbf{e}_U(i) + d_i\mathbf{e}_V(i) &\neq& 0
 Alors $\mathbf{e} = \varphi_{\mathbf{a},\mathbf{b},\mathbf{c},\mathbf{d}}(\mathbf{e_U},\mathbf{e_V})$ a au moins $2k_U$ coordonnées non nulles. De plus les $n-k_U$ autres coordonnées sont uniformément distribuées sur $\F_q$. \\
 On a alors 
 $$ \mathbb{E}(|\mathbf{e}|) = \frac{q-1}{q}n + \frac{2k_U}{q} $$
-et on peut alors espérer obtenir en temps polynomial des erreurs de poids:
+et on peut donc espérer obtenir en temps polynomial des erreurs de poids :
 \begin{center}
 $\omega^+_{UV} = $
 $\left \{
@@ -495,12 +532,7 @@ $\left \{
 \end{center}
 \end{propo}
 
-\begin{proof}[Preuve]
-La preuve étant similaire à celle de la proposition \ref{Wuv-}, nous ne la détaillerons pas ici.\\
-\end{proof}
-
-
-\begin{propo}\label{Wuv-} Soit $\mathbf{e}_V$ une sortie de \verb|DECODE_V|. Soit \verb|DECODE_U| un algorithme prenant en entrée $\mathbf{s}_U$ et $\mathbf{e}_V$ et renvoyant $\mathbf{e}_U$ tel que $\mathbf{e}_U\mathbf{H}_U^T = \mathbf{s}^U$ et tel que pour $k_U$ positions de $\mathbf{e}_U$ 
+\begin{propo}\label{Wuv-} Soit $\mathbf{e}_V$ une sortie de \verb|DecodeV|. Soit \verb|DecodeU| un algorithme prenant en entrée $\mathbf{s}_U$ et $\mathbf{e}_V$ et renvoyant $\mathbf{e}_U$ tel que $\mathbf{e}_U\mathbf{H}_U^T = \mathbf{s}^U$ et tel que pour $k_U$ positions de $\mathbf{e}_U$ 
 \begin{equation}\label{syst petit poid}
 \left \{
 \begin{array}{rcl}
@@ -542,9 +574,9 @@ Il n'existe de solution au système (\ref{syst petit poid}) que si $\e_V(i)=0$ c
 
 \noindent Nous allons maintenant détailler le calcul de $\omega_{UV}^-$. Supposons que notre code a une dimension $k = k_U + k_V$ et rappelons que nous cherchons à obtenir une erreur de la forme $\e = (\e_U,\e_U + \e_V)$ avec $k_U$ coordonnées nulles.\\
 \noindent On commence par décoder $\e_V$ avec un algorithme générique. 
-Nous pouvons donc découper ce dernier en fonction de son poids $|\e_V|$ de la façon suivante : $ \e_V = (0, \e_V'')$ avec $0 \in \F_q^{n/2-|\e_V|}$ et $\e_V''(i) = 0 \;\forall i$.
-On écrit alors $\e_U$ à l'aide du même découpage : $\e_U = (\e_U', \e_U'')$ avec $\e_U' \in \F_q^{n/2-|\e_V|}$ et $\e_U'' \in \F_q^{|\e_V|}$.\\
-
+Nous pouvons donc découper ce dernier en fonction de son poids de cette façon :\\$$ \e_V = (0, \e_V'') \text{ avec } 0 \in \F_q^{n/2-|\e_V|} \text{ et } \e_V''(i) = 0\text{ , } \forall i$$
+\noindent On écrit alors $\e_U$ à l'aide du même découpage : 
+$$\e_U = (\e_U', \e_U'') \text{ avec } \e_U' \in \F_q^{n/2-|\e_V|} \text{ et } \e_U'' \in \F_q^{|\e_V|}$$\\
 \noindent Nous allons dans cette démonstration, montrer la deuxième partie de l'égalité. Supposons que $k_U \geq n/2 - |\e_V|$, ce qui signifie que nous voulons choisir plus de coordonnées nulles qu'en dispose $\e_U'$. 
 Nous allons donc, lors de notre algorithme, fixer toutes les coordonnées de $\e_U'$ à zéro, et il nous restera à annuler $k_U - (n/2 -|\e_V|)$ coordonnées de $\e_U''$.
 Nous obtenons alors 
@@ -588,19 +620,21 @@ $$\frac{n}{2} \leq k$$
 Nous nous trouvons donc bien dans le deuxième cas : lorsque $k \geq n/2$. Finalement, nous pouvons calculer le poidsde $\e$ minimum :
 \begin{equation*}
 \begin{split}
-|\e| &= n\frac{2q-3}{2q} + \left(\frac{n}{2(2q-1)} + k\frac{q-1}{q}\right)\frac{1}{q}+ k \frac{1-q}{1}\\
-&= n\left(\frac{2q-3}{2q} + \frac{1}{2(2q-1)q}\right) + k\left(\frac{q-1}{(2q-1)q}+ \frac{1-q}{1}\right)\\
-&= n\;\frac{4q^2-8q+4}{2q(2q-1)} + k\;\frac{-2q^2+4q-2}{(2q-1)q}\\
-&= n\;\frac{2(q-1)^2}{q(2q-1)} + k\;\frac{-2(q-1)^2}{(2q-1)q}\\
-&= \frac{2(q-1)^2}{q(2q-1)}(n-k)\\
+|\e| &= n\frac{2q-3}{2q} + \left(\frac{n}{2(2q-1)} + k\frac{q-1}{q}\right)\frac{1}{q}+ k \frac{1-q}{1}\\[0.6cm]
+&= n\left(\frac{2q-3}{2q} + \frac{1}{2(2q-1)q}\right) + k\left(\frac{q-1}{(2q-1)q}+ \frac{1-q}{1}\right)\\[0.6cm]
+&= n\;\frac{4q^2-8q+4}{2q(2q-1)} + k\;\frac{-2q^2+4q-2}{(2q-1)q}\\[0.6cm]
+&= n\;\frac{2(q-1)^2}{q(2q-1)} + k\;\frac{-2(q-1)^2}{(2q-1)q}\\[0.6cm]
+&= \frac{2(q-1)^2}{q(2q-1)}(n-k)\\[0.6cm]
 \end{split}
 \end{equation*}
 
 \noindent Nous avons donc bien le résultat souhaité lorsque $ k \geq \frac{n}{2q}$. La démonstration du cas où $k \leq \frac{n}{2q}$ étant équivalente, nous ne la ferons pas ici.\\
 
+\noindent On remarque que l'on peut prouver la proposition \ref{uv+} similairement.
+
 \end{proof}
 
-\noindent On récapitule les différents cas dans la figure \ref{graphique ratio}. \\
+\noindent Nous récapitulons dans la figure \ref{graphique ratio} la difficulté de décodage en fonction du poids $\omega$. \\
 
 \begin{figure}[h]
 \begin{center}
@@ -618,12 +652,12 @@ La fonction \verb|Verify| prend en entrée $(m,(\e',r))$, récupère $s \leftarr
 
 \subsection{Implémentation et choix de paramètres}
 TODO \\
-\section{Uniformisation des signatures et syndromes}
+\section{Uniformisation des sorties}
 
 \subsection{Une fuite d'information}
 Afin d'assurer la sécurité du système, il est nécéssaire que les $\mathbf{e} \in f_{w,\mathbf{H}}^{-1}(\mathbf{s})$ ne révèlent pas d'information sur la structure du code (U,U+V)-généralisé utilisé. \\
-Or, si la sortie $\mathbf{e_V}$ de \verb|DECODE_V| n'est pas uniforme, alors des corrélations entre les coordonnées $\mathbf{e}_i$ et $\mathbf{e}_{i+n/2}$ du vecteur $\mathbf{e}$. \\
-Par exemple, prenons le cas où $q=3$, et où pour tout $i \in \{1,n/2\}$, $a_i = c_i = d_i = 1$ et $b_i = 0$, et où \verb|DECODE_V| est l'algorithme de Prange. \\
+Or, si la sortie $\mathbf{e_V}$ de \verb|DecodeV| n'est pas uniforme, alors des corrélations entre les coordonnées $\mathbf{e}_i$ et $\mathbf{e}_{i+n/2}$ du vecteur $\mathbf{e}$. \\
+Par exemple, prenons le cas où $q=3$, et où pour tout $i \in \{1,n/2\}$, $a_i = c_i = d_i = 1$ et $b_i = 0$, et où \verb|DecodeV| est l'algorithme de Prange. \\
 On a alors pour tout $\mathbf{e} = (\mathbf{e_U},\mathbf{e_U}+\mathbf{e_V})$
 $$ |\mathbf{e_V}| = \# \; \{1  \leq i \leq n/2 \;|\; e_i \neq e_{i+n/2}\}$$
 
@@ -631,15 +665,13 @@ $$ |\mathbf{e_V}| = \# \; \{1  \leq i \leq n/2 \;|\; e_i \neq e_{i+n/2}\}$$
 Si le vecteur $\mathbf{e_V}$ est obtenu par l'algorithme de Prange, alors il est de poids moyen $\frac{2}{3}(\frac{n}{2}-k_V)$.
 \end{propo}
 
-
-
-Alors, pour tout $i \ in \{1,n/2\}$, on a :
+\noindent Alors, pour tout $i \ in \{1,n/2\}$, on a :
 $$ \mathbb{P}(\mathbf{e}_i \neq \mathbf{e}_{i+n/2}) = \frac{2}{3(n/2)}(n/2-k_V)(1+o(1))$$
 
 \noindent En revanche, pour les autres paires $(i,j)$, on a :
 $$ \mathbb{P}(\mathbf{e}_i \neq \mathbf{e}_{j}) = \frac{4wn - 3w^2-w}{n(n-1)}$$
 
-Ces deux probabilités n'ont donc aucune raison d'être égales. On a donc une fuite d'information. En effet, dans la pratique et afin de cacher la structure, on effectue une permutation sur les coordonnées de $\mathbf{e}$ lors de la signature. Si un attaquant récupère suffisemment de signatures, il pourra donc en analysant la fréquence des $\mathbf{e}_i \neq \mathbf{e}_j$ retrouver cette permutation. Il est donc nécéssaire pour la sécurité du schéma de s'assurer de l'uniformité des sorties de l'algorithme \verb|sign|.
+\noindent Ces deux probabilités n'ont donc aucune raison d'être égales. On a donc une fuite d'information. En effet, dans la pratique et afin de cacher la structure, on effectue une permutation sur les coordonnées de $\mathbf{e}$ lors de la signature. Si un attaquant récupère suffisemment de signatures, il pourra donc en analysant la fréquence des $\mathbf{e}_i \neq \mathbf{e}_j$ retrouver cette permutation. Il est donc nécéssaire pour la sécurité du schéma de s'assurer de l'uniformité des sorties de l'algorithme \verb|sign|.
 
 \subsection{La méthode du rejet}
 Afin de s'assurer un $\mathbf{e}$ uniforme dans son ensemble, nous allons :
@@ -661,12 +693,12 @@ Avant d'expliciter nos algorithmes, il est nécéssaire d'introduire quelques no
 
 \begin{defi} (uniforme en poids et $m_1$-uniforme)
 \begin{itemize}
-\item \verb|DECODE_V| est dit uniforme en poids si ces sorties $\mathbf{e}_V$ sont telles que $\mathbb{P}(\mathbf{e}_V)$ n'est fonction que du poids de $\mathbf{e}_V$ quand $\mathbf{s}^V$ est tiré uniformément dans son ensemble.
-\item \verb|DECODE_U| est dit $m_1$-uniforme si ces sorties $\mathbf{e}_U$ sont telles que $\mathbb{P}(\mathbf{e}_U\; |\;  \mathbf{e}_V)$ n'est fonction que du poids de $\mathbf{e}_V$ et de $m_1(\varphi(\mathbf{e}_U,\mathbf{e}_V))$.
+\item \verb|DecodeV| est dit uniforme en poids si ces sorties $\mathbf{e}_V$ sont telles que $\mathbb{P}(\mathbf{e}_V)$ n'est fonction que du poids de $\mathbf{e}_V$ quand $\mathbf{s}^V$ est tiré uniformément dans son ensemble.
+\item \verb|DecodeU| est dit $m_1$-uniforme si ces sorties $\mathbf{e}_U$ sont telles que $\mathbb{P}(\mathbf{e}_U\; |\;  \mathbf{e}_V)$ n'est fonction que du poids de $\mathbf{e}_V$ et de $m_1(\varphi(\mathbf{e}_U,\mathbf{e}_V))$.
 \end{itemize}
 \end{defi}
 
-\begin{lemme} Soit $\mathbf{e}$ la sortie de \verb|InvertAlg| avec $\mathbf{s}_U$ et $\mathbf{s}_V$ choisis uniformément dans leurs ensembles. Soit \verb|DECODE_V| uniforme en poids et \verb|DECODE_U| $m_1$-uniforme. Si pour tout $y$ et $z$ 
+\begin{lemme} Soit $\mathbf{e}$ la sortie de \verb|InvertAlg| avec $\mathbf{s}_U$ et $\mathbf{s}_V$ choisis uniformément dans leurs ensembles. Soit \verb|DecodeV| uniforme en poids et \verb|DecodeU| $m_1$-uniforme. Si pour tout $y$ et $z$ 
 $$|\mathbf{e}_V| \sim |\mathbf{e}_V^{unif}|\quad \text{et} \quad\mathbb{P}(m_1(\mathbf{e}) = z\; |\; |\mathbf{e}_V| = y) = \mathbb{P}(m_1(\mathbf{e}^{unif}) = z\; |\; |\mathbf{e}_V^{unif}| = y)$$
 Alors
 $$ \mathbf{e} \sim \mathbf{e}_V^{unif}.$$
@@ -779,7 +811,7 @@ Donc les coordonnées de $r$ sont bien des probabilités.\\
     \end{split}
 \end{equation*}
 
-De plus, la probabilité que $Y = x$ est égale à la probabilité que $x$ ai été tiré et qu'il ai été accepté. 
+\noindent De plus, la probabilité que $Y = x$ est égale à la probabilité que $x$ ai été tiré et qu'il ai été accepté. 
 \noindent Pour tout $x \in \mathcal{X}$, on a alors,
 \begin{equation*}
    \begin{split}
@@ -802,18 +834,18 @@ Si \verb|DecodeV| est uniforme en poids et si \verb|DecodeU| est $m_1$-uniforme,
 \end{propo}
 
 \begin{proof}[Preuve]
-Soit $\e_U'$ le vecteur obtenu à la sortie de la boucle dans \verb|DECODE_UV|.  Notons pour tout $i,j \in \llbracket 1,n \rrbracket$:
+Soit $\e_U'$ le vecteur obtenu à la sortie de la boucle dans \verb|DecodeUV|.  Notons pour tout $i,j \in \llbracket 1,n \rrbracket$:
 $$q'(i,j) := \mathbb{P}(m_1(\mathbf{e'}_U)=i\;|\;|\mathbf{e'}_V|=j)$$
 
 \noindent On a alors par le lemme \ref{rejet}
 $$q'(i,j) = q^{unif}(i,j)$$
-De plus la sortie de l'algorithme \verb|DECODE_V| est uniforme, ce qui conclu la preuve.
+De plus la sortie de l'algorithme \verb|DecodeV| est uniforme, ce qui conclu la preuve.
 \end{proof}
 
 \subsection{Choix des algorithmes de décodage}
 À FAIRE :\\
-description explicite de \verb|DECODE_V| \\
-description explicite de \verb|DECODE_U| \\
+description explicite de \verb|DecodeV| \\
+description explicite de \verb|DecodeU| \\
 
 \begin{algorithm}
 	\caption{DecodeU($\varphi, \e_V, \s^U, \mathbf{H}_U$)}
@@ -845,7 +877,7 @@ EXPLIQUER POURQUOI ON AJOUTE LE $d$.\\
 Avec $d\in [0,k_U]$, qui permettra de montrer que notre sortie est uniforme.
 
 \subsection{Estimation du nombre de rejet}
-Nous souhaitons estimer le nombre de rejets effectué dans notre algorithme \verb|DecodeUV| utilisant les algorithmes \verb|DecodeU|, \verb|DecodeV| définit précédemment. Pour cela, introduisons la définition suivante:
+Nous souhaitons estimer le nombre de rejets effectués dans notre algorithme \verb|DecodeUV| utilisant les algorithmes \verb|DecodeU|, \verb|DecodeV| définis précédemment. Pour cela, introduisons la définition suivante:
 
 \begin{defi} (Bon ensemble).
 Soient $d \leq k \leq n$, $\mathbf{H}\in\F_3^{(n-k)\times n}$ et $\varepsilon \subseteq \llbracket1,n\rrbracket$ de taile $k-d$. On dit que $\varepsilon$ est un bon ensemble pour $\mathbf{H}$ si $\mathbf{H}_{\overline{\varepsilon}}$ est de rang plein. Sinon, on dit que $\varepsilon$ est un mauvais ensemble.
@@ -1140,43 +1172,6 @@ Ainsi nous avons :
 \end{equation*}
 \end{proof}
 
-\subsection*{Démonstration de la propostion \ref{dim_hull_UV}}
-\begin{proof}[Preuve de la proposition \ref{dim_hull_UV}]
-La dimension d'un $hull$ étant invariante par permutation nous allons ici montrer que nous avons $dim(hull(U,U+V)) = k_U - k_V$ avec probabilité $1-\mathcal{O}(2^{k_U-k_V})$.
-Par définition du $hull$, nous avons :
-\begin{equation*}
-\begin{split}
-hull(U,U+V) &= (U,U+V) \cap (U,U+V)^{\bot } \\
-&= (U,U+V) \cap (V^{\bot}+U^{\bot}, V^{\bot}) \\
-\end{split}
-\end{equation*} 
-Ainsi $\forall u\in U$ et $\forall v\in V$ tels que $(u,u+v)\in hull(U,U+V)$, il existe $u_t\in U^{\bot}$ et $v_t\in V^{\bot}$ tels que
-
-\begin{equation*}
-\left\{
-\begin{aligned}
-&u = v_t + u_t\\
-&u + v = v_t\\
-\end{aligned}
-\right.
-\iff
-\left\{
-\begin{aligned}
-&v = u_t\\
-&u + v = v_t\\
-\end{aligned}
-\right.
-\end{equation*}
-Donc $v\in V\cap U^{\bot}$.
-De plus, nous avons $$\dim(V) + \dim(U^{\bot}) = \frac{n}{2} +k_V - k_U < \frac{n}{2}$$
-Alors, avec probabilité $1-0(2^{k_V-k_U})$ sur le choix des codes, nous aurons $V \cap U^{\bot} = {0}$ et $v=u^{\bot} = 0$. Ainsi, les vecteurs de hull$(U,U+V)$ seront de la forme $(x,x)$ où $x \in U \cap V^{\bot}$ avec probabilité  $1-0(2^{k_V-k_U})$ .
-De même on a,
-$$\dim(U) + \dim(V^{\bot}) = \frac{n}{2} +k_U - k_V < \frac{n}{2}$$
-
-Alors avec probabilité $1-0(2^{k_V-k_U})$, on aura 
-$$\dim(\text{hull}((U,U+V))) = \dim(U\cap V^{\bot}) = k_U-k_V $$
-ce qui conclue la preuve.
-\end{proof}
 
 \subsection*{Démonstration du théorème \ref{DOOM}}
 \begin{proof}[Preuve du théorème \ref{DOOM}] \
