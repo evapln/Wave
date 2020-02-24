@@ -150,7 +150,7 @@
 Le système de signature Wave utilise une famille de codes correcteurs appelés codes $(U,U+V)$-généralisés.
 \vspace{0.15in}
 \begin{block}{}
-Soient $n$ un entier pair, $U$ et $V$ deux codes aléatoires de dimension respectives $k_U$ et $k_V$ et de longueur $n/2$. Le \textit{code $(U,U+V)$-généralisé } correspond à l'ensemble des mots :
+Soit $n$ un entier pair, et soient $U$ et $V$ deux codes aléatoires de dimension respectives $k_U$ et $k_V$ et de longueur $n/2$. Le \textit{code $(U,U+V)$-généralisé } correspond à l'ensemble des mots :
 \begin{center}
 $ \{(a.u + b.v, c.u + d.v)$ tel que $u \in U$ et $v \in V \}$
 \end{center}
@@ -268,7 +268,7 @@ c_i\mathbf{e}_U(i) + d_i\mathbf{e}_V(i) &=& \mathbf{e}(i+n/2)
 \vspace{0.1in}
 
 \begin{itemize}
-\item[•] On décode $\e_U$ avec une variante du décodage par ensemble d'informations
+\item[•] On décode $\e_U$ avec une variante du décodage par ensemble d'information
 \vspace{0.1in}
 \item[•] On choisi $k_U$ coordonnées de $\e_U$ telles que les lignes du système soient non nulles à ces positions
 \vspace{0.1in}
@@ -327,7 +327,7 @@ $$\mathbb{P}(\mathbf{e}_i \neq \mathbf{e}_{i+n/2})\quad \text{et}\quad\mathbb{P}
 \vspace{-0.3in}
 \begin{figure}[h]
 \begin{center}
-\includegraphics [scale=0.38]{algo_UV.png}
+\includegraphics [scale=0.38]{algo_uv.png}
 \end{center}
 \end{figure}
 $$ \text{Où  } m_1(x) := \# \; \{1  \leq i \leq n/2 \;;\; |(x_i, x_{i+n/2})| = 1\}$$
@@ -353,13 +353,13 @@ $$ \text{Où  } m_1(x) := \# \; \{1  \leq i \leq n/2 \;;\; |(x_i, x_{i+n/2})| = 
 
 \begin{frame}
 \frametitle{La méthode du rejet}
-Soient $X$ et $X^{unif}$ deux variables aléatoires à valeur dans un même ensemble $\mathcal{X}$
+Soient $X$ et $X^{unif}$ deux variables aléatoires à valeur dans un même ensemble $\mathcal{X}$.
 Pour tout $x \in \mathcal{X}$ on pose :
 \begin{equation*}
     r(x) := \left(\inf\limits_{y \in \mathcal{X}}\frac{\mathbb{P}(X=y)}{\mathbb{P}(X^{unif}=y)}\right) \frac{\mathbb{P}(X^{unif}=x)}{\mathbb{P}(X=x)}
 \end{equation*}
 \vspace{0.2in}
-Soit la variable aléatoire $Y$ définie telle que:
+Soit la variable aléatoire $Y$ définie telle que :
 \begin{enumerate}
 \item[1.] On tire $x \in \mathcal{X}$ selon la distribution $X$
 \vspace{0.1in}
@@ -379,7 +379,7 @@ Alors $Y$ suit une loi uniforme.
 \vspace{-0.3in}
 \begin{figure}[h]
 \begin{center}
-\includegraphics [scale=0.38]{algo_UV.png}
+\includegraphics [scale=0.38]{algo_uv.png}
 \end{center}
 \end{figure}
 $$ \text{Où  } m_1(x) := \# \; \{1  \leq i \leq n/2 \;;\; |(x_i, x_{i+n/2})| = 1\}$$
@@ -402,7 +402,7 @@ $$ \text{Où  } m_1(x) := \# \; \{1  \leq i \leq n/2 \;;\; |(x_i, x_{i+n/2})| = 
 
 \vspace{0.1in}
 
-L'attaquant $\mathcal{A}$ appelle la fonction \verb|init| et récupère la matrice de parité du code $(U,U+V)$-généralisé $\mathbf{H}_{pk}$.
+L'attaquant $\mathcal{A}$ appelle la fonction \verb|Init| et récupère la matrice de parité $\mathbf{H}_{pk}$ du code $(U,U+V)$-généralisé.
 \end{frame}
 
 
@@ -415,9 +415,9 @@ L'attaquant $\mathcal{A}$ appelle la fonction \verb|init| et récupère la matri
 \vspace{0.1in}
 
 \begin{itemize}
-\item[•] L'attaquant $\mathcal{A}$ peut faire $N_{sign}$ appels à la fonction \verb|sign| et récupérer $N_{sign}$ couples $(s,\e)$
+\item[•] L'attaquant $\mathcal{A}$ peut faire $N_{sign}$ appels à la fonction \verb|Sign| et récupérer $N_{sign}$ couples $(s,\e)$
 \vspace{0.1in}
-\item[•] Il doit alors renvoyer un nouveau couple $(s,\e)$ où $s$ n'a jamais été demandé \\à la fonction \verb|sign|
+\item[•] Il doit alors renvoyer un nouveau couple $(s,\e)$ où $s$ n'a jamais été demandé \\à la fonction \verb|Sign|
 \end{itemize}
 
 \end{frame}
