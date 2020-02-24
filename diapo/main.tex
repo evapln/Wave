@@ -70,7 +70,7 @@
 
 \institute[Master CSI]{Master CSI, Université de Bordeaux, France}
 
-\date{Mardi 25 Février 2020}
+\date{25 Février 2020}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%[ Document ]%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
@@ -94,15 +94,15 @@
 \item[•] Éventualité de l'arrivée de l'ordinateur quantique:
        \begin{itemize}
        \item[$\rightarrow$] On cherche des alternatives à RSA et DH 
-       \item[$\rightarrow$] Appel du NIST
+       \item[$\rightarrow$] Le NIST lance en 2017 un appel pour la standardisation des systèmes à clef publique
        \end{itemize}
 \vspace{0.2in}
-\item[•] Utilisation des codes correcteurs
+\item[•] Les codes correcteurs
        \begin{itemize}
-       \item[$\rightarrow$] Sont quantiquement
+       \item[$\rightarrow$] Peuvent être quantiquement
         sûrs
-       \item[$\rightarrow$] Déjà des systèmes de chiffrement les utilisant
-       \item[$\rightarrow$] Peu (pas) utilisés pour les signatures
+       \item[$\rightarrow$] Peuvent déjà être utilisés dans des systèmes de chiffrement
+       \item[$\rightarrow$] Sont difficilement utilisables pour les signatures
        \end{itemize}
 \end{itemize}
 \end{frame}
@@ -123,13 +123,13 @@
 \item[•] Difficile de faire un système de signature à base de codes 
        \begin{itemize}
        \item[$\rightarrow$] Difficile de se placer dans l'ensemble des syndromes facilement et \\uniquement décodables
-       \item[$\rightarrow$] Tous les systèmes existant sont cassés ou inutilisable dans la pratique
+       \item[$\rightarrow$] Tous les systèmes existant sont cassés ou inutilisables dans la pratique
        \end{itemize}
 \vspace{0.2in}
 \item[•] Le système Wave
        \begin{itemize}
        \item[$\rightarrow$] Enlève la restriction au mot le plus proche
-       \item[$\rightarrow$] Décodage en grande distance
+       \item[$\rightarrow$]Décode en grande distance
        \end{itemize}
 \end{itemize}   
 
@@ -137,7 +137,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Schéma de signature Wave}
-\begin{frame}<handout:0>
+\begin{frame}
   \frametitle{Plan}
   \tableofcontents[currentsection,subsectionstyle=hide]
 \end{frame}
@@ -146,21 +146,17 @@
 
 \begin{frame}
 \frametitle{Codes $(U,U+V)$-généralisés} 
-%Soient $n$ un entier pair et $a$,$b$,$c$,$d$ quatre vecteurs de $\F_q^{n/2}$ tels que $\forall i \in \llbracket 1,n/2\rrbracket$ :
-%\begin{equation}
-%a_ic_i \neq 0 
-%\end{equation}
-%\begin{equation}
-%a_id_i - b_ic_i \neq 0 
-%\end{equation}
 
-\noindent Soient $n$ un entier pair, $U$ et $V$ deux codes aléatoires de dimension respectives $k_U$ et $k_V$. Le \textit{code $(U,U+V)$-généralisé } $C$ correspond à l'ensemble :
-\vspace{0.1in}
+Le système de signature Wave utilise une famille de codes correcteurs appelés codes $(U,U+V)$-généralisés.
+\vspace{0.15in}
+\begin{block}{}
+Soient $n$ un entier pair, $U$ et $V$ deux codes aléatoires de dimension respectives $k_U$ et $k_V$ et de longueur $n/2$. Le \textit{code $(U,U+V)$-généralisé } correspond à l'ensemble des mots :
 \begin{center}
-$C := \{(a.u + b.v, c.u + d.v)$ tel que $u \in U$ et $v \in V \}$
+$ \{(a.u + b.v, c.u + d.v)$ tel que $u \in U$ et $v \in V \}$
 \end{center}
 \vspace{0.1in}
-où $x.y$ est le produit coordonnée par coordonnée des $x_i$ et $y_i$ et $a$,$b$,$c$,$d$ sont quatre vecteurs de $\F_q^{n/2}$.\\
+où $x.y$ est le produit coordonnée par coordonnée des $x_i$ et $y_i$ et $a$,$b$,$c$,$d$ sont quatre vecteurs de $\F_q^{n/2}$.
+\end{block}
 \end{frame}
 
 
@@ -169,30 +165,47 @@ où $x.y$ est le produit coordonnée par coordonnée des $x_i$ et $y_i$ et $a$,$
 \begin{frame}[fragile]
 \frametitle{Signature}
 \begin{itemize}
-\item[•]  Le système Wave utilise la fonction qui a un vecteur $\e$ de poids $\omega$ associe son syndrome par $\mathbf{H}$ :
+\item[•]  Le système Wave utilise la fonction qui a un vecteur $\e$ de poids $\omega$\\ associe son syndrome par $\mathbf{H}$ :
 $$ f_{\omega,\mathbf{H}}: \e \longrightarrow \e H^T = s $$
 comme fonction à sens unique
-\vspace{0.1in}
+\vspace{0.2in}
 \item[•]  Il utilise un algorithme \verb|InvertAlg| permettant d'inverser la fonction syndrome à l'aide de la trappe $T$
-\vspace{0.1in}
+\vspace{0.2in}
 \item[•]  La trappe $T$ correspond à la structure du code $(U,U+V)$-généralisé
 \end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]
 \frametitle{Signature}
-
-\quad \quad\quad \quad \quad  \quad $\verb|Sign|^{sk}(s)$:\\
-\quad \quad\quad \quad \quad  \quad 	$\quad \;\e \leftarrow  \verb|InvertAlg|(s,T)$ \\
-\quad \quad\quad \quad \quad \quad 	$\quad \verb| renvoie | \e$\\
-\vspace{0.4in}
-\quad \quad \quad \quad \quad \quad $\verb|Verify|^{pk}(s,e')$: \\
-\quad \quad \quad \quad \quad \quad 	$\quad \verb| Si | \e'H^T = s \verb| et | |\e'| = \omega $ \\
-\quad \quad\quad \quad \quad  \quad 	$\quad \quad \verb| renvoie 1| $\\
-\quad \quad\quad \quad \quad  \quad 	$\quad \verb| renvoie 0|$\\
+Le schéma de signature Wave est donc composé de deux algorithmes :
+ \begin{columns}[t]
+  \begin{column}{5cm}
+  \begin{block}{}
+    $\verb|Sign|^{sk}(s)$:\\
+	$\quad \;\e \leftarrow  \verb|InvertAlg|(s,T)$ \\
+ 	$\quad \verb| renvoie | \e$
+  \end{block} 
+  \end{column}
+  
+  \begin{column}{5cm}
+  \begin{block}{}
+    $\verb|Verify|^{pk}(s,e')$: \\
+	$\quad \verb| Si | \e'H^T = s \verb| et | |\e'| = \omega $ \\
+	$\quad \quad \verb| renvoie 1| $\\
+	$\quad \verb| renvoie 0|$
+  \end{block}   
+  \end{column}
+ \end{columns}  
+ 
+\vspace{0.2in}
+\begin{itemize}
+\item[•] L'algorithme de signature utilise la trappe et un algorithme de décodage \\pour renvoyer une erreur de poids $\omega$
+ \vspace{0.1in}
+\item[•] L'algorithme de vérification accepte la signature si le syndrome et le poids sont corrects 
+\end{itemize}
 \end{frame}
 
-\section{Décodage}
+\subsection{Décodage}
 
 \begin{frame}
 \frametitle{Décodage}
@@ -204,31 +217,71 @@ $$\begin{array}{ccccc}
 \end{array}$$
 
 
-et soient $\mathbf{e}_U$ et $\mathbf{e}_V$ de $\F_q^{n/2}$ tels que 
-$$ (\mathbf{e}_U,\mathbf{e}_V) = \varphi^{-1}_{a,b,c,d}(\mathbf{e}).$$
-
 \begin{propo} Inverser $f_{\omega,\mathbf{H}}$ pour un certain $\mathbf{s} \in F_q^{n-k}$ est équivalent à trouver $\mathbf{e} \in \F_q^n$ tel que:
 $$ \mathbf{e}_U\mathbf{H}_U^T = \mathbf{s}^U \qquad \text{et} \qquad \mathbf{e}_V\mathbf{H}_V^T = \mathbf{s}^V $$
 
 \vspace{0.1in}
-où $\mathbf{s} = (\mathbf{s}^U, \mathbf{s}^V)$ avec $\mathbf{s}^U \in \F_q^{n/2-k_U}$ et $\mathbf{s}^V \in \F_q^{n/2-k_V}$.
+où $\mathbf{s} = (\mathbf{s}^U, \mathbf{s}^V)$ avec $\mathbf{s}^U \in \F_q^{n/2-k_U}$, $\mathbf{s}^V \in \F_q^{n/2-k_V}$ et où
+$\mathbf{e}_U$ et $\mathbf{e}_V$ de $\F_q^{n/2}$ sont\\
+\vspace{0.1in}
+tels que $(\mathbf{e}_U,\mathbf{e}_V) = \varphi^{-1}_{a,b,c,d}(\mathbf{e}).$
 \end{propo}
-
 \end{frame}
 
 \begin{frame}
 \frametitle{Décodage}
-\vspace{-1in}
 \begin{figure}
 \begin{center}
 \includegraphics [scale=0.4]{schema.png}
 \end{center}
 \end{figure}
 
-- poids haut -> conditions sur les coordonnées de $e_U$ avant le décodage\\
-- alors e aura un grand poids
+\vspace{0.2in}
+
+\begin{itemize}
+\item[•] On veut se placer dans un intervalle qui permet de décoder, mais uniquement en connaissant la trappe
+\vspace{0.1in}
+\item[•] On prend $\omega \in \llbracket \omega_{easy}^+, \omega_{UV}^+\rrbracket$
+\vspace{0.1in}
+\item[•] Afin d'obtenir une erreur de poids $\omega$ on pose des contraintes sur le vecteur $\e_U$
+\end{itemize}
+
 \end{frame}
 
+\begin{frame}
+\frametitle{Décodage}
+
+\vspace{0.15in}
+\begin{block}{}
+Pour tout $\mathbf{e} = \varphi_{\mathbf{a},\mathbf{b},\mathbf{c},\mathbf{d}}(\mathbf{e_U},\mathbf{e_V})$, on a pour tout $i \in \llbracket 1,n/2\rrbracket$ :
+
+\begin{center}
+$\left \{
+\begin{array}{rcl}
+a_i\mathbf{e}_U(i) + b_i\mathbf{e}_V(i) &=& \mathbf{e}(i) \\[0.3cm]
+c_i\mathbf{e}_U(i) + d_i\mathbf{e}_V(i) &=& \mathbf{e}(i+n/2) 
+\end{array}
+\right.$
+\end{center}
+\end{block}
+
+\vspace{0.1in}
+
+\begin{itemize}
+\item[•] On décode $\e_U$ avec une variante du décodage par ensemble d'informations
+\vspace{0.1in}
+\item[•] On choisi $k_U$ coordonnées de $\e_U$ telles que les lignes du système soient non nulles à ces positions
+\vspace{0.1in}
+\item[•] Ainsi on aura
+	\begin{itemize}
+	\vspace{0.05in}
+	\item[$\rightarrow$] $2k_U$ coordonnées de $\e$ non nulles
+	\vspace{0.1in}
+	\item[$\rightarrow$] Les $n-2k_U$ autres seront uniformément distribuées dans leur ensemble
+	\end{itemize}
+\end{itemize}
+
+\end{frame}
 
 \begin{frame}
 \frametitle{Décodage}
@@ -244,9 +297,40 @@ où $\mathbf{s} = (\mathbf{s}^U, \mathbf{s}^V)$ avec $\mathbf{s}^U \in \F_q^{n/2
 \section{Uniformisation des sorties}
 
 \begin{frame}
+  \frametitle{Plan}
+  \tableofcontents[currentsection,subsectionstyle=hide]
+\end{frame}
+
+\begin{frame}
 \frametitle{Uniformisation des sorties}
-fuite d'info\\
-m1 donne les info sur la permutation\\
+
+\begin{itemize}
+\item[•] Des corrélations vont apparaître entre les coordonnées $\e_i$ et $\e_{i+n/2}$
+\vspace{0.05in}
+	\begin{itemize}
+	\item[$\rightarrow$] Si un attaquant $\mathcal{A}$ récupère suffisamment de signatures, il pourra calculer :
+$$\mathbb{P}(\mathbf{e}_i \neq \mathbf{e}_{i+n/2})\quad \text{et}\quad\mathbb{P}(\mathbf{e}_i \neq \mathbf{e}_{j})\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad$$
+	\end{itemize}
+	
+\vspace{0.3in}
+\item[•] Normalement les coordonnées de $\e$ sont permutées pour cacher la structure du code
+\vspace{0.05in}
+	\begin{itemize}
+	\item[$\rightarrow$] $\mathcal{A}$ peut donc retrouver la permutation
+	\end{itemize}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{La méthode du rejet}
+\vspace{-0.3in}
+\begin{figure}[h]
+\begin{center}
+\includegraphics [scale=0.38]{algo_UV.png}
+\end{center}
+\end{figure}
+$$ \text{Où  } m_1(x) := \# \; \{1  \leq i \leq n/2 \;;\; |(x_i, x_{i+n/2})| = 1\}$$
 \end{frame}
 
 
@@ -254,66 +338,147 @@ m1 donne les info sur la permutation\\
 \frametitle{La méthode du rejet}
 \begin{figure}[h]
 \begin{center}
-\includegraphics [scale=0.32]{algo_UV.png}
+\includegraphics [scale=0.35]{decodeV.png}
+\end{center}
+\end{figure}
+
+\vspace{-0.1in}
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics [scale=0.35]{decodeU.png}
 \end{center}
 \end{figure}
 \end{frame}
 
 \begin{frame}
 \frametitle{La méthode du rejet}
-preuve générique rejet
+Soient $X$ et $X^{unif}$ deux variables aléatoires à valeur dans un même ensemble $\mathcal{X}$
+Pour tout $x \in \mathcal{X}$ on pose :
+\begin{equation*}
+    r(x) := \left(\inf\limits_{y \in \mathcal{X}}\frac{\mathbb{P}(X=y)}{\mathbb{P}(X^{unif}=y)}\right) \frac{\mathbb{P}(X^{unif}=x)}{\mathbb{P}(X=x)}
+\end{equation*}
+\vspace{0.2in}
+Soit la variable aléatoire $Y$ définie telle que:
+\begin{enumerate}
+\item[1.] On tire $x \in \mathcal{X}$ selon la distribution $X$
+\vspace{0.1in}
+\item[2.] On tire $\theta$ uniformément dans l'intervalle $\llbracket 0,1 \rrbracket$
+\vspace{0.1in}
+\item[3.] Si $\;\theta \leq r(x)$, alors $Y$ prend la valeur $x$
+\vspace{0.1in}
+\item[4.] Sinon, on recommence
+\end{enumerate}
+\vspace{0.2in}
+Alors $Y$ suit une loi uniforme. 
+
 \end{frame}
 
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{La méthode du rejet}
-application à nous
+\vspace{-0.3in}
+\begin{figure}[h]
+\begin{center}
+\includegraphics [scale=0.38]{algo_UV.png}
+\end{center}
+\end{figure}
+$$ \text{Où  } m_1(x) := \# \; \{1  \leq i \leq n/2 \;;\; |(x_i, x_{i+n/2})| = 1\}$$
 \end{frame}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Sécurité EUF-CMA}
 
+\begin{frame}
+  \frametitle{Plan}
+  \tableofcontents[currentsection,subsectionstyle=hide]
+\end{frame}
+
 \begin{frame}[fragile]
-\frametitle{Sécurité EUF-CMA}	
+\frametitle{Jeu EUF-CMA}	
 \begin{figure}[h]
-		\includegraphics[scale=0.35]{eufcma.png}
+		\includegraphics[width=\textwidth]{init.png}
 \end{figure}
+
+\vspace{0.1in}
+
+L'attaquant $\mathcal{A}$ appelle la fonction \verb|init| et récupère la matrice de parité du code $(U,U+V)$-généralisé $\mathbf{H}_{pk}$.
 \end{frame}
 
 
 \begin{frame}[fragile]
-\noindent Le jeu EUF-CMA se déroule comme suit. $\mathcal{A}$ fait appel à \verb|Init|. Il peut ensuite faire $N_{sign}$ requêtes à \verb|sign|. Le jeu est dit réussi si $\mathcal{A}$ est capable de donner $(s,e)$ accepté par \verb|Fin| et tel que $s$ n'est jamais été demandé à \verb|Sign|. \\
+\frametitle{Jeu EUF-CMA}	
+\begin{figure}[h]
+		\includegraphics[width=\textwidth]{sign.png}
+\end{figure}
+
+\vspace{0.1in}
+
+\begin{itemize}
+\item[•] L'attaquant $\mathcal{A}$ peut faire $N_{sign}$ appels à la fonction \verb|sign| et récupérer $N_{sign}$ couples $(s,\e)$
+\vspace{0.1in}
+\item[•] Il doit alors renvoyer un nouveau couple $(s,\e)$ où $s$ n'a jamais été demandé \\à la fonction \verb|sign|
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Jeu EUF-CMA}	
+\begin{figure}[h]
+		\includegraphics[width=\textwidth]{fin.png}
+\end{figure}
+
+\vspace{0.1in}
+
+\begin{itemize}
+\item[•] La fonction \verb|Fin| vérifie la validité de la signature
+\vspace{0.1in}
+\item[•] L'attaquant $\mathcal{A}$ a réussi le jeu EUF-CMA si la fonction \verb|Fin| renvoie 1
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Sécurité EUF-CMA}
+\begin{block}{}
 On définit alors le succès EUF-CMA comme :
-$$Succ^{EUF-CMA}_{Wave}(t,N_{sign}) := \max_{\mathcal{A};|A|\leq t}(\mathbb{P}(\mathcal{A}\text{ réussit le jeu EUF-CMA de Wave})).$$
+$$Succ^{EUF-CMA}_{Wave}(N_{sign}) := \max_{\mathcal{A}}(\mathbb{P}(\mathcal{A}\text{ réussit le jeu EUF-CMA de Wave})).$$
+\end{block}	
+\vspace{0.2in}
 Le protocole est alors sûr au sens EUF-CMA si ce succès est négligeable. \\
+\vspace{0.2in}
+Pour montrer que le schéma Wave est sûr au sens EUF-CMA, nous pouvons le réduire au problème DOOM.\\
 \end{frame}
 
 \begin{frame}
-\frametitle{Sécurité EUF-CMA}
+\frametitle{Réduction au problème DOOM}
+
+\begin{block}{}
 \textbf{Le problème DOOM.} Soient des paramètres $(n,q,k,\omega,N)$, où $N$ est un entier. \\
 
 \leftskip=1cm
 \noindent \textbf{I :} $\mathbf{H}$ une matrice uniforme de $\F_q^{(n-k)\times n}$ et $(\mathbf{s}_1,...,\mathbf{s}_N)$ une liste de $N$ syndromes. 
 
-\noindent \textbf{Q :} Décoder l'un des syndromes à la distance $w := \lfloor \omega n \rfloor$. \\
+\noindent \textbf{Q :} Décoder l'un des syndromes à la distance $\omega$. \\
 
 \leftskip=0cm
+\end{block}
 
-\noindent On définit alors le succès de DOOM comme :
-$$Succ^{DOOM(n,q,k,N)}(t) := \max_{\mathcal{A};|A|\leq t}(\mathbb{P}(\mathcal{A}(\mathbf{H},\mathbf{s}_1,...,\mathbf{s}_n)=\mathbf{e}\text{ tel que }$$
-$$ \mathbf{eH}^T = \mathbf{s}_j \text{ pour un certain } j \in \{1,...,N\})).$$
+\vspace{0.2in}
+$$Succ^{DOOM} :=
+ \max_{\mathcal{A}}\left[\mathbb{P}\left(\mathcal{A}(\mathbf{H},\mathbf{s}_1,...,\mathbf{s}_n)=\mathbf{e} \; \left| \; \exists  j \in \{1,...,N\} \text{ tq } \mathbf{eH}^T = \mathbf{s}_j\right)\right]\right..$$
 
-%pourquoi à DOOM et pas au decodage?\\
-%expliquer pourquoi ça parait logique\\
 \end{frame}
 
-%\begin{frame}
-%\frametitle{Sécurité EUF-CMA}
-%expliquer réduction : jeux à donner
-%\end{frame}
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Implémentation et résultats}
+\section{Implémentation}
+
+\begin{frame}
+  \frametitle{Plan}
+  \tableofcontents[currentsection,subsectionstyle=hide]
+\end{frame}
 
 \begin{frame}
 \frametitle{Implémentation et résultats}
@@ -345,7 +510,7 @@ $$ \mathbf{eH}^T = \mathbf{s}_j \text{ pour un certain } j \in \{1,...,N\})).$$
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Références}
+\section*{Références}
 
 %\begin{frame}<handout:0>
 %  \frametitle{Plan}
