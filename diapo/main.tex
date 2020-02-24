@@ -91,10 +91,19 @@
 \begin{frame}
 \frametitle{Introduction}
 \begin{itemize}
-\item[•] arrivée ordinateur quantique -> alternative RSA + DH 
-\item[•] code correcteur -> quantiquement sûr 
-\item[•] chiffrement ok signature pas ok
-\item[•] NIST
+\item[•] Éventualité de l'arrivée de l'ordinateur quantique:
+       \begin{itemize}
+       \item[$\rightarrow$] On cherche des alternatives à RSA et DH 
+       \item[$\rightarrow$] Appel du NIST
+       \end{itemize}
+\vspace{0.2in}
+\item[•] Utilisation des codes correcteurs
+       \begin{itemize}
+       \item[$\rightarrow$] Sont quantiquement
+        sûrs
+       \item[$\rightarrow$] Déjà des systèmes de chiffrement les utilisant
+       \item[$\rightarrow$] Peu (pas) utilisés pour les signatures
+       \end{itemize}
 \end{itemize}
 \end{frame}
 
@@ -110,8 +119,20 @@
 
 \begin{frame}
 \frametitle{Introduction}
-Wave solution au problème pour les signatures
-poids grands
+\begin{itemize}    
+\item[•] Difficile de faire un système de signature à base de codes 
+       \begin{itemize}
+       \item[$\rightarrow$] Difficile de se placer dans l'ensemble des syndromes facilement et \\uniquement décodables
+       \item[$\rightarrow$] Tous les systèmes existant sont cassés ou inutilisable dans la pratique
+       \end{itemize}
+\vspace{0.2in}
+\item[•] Le système Wave
+       \begin{itemize}
+       \item[$\rightarrow$] Enlève la restriction au mot le plus proche
+       \item[$\rightarrow$] Décodage en grande distance
+       \end{itemize}
+\end{itemize}   
+
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -124,8 +145,7 @@ poids grands
 \subsection{Codes $(U,U+V)$-généralisés}
 
 \begin{frame}
-\frametitle{Codes $(U,U+V)$-généralisés}
-\begin{defi} 
+\frametitle{Codes $(U,U+V)$-généralisés} 
 %Soient $n$ un entier pair et $a$,$b$,$c$,$d$ quatre vecteurs de $\F_q^{n/2}$ tels que $\forall i \in \llbracket 1,n/2\rrbracket$ :
 %\begin{equation}
 %a_ic_i \neq 0 
@@ -134,53 +154,77 @@ poids grands
 %a_id_i - b_ic_i \neq 0 
 %\end{equation}
 
-\noindent Soient $n$ un entier pair, $U$ et $V$ deux codes définis comme précédemment. Le code $(U,U+V)$-généralisé correspond à l'ensemble :
+\noindent Soient $n$ un entier pair, $U$ et $V$ deux codes aléatoires de dimension respectives $k_U$ et $k_V$. Le \textit{code $(U,U+V)$-généralisé } $C$ correspond à l'ensemble :
+\vspace{0.1in}
 \begin{center}
-$\{(a.u + b.v, c.u + d.v)$ tel que $u \in U$ et $v \in V \}$
+$C := \{(a.u + b.v, c.u + d.v)$ tel que $u \in U$ et $v \in V \}$
 \end{center}
+\vspace{0.1in}
 où $x.y$ est le produit coordonnée par coordonnée des $x_i$ et $y_i$ et $a$,$b$,$c$,$d$ sont quatre vecteurs de $\F_q^{n/2}$.\\
-\end{defi}
 \end{frame}
 
 
 \subsection{Signature}
 
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Signature}
 \begin{itemize}
-\item fonction syndrome : sens unique
-\item trappe : structure du code
+\item[•]  Le système Wave utilise la fonction qui a un vecteur $\e$ de poids $\omega$ associe son syndrome par $\mathbf{H}$ :
+$$ f_{\omega,\mathbf{H}}: \e \longrightarrow \e H^T = s $$
+comme fonction à sens unique
+\vspace{0.1in}
+\item[•]  Il utilise un algorithme \verb|InvertAlg| permettant d'inverser la fonction syndrome à l'aide de la trappe $T$
+\vspace{0.1in}
+\item[•]  La trappe $T$ correspond à la structure du code $(U,U+V)$-généralisé
 \end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]
 \frametitle{Signature}
-\begin{multicols}{2}
-\begin{flushleft}
-$\verb|Sign|^{sk}(s)$:\\
-	$\quad$ e $\leftarrow  \verb|InvertAlg|(s,T)$ \\
-	$\quad \verb|renvoie| e$\\
-\end{flushleft}
-\begin{flushleft}
-$\verb|Verify|^{pk}(s,e')$: \\
-	$\quad \verb| Si | e'H^T = s \verb| et | |e'| = \omega $ \\
-	$\quad \quad \verb|renvoie 1| $\\
-	$\quad \verb|renvoie 0|$\\
-\end{flushleft}
-\end{multicols}
+
+\quad \quad\quad \quad \quad  \quad $\verb|Sign|^{sk}(s)$:\\
+\quad \quad\quad \quad \quad  \quad 	$\quad \;\e \leftarrow  \verb|InvertAlg|(s,T)$ \\
+\quad \quad\quad \quad \quad \quad 	$\quad \verb| renvoie | \e$\\
+\vspace{0.4in}
+\quad \quad \quad \quad \quad \quad $\verb|Verify|^{pk}(s,e')$: \\
+\quad \quad \quad \quad \quad \quad 	$\quad \verb| Si | \e'H^T = s \verb| et | |\e'| = \omega $ \\
+\quad \quad\quad \quad \quad  \quad 	$\quad \quad \verb| renvoie 1| $\\
+\quad \quad\quad \quad \quad  \quad 	$\quad \verb| renvoie 0|$\\
 \end{frame}
 
 \section{Décodage}
 
 \begin{frame}
 \frametitle{Décodage}
-décodage classique\\
-décoder UV <=> décoder U puis décoder V\\
+Soit 
+
+$$\begin{array}{ccccc}
+\varphi_{\mathbf{a},\mathbf{b},\mathbf{c},\mathbf{d}} & : & \F_q^{n/2} \times  \F_q^{n/2} & \to & \F_q^{n/2} \times  \F_q^{n/2} \\
+ & & (\mathbf{x} , \mathbf{y}) & \mapsto &  (a.\mathbf{x} + b.\mathbf{y}, c.\mathbf{x} + d.\mathbf{y}) \\
+\end{array}$$
+
+
+et soient $\mathbf{e}_U$ et $\mathbf{e}_V$ de $\F_q^{n/2}$ tels que 
+$$ (\mathbf{e}_U,\mathbf{e}_V) = \varphi^{-1}_{a,b,c,d}(\mathbf{e}).$$
+
+\begin{propo} Inverser $f_{\omega,\mathbf{H}}$ pour un certain $\mathbf{s} \in F_q^{n-k}$ est équivalent à trouver $\mathbf{e} \in \F_q^n$ tel que:
+$$ \mathbf{e}_U\mathbf{H}_U^T = \mathbf{s}^U \qquad \text{et} \qquad \mathbf{e}_V\mathbf{H}_V^T = \mathbf{s}^V $$
+
+\vspace{0.1in}
+où $\mathbf{s} = (\mathbf{s}^U, \mathbf{s}^V)$ avec $\mathbf{s}^U \in \F_q^{n/2-k_U}$ et $\mathbf{s}^V \in \F_q^{n/2-k_V}$.
+\end{propo}
 
 \end{frame}
 
 \begin{frame}
 \frametitle{Décodage}
+\vspace{-1in}
+\begin{figure}
+\begin{center}
+\includegraphics [scale=0.4]{schema.png}
+\end{center}
+\end{figure}
+
 - poids haut -> conditions sur les coordonnées de $e_U$ avant le décodage\\
 - alors e aura un grand poids
 \end{frame}
