@@ -1,0 +1,324 @@
+% Permission is granted to copy, distribute and/or modify this
+% document under the terms of the Creative Common by-nc-sa License
+% version 3.0 (CC BY-NC-SA 3.0). A copy of the license can be found at
+% http://creativecommons.org/licenses/by-nc-sa/3.0/legalcode.
+%
+
+%% Slides Class
+\documentclass[10pt,a4paper]{beamer}
+
+%% Setting beamer style
+\usepackage{UBdx}
+
+\setbeamertemplate{bibliography entry title}{}
+\setbeamertemplate{bibliography entry location}{}
+\setbeamertemplate{bibliography entry note}{}
+
+%% Font packages
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{babel}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage{listings}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{appendix}
+\usepackage{multicol}
+\usepackage{stmaryrd}
+\usepackage{verbatim}
+\usepackage{algorithm, algorithmic}
+
+\theoremstyle{plain}
+\newtheorem{thm}{Théorème}[section]
+\newtheorem{lemme}[thm]{Lemme}
+\newtheorem{propo}[thm]{Proposition}
+
+\theoremstyle{definition}
+\newtheorem{remarque}[thm]{Remarque}
+\newtheorem{defi}[thm]{Définition}
+\newtheorem{nota}[thm]{Notation}
+
+
+\renewcommand{\a}{\alpha}
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}} 
+\newcommand{\F}{\mathbb{F}} 
+\newcommand{\A}{\mathcal{A}} 
+\newcommand{\e}{\mathbf{e}}  
+\newcommand{\s}{\mathbf{s}} 
+\newcommand{\K}{\mathbb{K}} 
+\newcommand{\J}{\mathcal{J}} 
+\newcommand{\D}{\mathcal{D}} 
+
+% traduction des mots pour les algos
+\floatname{algorithm}{Algorithme}
+\renewcommand{\algorithmicrequire}{\textbf{Entrées:}}
+\renewcommand{\algorithmicensure}{\textbf{Sortie:}}
+\renewcommand{\algorithmicrepeat}{\textbf{Faire}}
+\renewcommand{\algorithmicuntil}{\textbf{Tant que}}
+\renewcommand{\algorithmicreturn}{\textbf{Retourne}}
+
+% Highlight macros
+\newcommand{\highlight}[1]{\textcolor{structure.fg}{\bfseries #1}}
+
+%% Title, subtitle, authors, institute, date, ...
+\title{Projet - Wave}
+\subtitle{Un procédé de signature à base de codes correcteurs}
+\author{ Suzanne LANSADE, Eva PALANDJIAN \\\quad\quad\quad\quad\quad \\Encadrant : Gilles ZEMOR}
+
+
+\institute[Master CSI]{Master CSI, Université de Bordeaux, France}
+
+\date{Mardi 25 Février 2020}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%[ Document ]%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+\begin{frame}
+  \vspace{3.5em}
+  \titlepage
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Plan}
+  \tableofcontents[subsectionstyle=hide]
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+\begin{frame}
+\frametitle{Introduction}
+\begin{itemize}
+\item[•] arrivée ordinateur quantique -> alternative RSA + DH 
+\item[•] code correcteur -> quantiquement sûr 
+\item[•] chiffrement ok signature pas ok
+\item[•] NIST
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Introduction}
+\begin{figure}[h]
+\begin{center}
+\includegraphics [scale=0.3]{../rapport/include/nist_second_tour.png}
+\end{center}
+\caption{\small Comparaison des soumissions au NIST du second tour.}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+\frametitle{Introduction}
+Wave solution au problème pour les signatures
+poids grands
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Schéma de signature Wave}
+\begin{frame}<handout:0>
+  \frametitle{Plan}
+  \tableofcontents[currentsection,subsectionstyle=hide]
+\end{frame}
+
+\subsection{Codes $(U,U+V)$-généralisés}
+
+\begin{frame}
+\frametitle{Codes $(U,U+V)$-généralisés}
+\begin{defi} 
+%Soient $n$ un entier pair et $a$,$b$,$c$,$d$ quatre vecteurs de $\F_q^{n/2}$ tels que $\forall i \in \llbracket 1,n/2\rrbracket$ :
+%\begin{equation}
+%a_ic_i \neq 0 
+%\end{equation}
+%\begin{equation}
+%a_id_i - b_ic_i \neq 0 
+%\end{equation}
+
+\noindent Soient $n$ un entier pair, $U$ et $V$ deux codes définis comme précédemment. Le code $(U,U+V)$-généralisé correspond à l'ensemble :
+\begin{center}
+$\{(a.u + b.v, c.u + d.v)$ tel que $u \in U$ et $v \in V \}$
+\end{center}
+où $x.y$ est le produit coordonnée par coordonnée des $x_i$ et $y_i$ et $a$,$b$,$c$,$d$ sont quatre vecteurs de $\F_q^{n/2}$.\\
+\end{defi}
+\end{frame}
+
+
+\subsection{Signature}
+
+\begin{frame}
+\frametitle{Signature}
+\begin{itemize}
+\item fonction syndrome : sens unique
+\item trappe : structure du code
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Signature}
+\begin{multicols}{2}
+\begin{flushleft}
+$\verb|Sign|^{sk}(s)$:\\
+	$\quad$ e $\leftarrow  \verb|InvertAlg|(s,T)$ \\
+	$\quad \verb|renvoie| e$\\
+\end{flushleft}
+\begin{flushleft}
+$\verb|Verify|^{pk}(s,e')$: \\
+	$\quad \verb| Si | e'H^T = s \verb| et | |e'| = \omega $ \\
+	$\quad \quad \verb|renvoie 1| $\\
+	$\quad \verb|renvoie 0|$\\
+\end{flushleft}
+\end{multicols}
+\end{frame}
+
+\section{Décodage}
+
+\begin{frame}
+\frametitle{Décodage}
+décodage classique\\
+décoder UV <=> décoder U puis décoder V\\
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Décodage}
+- poids haut -> conditions sur les coordonnées de $e_U$ avant le décodage\\
+- alors e aura un grand poids
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Décodage}
+\begin{figure}[h]
+\begin{center}
+\includegraphics [scale=0.32]{../rapport/include/graph_ratio_w.png}
+\end{center}
+\caption{\scriptsize Comparaison des distances $w/n$ avec et sans trappe en fonction du rendement.}
+\end{figure}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Uniformisation des sorties}
+
+\begin{frame}
+\frametitle{Uniformisation des sorties}
+fuite d'info\\
+m1 donne les info sur la permutation\\
+\end{frame}
+
+
+\begin{frame}
+\frametitle{La méthode du rejet}
+\begin{figure}[h]
+\begin{center}
+\includegraphics [scale=0.32]{algo_UV.png}
+\end{center}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+\frametitle{La méthode du rejet}
+preuve générique rejet
+\end{frame}
+
+\begin{frame}
+\frametitle{La méthode du rejet}
+application à nous
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Sécurité EUF-CMA}
+
+\begin{frame}[fragile]
+\frametitle{Sécurité EUF-CMA}	
+\begin{figure}[h]
+		\includegraphics[scale=0.35]{eufcma.png}
+\end{figure}
+\end{frame}
+
+
+\begin{frame}[fragile]
+\noindent Le jeu EUF-CMA se déroule comme suit. $\mathcal{A}$ fait appel à \verb|Init|. Il peut ensuite faire $N_{sign}$ requêtes à \verb|sign|. Le jeu est dit réussi si $\mathcal{A}$ est capable de donner $(s,e)$ accepté par \verb|Fin| et tel que $s$ n'est jamais été demandé à \verb|Sign|. \\
+On définit alors le succès EUF-CMA comme :
+$$Succ^{EUF-CMA}_{Wave}(t,N_{sign}) := \max_{\mathcal{A};|A|\leq t}(\mathbb{P}(\mathcal{A}\text{ réussit le jeu EUF-CMA de Wave})).$$
+Le protocole est alors sûr au sens EUF-CMA si ce succès est négligeable. \\
+\end{frame}
+
+\begin{frame}
+\frametitle{Sécurité EUF-CMA}
+\textbf{Le problème DOOM.} Soient des paramètres $(n,q,k,\omega,N)$, où $N$ est un entier. \\
+
+\leftskip=1cm
+\noindent \textbf{I :} $\mathbf{H}$ une matrice uniforme de $\F_q^{(n-k)\times n}$ et $(\mathbf{s}_1,...,\mathbf{s}_N)$ une liste de $N$ syndromes. 
+
+\noindent \textbf{Q :} Décoder l'un des syndromes à la distance $w := \lfloor \omega n \rfloor$. \\
+
+\leftskip=0cm
+
+\noindent On définit alors le succès de DOOM comme :
+$$Succ^{DOOM(n,q,k,N)}(t) := \max_{\mathcal{A};|A|\leq t}(\mathbb{P}(\mathcal{A}(\mathbf{H},\mathbf{s}_1,...,\mathbf{s}_n)=\mathbf{e}\text{ tel que }$$
+$$ \mathbf{eH}^T = \mathbf{s}_j \text{ pour un certain } j \in \{1,...,N\})).$$
+
+%pourquoi à DOOM et pas au decodage?\\
+%expliquer pourquoi ça parait logique\\
+\end{frame}
+
+%\begin{frame}
+%\frametitle{Sécurité EUF-CMA}
+%expliquer réduction : jeux à donner
+%\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Implémentation et résultats}
+
+\begin{frame}
+\frametitle{Implémentation et résultats}
+\frametitle{Résultats de notre implémentation}
+\begin{center}
+\begin{tabular}{|c|c|c|c|} 
+\hline
+\textbf{nombre d'itérations} & \textbf{d} & \textbf{nombre de rejets} & \textbf{ratio\;} \\\hline 
+100 & 0 & 6 & 6\% \\\hline
+100 & 1 & 3 & 3\% \\\hline 
+100 & 2 & 6 & 6\% \\\hline
+100 & 3 & 3 & 3\% \\\hline
+100 & 4 & 6 & 6\% \\\hline
+100 & 5 & 4 & 4\% \\\hline
+\end{tabular}
+\end{center}
+\begin{center}
+\begin{tabular}{|c|c|c|c|} 
+\hline
+\textbf{nombre d'itérations} & \textbf{d} & \textbf{nombres de rejets} & \textbf{ratio} \\\hline 
+400 & 3 & 19 & $\sim$5\% \\\hline
+400 & 5 & 17 & $\sim$4\%\\\hline 
+\end{tabular}\
+
+\vspace{0.2in}
+\textbf{Ratio moyen de l'article : $\sim$10\%}
+\end{center}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Références}
+
+%\begin{frame}<handout:0>
+%  \frametitle{Plan}
+%  \tableofcontents[currentsection,subsectionstyle=hide]
+%\end{frame}
+
+
+
+\begin{frame}
+  \frametitle{Références}
+  \begin{enumerate}
+  \item[{[1]}] Thomas Debris-Alazard. \textit{Cryptographie fondée sur les codes : nouvelles approches pour constructions et preuves ; contribution en cryptanalyse}. 2019.
+  \vspace{0.1in}
+  \item[{[2]}] Jean-Pierre Tillich, Thomas Debris-Alazard, Nicolas Sendrier. \textit{Wave : A
+new family of trapdoor one-way preimage sampleable functions based on codes}. 2018.
+  \end{enumerate}
+\end{frame}
+
+
+\end{document}

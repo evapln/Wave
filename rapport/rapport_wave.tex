@@ -975,9 +975,9 @@ Soit $\mathcal{A}$ un adversaire ayant accès à $N_{sign}$ signatures de son ch
 \begin{algorithm} [h]
 	\caption{Init($\lambda$)}
 	\begin{algorithmic}[1]
-    	\STATE $(pk,sk) \Longleftarrow$ Gen$(1^\lambda)$ 
-    	\STATE $\mathbf{H}_{pk} \Longleftarrow pk$
-    	\STATE $(\varphi,\mathbf{H}_{U},\mathbf{H}_{V})\Longleftarrow sk$
+    	\STATE $(pk,sk) \leftarrow$ Gen$(1^\lambda)$ 
+    	\STATE $\mathbf{H}_{pk} \leftarrow pk$
+    	\STATE $(\varphi,\mathbf{H}_{U},\mathbf{H}_{V})\leftarrow sk$
     	\RETURN $\mathbf{H}_{pk}$
     \end{algorithmic}
 \end{algorithm}

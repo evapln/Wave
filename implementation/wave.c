@@ -4,7 +4,7 @@
 #include <err.h>
 #include <getopt.h>
 
-int NB_IT = 100;
+int NB_IT = 200;
 
 int main(int argc, char *argv[]) {
   int optc;

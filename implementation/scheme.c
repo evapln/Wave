@@ -2,7 +2,7 @@
 
 const int SIZE = floor(LAMBDA/0.0154)+((int)(floor(LAMBDA/0.0154))%2);
 const int OMEGA = 0.9261*SIZE;
-const int d = 4;
+const int d = 3;
 const int K_U = 0.7978*SIZE/2;
 const int K_V = 0.4201*SIZE/2;
 matrix_t* A = NULL;
@@ -677,7 +677,7 @@ int decode_eu(matrix_t * eu, const sk_t *sk, const matrix_t *synd,
     e = phi(eu_int, ev);
     w = weight(e);
     matrix_free(e);
-    if (cpt > 30000) {
+    if (cpt > 100000) {
       matrix_free(eu_int);
       return 1;
     }
